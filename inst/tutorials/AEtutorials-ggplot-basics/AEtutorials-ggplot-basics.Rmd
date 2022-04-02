@@ -20,6 +20,10 @@ library(etude) # helper functions for gradethis
 library(basket) # not sure if we need this
 library(DT)
 library(janitor)
+library(stringr)
+library(dplyr)
+library(magrittr)
+library(tidyr)
 library(skimr)
 library(epikit)
 library(lubridate)
@@ -61,24 +65,24 @@ tutorial_options(exercise.eval = FALSE)  # pre-evaluate exercises
 
 
  
-
-new_recorder <- function(tutorial_id, tutorial_version, user_id, event, data) {
-    cat(
-      tutorial_id, 
-      " (v", tutorial_version, "); ",
-      format(Sys.time(), "%Y-%M%-%D %H:%M:%S %Z"), "; ",
-      user_id, "; ",
-      event, "; ",
-      data$label, "; ",
-      data$answers, "; ",
-      data$code, "; ",
-      data$correct, "\n", sep = "",
-      
-      file = here::here("event_records", "learnr_basics.txt"),
-      append = TRUE)
-}
-
-options(tutorial.event_recorder = new_recorder)
+# 
+# new_recorder <- function(tutorial_id, tutorial_version, user_id, event, data) {
+#     cat(
+#       tutorial_id, 
+#       " (v", tutorial_version, "); ",
+#       format(Sys.time(), "%Y-%M%-%D %H:%M:%S %Z"), "; ",
+#       user_id, "; ",
+#       event, "; ",
+#       data$label, "; ",
+#       data$answers, "; ",
+#       data$code, "; ",
+#       data$correct, "\n", sep = "",
+#       
+#       file = here::here("event_records", "learnr_basics.txt"),
+#       append = TRUE)
+# }
+# 
+# options(tutorial.event_recorder = new_recorder)
 
 
 
@@ -92,185 +96,258 @@ knitr::opts_chunk$set(echo = FALSE, fig.align = "center", message = F, warning =
 
 
 ## Introduction to R for Applied Epidemiology and Public Health
-### Data visualisation
 
-```{r appliedepi-banner, fig.margin = TRUE, echo = FALSE, fig.width = 3, out.width = "100%", fig.cap = ""}
-knitr::include_graphics("images/moz-banner.png", error = F)
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics("images/banner.png", error = F)
 ```
 
+Welcome to the self-paced interactive tutorial course "Introduction to R for applied epidemiologists" offered for free by **[Applied Epi](www.appliedepi.org)**, a nonprofit organization of 150 epidemiologists each with years of ground-level experience in local public health and outbreak response.  
+
+This tutorial teaches **visualization of public health data with the ggplot2 R package**. We teach you how to write code to create figures such as epidemic curves, demographic pyramids, and many varieties of bar, line, and scatter plots.  
 
 
-### Welcome
 
-```{r, eval = TRUE, echo = FALSE, out.width = "25%"}
-knitr::include_graphics("images/logo.png", error = F)
+
+#### Applied Epi  
+
+
+**[Applied Epi](www.appliedepi.org) is a nonprofit organization that supports frontline public health practitioners through open-source tools, training, and support.**  
+
+Our free [Epidemiologist R Handbook](www.epiRhandbook.com) has helped over **150,000 people** learn R and remains a vital resource for many practitioners.  
+We have built a comprehensive ecosystem of tools, training, and support around this foundation:  
+
+
+:::: {style="display: flex;"}
+
+::: {}
+```{r, out.width = "75%", fig.align = "center", echo=F}
+knitr::include_graphics("images/Applied Epi Hex Tools.png")
 ```
 
-Welcome to the course "Introduction to R for applied epidemiologists", offered for free by **[Applied Epi](www.appliedepi.org)** - a nonprofit organisation supporting frontline epidemiologists and public health practitioners through open-source tools, training, and support.  
+* **[Epi R Handbook](www.epiRhandbook.com)**
+* **[R packages](https://appliedepi.org/tools/)**
+* **[Situation report templates](https://appliedepi.org/tools/)**
+:::
 
-Applied Epi created the free [Epidemiologist R Handbook](www.epiRhandbook.com), runs a [Community forums]
 
-This interactive tutorial focuses on **visualisation of data with the ggplot2 R package**, for example into figures such as epidemic curves, demographic pyramids, and many varieties of bar, line, and scatter plots.  
 
-This tutorial draws from chapters of our free [Epidemiologist R handbook](https://epirhandbook.com/en/) such as [ggplot basics](https://www.epirhandbook.com/en/ggplot-basics.html), [ggplot tips](https://www.epirhandbook.com/en/ggplot-tips.html), [epidemic curves](https://www.epirhandbook.com/en/epidemic-curves.html). The Epi R Handbook has over 50 chapters, has helped over 110,000 people learn R, and is also available for offline use.
+
+
+::: {.col data-latex="{0.05\textwidth}"}
+\ 
+<!-- an empty Div (with a white space), serving as
+a column separator -->
+:::
+
+
+
+
+
+::: {}
+```{r, out.width = "75%", fig.align = "center", echo=F}
+knitr::include_graphics("images/Applied Epi Hex Training.png")
+```
+
+* **[Live R training courses](www.training.appliedepi.org)**
+* **[Self-paced R tutorials](https://training.appliedepi.org)**
+* **[YouTube channel](https://www.youtube.com/channel/UCgXBQIFJ_Rmq3UhWL_yrkxQ)**
+:::
+
+
+
+
+::: {.col data-latex="{0.05\textwidth}"}
+\ 
+<!-- an empty Div (with a white space), serving as
+a column separator -->
+:::
+
+::: {}
+```{r, out.width = "75%", fig.align = "center", echo=F}
+knitr::include_graphics("images/Applied Epi Hex Support.png")
+```
+
+* **[Q&A discussion forum](www.community.appliedepi.org)**
+* **[R Help Desk](https://appliedepi.org/helpdesk/)**
+* **[Case studies](www.training.appliedepi.org)**
+:::
+
+
+
+::::
+
+
+
+<form target="_blank" action="https://www.paypal.com/donate" method="post" target="_top">
+<input type="hidden" name="hosted_button_id" value="YTEZELC8VBXV6" />
+<input type="image" src="https://github.com/appliedepi/epiRhandbook_eng/raw/master/images/donate_button_long.png" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
+<img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" />
+</form>
+
+
+
+
+
+
 
 #### Target Audience  
 
-This course is designed with the following objectives: 
+Public health practitioners, applied epidemiologists, clinicians, and researchers seeking to learn R but who do not have access to our *live R courses*. R coding is taught *within* the tutorials, whereas in our live courses we have the flexibility to teaching *in RStudio*.    
 
-* To be friendly to people who have never used a programming language before
-* To teach R emphasizing examples, datasets, and challenges commonly faced by applied epidemiologists
-* To be modular - so that you can skip to section most relevant to you
+These tutorials:  
 
-
-We expect that you know how to do ... TO DO
-
+* Are friendly to people who have never used a programming language before
+* Teach R emphasizing examples, datasets, and challenges commonly faced by applied epidemiologists
+* Are modular so that you can skip to sections most relevant to you
 
 
-#### Other languages
-This course is available...
 
 
 #### Offline / Online
 
-You can access this tutorial offline by downloading our R package ... 
-If viewing offline, you can view the videos by doing ...
-
+You can access these tutorials offline by following [these instructions] to download our R package {epitutorials}. You will then be able to complete these exercises *within RStudio* offline.  
 
 
 #### Learning goals
 
 In this tutorial you will learn:  
 
-* The basics of data visualization in R with **ggplot2** (Part 1)
-* The "grammar of graphics" approach to data visualization (Part 1)
-* How to customize and edit plots to achieve the look you want (Part 1)
-* Methods to produce some common epidemiological plots with **ggplot2** and other helper functions (Part 2)
-* How to combine and overlay your plots (Part 2)
-* Getting used to reading documentation and applying new functions to your data (Part 2)
-* The very basics of interactive plotting with **plotly** (Part 2)
+* The basics of data visualization in R with **ggplot2**  
+* The "grammar of graphics" approach to data visualization  
+* How to customize and edit plots to achieve the look you want  
 
 
-#### Data consent
+#### Accompanying resources
 
-We continually improve these tutorials by collecting your entries and submitted answers to the quiz questions. By continuing, you consent to this collection and use.
-
-To continue anonymously... do XYZ.
+This tutorial draws from chapters of our free [Epidemiologist R handbook](https://epirhandbook.com/en/) such as [ggplot basics](https://www.epirhandbook.com/en/ggplot-basics.html), [ggplot tips](https://www.epirhandbook.com/en/ggplot-tips.html), and [epidemic curves](https://www.epirhandbook.com/en/epidemic-curves.html). The Epi R Handbook has over 50 chapters, has helped over 150,000 people learn R, and is also available for offline use.  
 
 
-#### Who made this course  
+#### Acknowledgements  
 
-This course is designed by epidemiologists with decades of ground-level experience in outbreak response and local public health work. 
+Authors of this tutorial include:  
 
-
-```{r appliedepi-hexes, fig.margin = TRUE, echo = FALSE, fig.width = 3, out.width = "50%", fig.cap = ""}
-knitr::include_graphics("images/hex-sidebyside.png")
-```
+* David Jorgensen  
+* Neale Batra  
 
 
-## Data used and directory structure
 
-In this tutorial we will use the following dataset. Please take a few minutes to review the structure and content of the before continuing.
+
+## Data used  
+
+In this tutorial we will use the following "linelist" of cases from a simulated (fake) Ebola outbreak in Sierra Leone. Please take a few minutes to review the structure and content.  
 
 Use the arrows on the right to scroll through hidden columns. Note that there are "raw" (messy) datasets that mimic problems commonly found in real-life epidemiological datasets availble. As we are focusing on visualization here we will use pre-cleaned data. The data cleaning tutorials cover the processing of raw data to get to this point and we recommend looking through these first
 
-
-### **A "linelist" of cases in a fictional (not real) Ebola outbreak**
-
 A "linelist" is a term used in applied epidemiology to refer to a table that contains key information about each case or suspect case in an outbreak. Each row represents one case, and the columns contain variables such as age, sex, date of symptom onset, outcomes, etc.
 
-This dataset contains `r nrow(linelist)` rows and `r ncol(linelist)` columns. Below are the first 5 rows:  
+This dataset contains `r nrow(linelist)` rows and `r ncol(linelist)` columns. Below are the first 6 rows:  
 
 ```{r}
-head(linelist)
+head(linelist) %>% 
+  DT::datatable()
 ```
 
-Click to [download the **clean** dataset as an **.rds file**](https://github.com/appliedepi/epirhandbook_eng/raw/master/data/case_linelists/linelist_cleaned.rds) for your own practice. A *.rds file* is an R-specific file type that preserves column classes. This ensures you will have only minimal cleaning to do after importing the data into R.
-
-
-### Directory structure
-
-
-Photo or GIF of directory structure
 
 ### Accessing example data
-The example data used in this exercise is available from the link below. This data is in the rds format, an R-specific format which preserves data formatting.
-Click to [download the **clean** dataset as an **.rds file**](https://github.com/appliedepi/epirhandbook_eng/raw/master/data/case_linelists/linelist_cleaned.rds) for your own practice. A *.rds file* is an R-specific file type that preserves column classes. This ensures you will have only minimal cleaning to do after importing the data into R.
+If you want to practice with this dataset, click to [download the **clean** dataset as an **.rds file**](https://github.com/appliedepi/epirhandbook_eng/raw/master/data/case_linelists/linelist_cleaned.rds). An *.rds file* is an R-specific file type that preserves column classes, which leaves only minimal cleaning to do after importing the data into R.  
+
+
+
 
 ### Tidy Data
 
-We highly recommend doing our tutorial on Tidy Data in Applied Epidemiology. Collecting, formatting, and preparing your dataset *before* importing it into R is a critical step!
+We highly recommend doing our tutorial on [Tidy Data in Applied Epidemiology](www.training.appliedepi.org). Collecting, formatting, and preparing your dataset *before* importing it into R is a critical step!
 
-We also recommend following the tutorials in order and first learning the process of data cleaning which gives the example data above from a raw excel dataset.
-
-LINK
+We recommend completing our self-paced R tutorials in order, to first learning data cleaning. 
 
 
-## Install and Load R packages {#packages}
-
-To use basic functions with public health data, the tidyverse metapackage is very useful. Tidyverse loads the dplyr, ggplot2, and other packages that are useful in epi data analysis. 
-
-We've preloaded the below packages for now. Installation and loading of these packages is described on the EpiRHandbook [_Suggested Packages_](https://epirhandbook.com/en/suggested-packages-1.html) page. 
 
 
-```{r load-package-solution, echo=T, eval = FALSE}
-pacman::p_load(
-  rio,        # importing data  
-  here,       # relative file pathways  
-  skimr,      # review data
-  DT,         # visualize data frame
-  janitor,    # data cleaning and tables
-  epikit,     # age categories
-  lubridate,  # working with dates
-  incidence2, # epidemic curves
-  ggrepel,    # smart labels
-  ggExtra,    # extras
-  esquisse,   # point-and-click for simple ggplots
-  apyramid,   # age pyramids
-  scales,     # formatting of scales
-  plotly,     # interactive plots
-  cowplot,    # combine plots
-  tidyverse,  # ggplot2 & data management
-  gghighlight # nice highlighting features for ggplot
-)
+
+
+## Data visualization in R  
+
+Visualizing multi-dimensional data well is a balance of *art* and *science*.  
+
+Visualization is one of the most important parts of a statistical analysis as it allows you to share what you have achieved and, when done correctly, can help to explain complex work and concepts to a wider audience of stakeholders or the general public. Exploratory visualization can also be a key step when understanding new data or with analyses you are conducting.  
+
+
+### Examples of data visualization in R  
+
+Below are plots that were all created with R. You too can make plots as beautiful as these, but you must begin with the fundamentals.  
+
+### Epidemic curves  
+
+```{r, out.width = "75%", fig.align = "center", fig.show='hold', echo=F}
+knitr::include_graphics("images/epicurve_top.png")
 ```
 
-### Recommended R packages for public health
+[Source: Epi R Handbook](www.epiRhandbook.com)
 
-See this Epi R Handbook LINK for our recommended packages.
+### Reporting completeness - heat plot  
 
+This heat plot shows the proportion of heath facilities reporting complete surveillance data to the district office, over time.  
 
-
-## Import data {#import} 
-In this example code we will work with the *cleaned* fictional Ebola data linked in the "Data used and directory structure" section. Import that data into R. If you are interested in the process of cleaning data have a look at the data cleaning tutorial.
-
-To import data from a sub-folder, the `import()` command should be modified so that it correctly tells R where to search for this file. This is done using the here() function. In the example below we expect your data to be stored in a sub-directory (folder) named *data* within your R project. In your own use you will need to modify this code for your own directory structure.
-
-```{r import-demo-subfolder, echo=T, eval=F}
-linelist <- import(here("dat", "linelist_cleaned.rds"))   # import data and save as named object
+```{r, out.width = "75%", fig.align = "center", fig.show='hold', echo=F}
+knitr::include_graphics("images/heat_tile.png")
 ```
 
+[Source: Epi R Handbook](www.epiRhandbook.com)
+
+### Age pyramids  
+
+Age pyramids are very easy to make with R. This age pyramid actually plots *two* separate datasets over each other, to show the age/sex distribution of cases as compared to the underlying population.  
+
+```{r, out.width = "100%", fig.align = "center", fig.show='hold', echo=F}
+knitr::include_graphics("images/pop_pyramid_baseline.png")
+```
+
+[Source: Epi R Handbook](www.epiRhandbook.com)
+
+### Diagrams  
+
+Simple and complex flow charts and diagrams can also be made with R, such as this one that reflect the flow of patients and information during an outbreak response.  
+
+```{r, out.width = "50%", fig.align = "center", fig.show='hold', echo=F}
+knitr::include_graphics("images/flow_chart.png")
+```
+
+[Source: Epi R Handbook](www.epiRhandbook.com)
+
+
+### Mapping  
+
+One major asset of R's plotting capability is the capacity to produce stunning and reproducible GIS maps.  
+
+```{r, out.width = "100%", fig.align = "center", fig.show='hold', echo=F}
+knitr::include_graphics("images/swiss_map.png")
+```
+
+[Source](https://timogrossenbacher.ch/2016/12/beautiful-thematic-maps-with-ggplot2-only/)
+
+
+### Phylogenetic trees  
+
+There are many R packages that assist you with analyzing and visualizing phylogenetic trees and other genetic data.  
+
+```{r, out.width = "100%", fig.align = "center", fig.show='hold', echo=F}
+knitr::include_graphics("images/phylo.jpg")
+```
+
+[Source](https://www.biostars.org/p/200489/)
 
 
 
-## ggplot basics
+### The importance of visualization  
 
-There are a number of visualization options within the R software but in this tutorial and the handbook we focus on the **ggplot2** package available within the tidyverse. This is the visualization package of choice for may epidemiologists and other R users as it has a number of benefits over the basic `plot()` function built in to R.
+Summary statistics are vital in an analysis, but sometimes do not tell the entire story. Visualizing data can reveal important differences and trends that otherwise would have gone unnoticed.  
 
-**ggplot2**:
+Below is a famous example of four different datasets ("Anscombe's quartet"), which have the same summary statistics (e.g. means) and linear line of best fit - *yet, when the data are plotted as points reveal very different patterns*. This highlights the importance of visualization when dealing with new or unknown data.  
 
-* Is good for fast data exploration (especially with large numbers of parameters)
-* Produces very high quality final outputs which can often be used directly in publications or reports
-* has well structured and consistent inputs, once you learn the basics you can apply the same techniques to many data and plot types
-* Is actively updated and built on with additional packages to extend functionality
-
-
-### Grammar of graphics
-Visualizing multi-dimensional data *well* is a balance of art and science. Visualization is one of the most important parts of a statistical analysis as it allows you to share what you have achieved and, when done correctly, can help to explain complex work and concepts to a wider audience of stakeholders or the general public. Visualization can also be a key step when getting to grips with new data or with analyses you are working on.
 
 ```{r anscombe, fig.height=8, message = F, warning = F}
 p1 <- ggplot(anscombe) +
-  geom_point(aes(x1, y1), color = "darkorange", size = 1.5) +
+  geom_point(aes(x1, y1), color = "darkorange", size = 1) +
   scale_x_continuous(breaks = seq(0,20,2)) +
   scale_y_continuous(breaks = seq(0,12,2)) +
   expand_limits(x = 0, y = 0) +
@@ -279,7 +356,7 @@ p1 <- ggplot(anscombe) +
   theme_classic()
 
 p2 <- ggplot(anscombe) +
-  geom_point(aes(x2, y2), color = "darkorange", size = 1.5) +
+  geom_point(aes(x2, y2), color = "green4", size = 1) +
   scale_x_continuous(breaks = seq(0,20,2)) +
   scale_y_continuous(breaks = seq(0,12,2)) +
   expand_limits(x = 0, y = 0) +
@@ -288,7 +365,7 @@ p2 <- ggplot(anscombe) +
   theme_classic()
 
 p3 <- ggplot(anscombe) +
-  geom_point(aes(x3, y3), color = "darkorange", size = 1.5) +
+  geom_point(aes(x3, y3), color = "dodgerblue", size = 1) +
   scale_x_continuous(breaks = seq(0,20,2)) +
   scale_y_continuous(breaks = seq(0,12,2)) +
   expand_limits(x = 0, y = 0) +
@@ -297,7 +374,7 @@ p3 <- ggplot(anscombe) +
   theme_classic()
 
 p4 <- ggplot(anscombe) +
-  geom_point(aes(x4, y4), color = "darkorange", size = 1.5) +
+  geom_point(aes(x4, y4), color = "magenta3", size = 1) +
   scale_x_continuous(breaks = seq(0,20,2)) +
   scale_y_continuous(breaks = seq(0,12,2)) +
   expand_limits(x = 0, y = 0) +
@@ -318,7 +395,7 @@ joint <- plot_grid(p1_fitted, p2_fitted,
 
 title <- ggdraw() + 
   draw_label(
-    "Anscombe's Quartet",
+    "Four datasets with the same simple descriptive statistics\nbut different distributions (Anscombe's quartet)",
     fontface = 'bold',
     x = 0,
     hjust = 0
@@ -337,25 +414,95 @@ plot_grid(
 
 ```
 
-*Visualization of Anscombe's quartet, a famous set of 4 very different datasets which resolve to the same set of summary statistics and same linear line of best fit. This highlights the importance of visualization when dealing with new or unknown data. Figure adapted from [Debosruti Dutta](https://rpubs.com/debosruti007/anscombeQuartet)*
+*Figure adapted from [Debosruti Dutta](https://rpubs.com/debosruti007/anscombeQuartet)*
 
-The grammar of graphics refers to the basic structure generally followed in **ggplot2** where different building blocks of the plot are manipulated in individual lines of code. These range from data, the basic requirement of all data visualization, up to individual design tweaks specific to your own needs or liking.
 
-```{r grammar-graphics-pyramid, fig.margin = TRUE, echo = FALSE, fig.width = 3, out.width = "50%", fig.cap = ""}
-knitr::include_graphics("images/data_viz/gg_pyramid.png")
+
+
+## R packages {#packages}
+
+We cover the intricacies of R package installation and loading in our tutorial on [R Basics](www.training.appliedepi.org). We have pre-loaded the below packages for use in this tutorial.  
+
+Recall that the {pacman} package and it's function `p_load()` will automatically install each R package *if not yet installed* and will load it for use in the current R session.  
+
+Installation and loading of these packages is described in detail in the Epi R Handbook chapter [_Suggested Packages_](https://epirhandbook.com/en/suggested-packages-1.html).  
+
+
+```{r load-package-solution, echo=T, eval = FALSE}
+pacman::p_load(
+  rio,           # importing data  
+  here,          # relative file pathways  
+  skimr,         # review data
+  janitor,       # data cleaning and tables
+  epikit,        # age categories
+  lubridate,     # working with dates
+  incidence2,    # epidemic curves
+  ggrepel,       # smart plot labels
+  ggExtra,       # extra functions for plotting
+  esquisse,      # point-and-click for simple ggplots
+  apyramid,      # age pyramids
+  scales,        # formatting of plot scales
+  plotly,        # interactive plots
+  cowplot,       # combine plots
+  gghighlight,   # nice highlighting features for ggplot
+  tidyverse      # ggplot2 & data management
+)
 ```
 
 
-In **ggplot2** we build a plot by "adding" commands on top of one another which specify plot layers and design elements.
-For a standard plot your order will follow this process:
+
+## Import data {#import} 
+
+In this tutorial we will work with the *cleaned* Ebola linelist shown above. If you are interested in the process of cleaning data have a look at the data cleaning tutorial.
+
+Below we show a command that imports the data into R and saves it as the object `linelist` in our R environment for later use. This command uses the `import()` function from the package {rio}.  
+
+**Your import command may look different from this one**, depending upon how your files are organized within your RStudio project. See the [R Basics](www.training.appliedepi.org) tutorial to learn more about importing data into R with `import()`, RStudio projects, and the {here} R package.  
+
+```{r import-demo-subfolder, echo=T, eval=F}
+linelist <- import("linelist_cleaned.rds")   # import data and save as "linelist"
+```
+
+
+
+
+
+
+
+## ggplot basics
+
+There are a variety of visualization options within the R software, but in this tutorial and the Epi R Handbook we focus on the {ggplot2} package available within the {tidyverse} family of R packages. This is the visualization package of choice for many epidemiologists because it :  
+
+* Is good for fast data exploration (especially with large numbers of parameters)
+* Produces very high quality outputs which can be used directly in publications or reports
+* Has well structured and consistent syntax (easy to apply to many plots once you learn the basics)  
+* Benefits from additional R packages that extend its functionality  
+
+
+### Grammar of graphics
+
+
+The "grammar of graphics" refers to the basic structure of {ggplot2} commands, in which elements of the plot are created and sequentially "added" to one another in individual lines of code. This grammar incorporates actions as basic as specifying the dataset and columns to use, through extremely specific design adjustments.  
+
+
+In {ggplot2} we build a plot by "adding" commands on top of one another with a "+" symbol, which specify plot layers and design elements. A standard plot will follow this order:  
 
 1. **"Open" the plot** with the `ggplot()` command and specify the dataset
-2. **"Map" data columns** to "aesthetic" features of the plot such as axes, colour, size, shape fill, transparency etc. 
-3. **Add "geom" layers** to visualise your data in the desired way
-4. **Modify "scales"** such as colour choices, axis breaks
-5. **Add "theme" design elements** to your plot such as axis labels, title, captions, fonts, text sizes, background themes and the orientation of different elemnets
+2. **"Map" data columns** to "aesthetic" features of the plot such as axes, color, size, shape fill, transparency etc. 
+3. **Add "geom" layers** to visualize your data in the desired way (geometries such as bars, points, or boxplots)  
+4. **Modify "scales"** such as color choices and axis breaks
+5. **Add "theme" design elements** to your plot such as axis labels, title, captions, fonts, text sizes, background themes and the orientation of different elements
 
-"Adding" layers to your plot is done literally, by ending a ggplot line with the `+` symbol you can indicate that you wish to add further details on the following line. This can be repeated until your complete plot is built. Using this line-by-line syntax allows your code to be more readable, both for you to make changes in the future and to others trying to understand your work. Additionally we can add line breaks within lines of ggplot code, this is useful to highlight when you are specifying a different argument of the plot and leads to more readable plots, you will see examples of this throughout the tutorial. These line breaks are not necessary for the code to run but are useful to help yourself and others disect the code.
+```{r grammar-graphics-pyramid, fig.margin = TRUE, echo = FALSE, fig.width = 3, out.width = "50%", fig.cap = ""}
+knitr::include_graphics("images/gg_pyramid.png", error = F)
+```
+
+
+"Adding" layers to your plot is done literally by ending a line in the ggplot command with the `+` symbol. This indicates that you wish to add further details on the following line. This can be repeated until your complete plot is built.  
+
+Using this line-by-line syntax allows your code to be more readable, both for you to make changes in the future and to others trying to understand your work.  
+
+Additionally we can add line breaks within lines of ggplot code, this is useful to highlight when you are specifying a different argument of the plot and leads to more readable plots, you will see examples of this throughout the tutorial. These line breaks are not necessary for the code to run but are useful to help yourself and others understand the code.
 
 ```{r quiz1}
 quiz(
@@ -365,56 +512,70 @@ quiz(
     answer("Data", correct = TRUE),
     answer("Visualisation type")
   ),
-  question("Which of the R packages listed below are used to create plots?",
-    answer("ggplot2", correct = TRUE),
-    answer("here"),
-    answer("dplyr"),
-    answer("incidence2", correct = TRUE)
+  question("Sub-components of ggplot2 commands are linked together by what symbol?",
+    answer("`%>%`", message = "You have selected the 'pipe' operator, which is used in data management generally, but not within ggplot commands."),
+    answer("`*`"),
+    answer("`$`", message = "You can selected an indexing operator used to select a column from a data frame, which is generally not used within ggplot commands."),
+    answer("`+`", correct = TRUE, message = "Yes, the plus symbol is used to link sub-commands within a ggplot command.")
   )
 )
 ```
 
 In the following sections we will put this into practice step-by-step.
 
-## **ggplot2** in **RStudio**
+
+## {ggplot2} in RStudio  
+
 In this tutorial we code within chunks inside of this tutorial module. In reality you will likely be running your R code with the popular **R** coding environment **RStudio**.
 
 When we run a plotting command in RStudio the code will run in the console (as with any other R code) but you will not see the output here. The output will be passed to the "Plots" tab. By default this is in the bottom right quadrant of RStudio alongside the "Files", "Packages", "Help" and "Viewer" tabs:
 
-```{r, fig.margin = TRUE, echo = FALSE, fig.width = 3, out.width = "70%", fig.cap = ""}
-knitr::include_graphics("images/data_viz/RStudioplottab.PNG")
+```{r, fig.margin = TRUE, echo = FALSE, fig.width = 3, out.width = "100%", fig.cap = ""}
+knitr::include_graphics("images/RStudioplottab.PNG")
 ```
 
-If we save our plot in or R environment by assigning it to a name it will not plot when we run the code, only when we run the name of the plot:
-```{r, eval = TRUE, echo = FALSE,out.width = "90%"}
-knitr::include_graphics("./images/data_viz/plotvis.gif")
+Sometimes, we use the assignment operator `<-` to save our plot with a name in our R environment. In this case the plot will only print when we run a separate command containing the name of the plot:  
+
+```{r, eval = TRUE, echo = FALSE,out.width = "100%"}
+knitr::include_graphics("./images/plotvis.gif")
 ```
 
 
+### Plot handling buttons  
 
-```{r, fig.margin = TRUE, echo = FALSE, fig.width = 3, out.width = "70%", fig.cap = ""}
-knitr::include_graphics("images/data_viz/plotopts.png")
+In the RStudio plots pane there are some buttons worth knowing about:  
+
+
+```{r, fig.margin = TRUE, echo = FALSE, fig.width = 3, out.width = "100%", fig.cap = ""}
+knitr::include_graphics("images/plotopts.png")
 ```
 
-To see your plot in a larger window you can click on "Zoom" **(1)**
+To see your plot in a larger window you can click on "Zoom" **(1)**  
 
 We can also remove plots from the plot tab using the red X button to remove the current plot **(2)** or the little brush to remove all previous plots **(3)**. 
 
-The "Export" button **(4)** allows us to save plots to a file or copy to our clipboard to paste elsewhere. To save a `ggplot()` with a function we can use `ggsave()`. This gives more options than exporting via the RStudio window and is also useful to save multiple plots from the same code.
+The "Export" button **(4)** allows us to save plots to a file or copy to our clipboard to paste elsewhere. Sometimes, this feature can unexpectedly capture only part of a plot, so usually it is best to save/export with the function `ggsave()`. This gives more options than exporting via the RStudio window and is also useful to save multiple plots from the same code.  
 
 
-`ggsave()` can work in two ways:
-* Specify the name of the plot object, then the file path and name with extension
-    * For example: ggsave(plot_name, here("plots", "plot_name.png"))
-* Run the command with only a file path, to save the last plot that was printed
-    * For example: ggsave(here("plots", "plot_name.png"))
+### `ggsave()`  
+
+`ggsave()` can work in two ways:  
+
+* Specify the name of the plot object, then the file path and name with extension  
+    * For example: `ggsave(plot_name, path = here("plots", "plot_name.png"))`
+* Run the command with only a file path, to save the last plot that was printed  
+    * For example: `ggsave(path = here("plots", "plot_name.png"))`
 
 You can export as png, pdf, jpeg, tiff, bmp, svg, or several other file types, by specifying the file extension in the file path.
 
-You can also specify the arguments `width =`, `height =`, and `units =` (either “in”, “cm”, or “mm”). You can also specify `dpi =` with a number for plot resolution (e.g. 300). See the function details by entering `?ggsave` or reading the [documentation online](https://ggplot2.tidyverse.org/reference/ggsave.html)
+You can also specify the arguments `width =`, `height =`, and `units =` (either “in”, “cm”, or “mm”). You can also specify `dpi =` with a number for plot resolution (e.g. 300). See the function details by entering `?ggsave` or reading the [documentation online](https://ggplot2.tidyverse.org/reference/ggsave.html).  
 
-## "Open" the plot
-The **ggplot2** package is built around the **R** function `ggplot()` which is the first command for any ggplot. 
+
+
+
+## "Open" the plot  
+
+The {ggplot2} package is built around the **R** function `ggplot()` which is the first command for any ggplot. 
 Running `ggplot()` in your R console should generate a blank canvas:
 
 ```{r blank-plot, exercise = TRUE}
@@ -431,69 +592,92 @@ ggplot()
 
 
 
-We assign the dataframe we wish to use with the `data = ` argument of this function. In our example this dataframe is called `linelist`:
+In this step, we also typically specify the data frame (R's word for a dataset) to use, by placing the `data = ` argument inside the parentheses. In our example, the data frame is called `linelist`:  
+
 ```{r ggplot data, echo=T, eval=F}
 ggplot(data = linelist)
 ```
 
 
-If you are familiar with the pipe operator (`%>%`) from our data cleaning tutorial, data can also be passed into a ggplot command using a pipe:
+If you are familiar with the pipe operator (`%>%`) from our [Data cleaning tutorial](www.training.appliedepi.org), data can also be *piped into* a ggplot command using a pipe:  
+
 ```{r pipe, eval=F, echo=T}
 linelist %>%
   ggplot()
 ```
 
+Neither of these approaches to specifying the data will change the blank canvas:  
 
-## Mapping columns
-```{r aes, echo=T, eval=T}
-ggplot(
-  data = linelist,
-  mapping = aes(x = age,
-                y = bmi))
+```{r blank-plot2, exercise = TRUE}
+ggplot(data = linelist)
+```
 
+```{r blank-plot2-check}
+grade_this_code("correct, you should see a blank canvas loaded by ggplot2")
+```
 
+```{r blank-plot2-solution, eval= FALSE}
+ggplot(data = linelist)
 ```
 
 
-"Aesthetics" are features whose display could vary or each data point. An obvious example are the X and Y co-ordinates but these can also include the color, shape and other properties of the plot which depend on columns in your data. We will get into other aesthetics further into the tutorial.
 
-`mapping = aes()` assigns plot aesthetics to columns from your data. Any arguments to be input must be placed *within* the `aes()` command to be interpreted as dependent on the data.
 
-Here we have set the axes X and Y to the age and bmi columns from the linelist data. You can see this represented on the axes above.
+## Mapping columns  
 
-The first 25 rows of the linelist data are reproduced below. Try changing the Y axis to weight rather than BMI in the **R** window below. You can use the arrows to scroll left and right through the table and find the correct column. 
+
+Now that we have a canvas, we need to tell R what we want on the X-axis and on the Y-axis. The columns that we will **map** to the axes are simple examples of the plot's "aesthetics". Note this word "**aes**thetics" - the root **aes** becomes part of the next R command.  
+
+"Aesthetics" are features whose display could vary or each data point. An obvious example are the X and Y co-ordinates - for example, if we "map" the column `age` to the X-axis, then every row in the data will be evaluated and may be placed on a different X-axis position. But aesthetics can also include the color, shape and other properties of the plot that we will explore further in the tutorial.  
+
+The second argument of `ggplot()` is `mapping = aes()`. This is where you **map columns in the data to components of the plot.** Specifically, this is for components of the plot that you **allow to vary for each row of data**.  
+
+
+### `aes()`  
+
+The `mapping = ` argument of `ggplot()` is atypical in that you must provide the values to it **within the `aes()` function.**  
+
+> `mapping = aes(x = COLUMN, y = COLUMN)`  
+
+Remember that this code above is occurring *within* the `ggplot()` function. The `mapping = aes()` itself IS the second expected argument to `ggplot()`. Make the column mapping assignments *within* the `aes()` function.  
+
+```{r aes, echo=T, eval=T}
+ggplot(data = linelist, mapping = aes(x = age, y = ht_cm))
+```
+
+Above, we have set the axes X and Y to the age and height columns from the linelist data. You can see this represented on the axes scales above, which now have titles and values. Note that no data is yet displayed.  
+
+The first 25 rows of the linelist data are reproduced below. Try changing the Y axis to `temp` rather than `ht_cm` in the **R** window below. You can use the arrows to scroll left and right through the table and find the correct column. 
 
 ```{r linelist-data}
-head(linelist,25)
+head(linelist, 25)
 ```
 
 Below is an R exercise where you can edit and write your own code. Using "Run code" will run what you have entered and produce an output, to check your answer against the solution click "Submit Answer". If you get stuck be sure to click the "Hints" button above the code chunk to get a hint to the solution.
 
 ```{r axes-plot, exercise = TRUE}
-ggplot(
-  data = linelist,
-  mapping = aes(x = age,
-                y = bmi))
+ggplot(data = linelist, mapping = aes(x = age, y = ht_cm))
 ```
 
 ```{r axes-plot-check}
-grade_this_code("correct, you should now see weight on the y axis")
+grade_this_code("correct, you should now see temperature on the y axis")
 ```
 
 ```{r axes-plot-hint}
-The weight column is labeled wt_kg
+The temperature column is named temp
 ```
 
 ```{r axes-plot-solution, eval= FALSE}
-ggplot(
-  data = linelist,
-  mapping = aes(x = age,
-                y = wt_kg))
+ggplot(data = linelist, mapping = aes(x = age, y = temp))
 ```
 
 *Note: You may see `aes()` called in ggplot code without the `mapping = ` argument being specified, as with any R function the arguments do not need to be specifically named as long as they are passed in the order expected by the function. For clarity here we include `mapping = ` but if you see code elsewhere without this it achieves the same result.*
 
-## Add geoms
+
+
+
+## Add geoms  
+
 As we have seen above, running our `ggplot()` command with the data attached and X and Y coordinates determined does not give us a completed plot. 
 To do this we need to add geometry with "geom" commands. These all follow a common format of `geom_XXXX()` where XXXX is replaced with a plot type such as `geom_line()` or `geom_bar()` or more general objects to be plotted such as text: `geom_text()` or a horizontal line: `geom_hline()`. A full list of available **ggplot2** geoms can be found in the [ggplot reference document](ggplot2.tidyverse.org/reference/) and many more can be added by loading additional packages.
 Some common "geoms" for epidemiology are listed below:
@@ -541,6 +725,39 @@ ggplot(
   mapping = aes(x = age)) +
 geom_histogram()
 ```
+
+
+### A note on newlines and indentations  
+
+As in much of **R** code, indentations, spaces, and newlines within a ggplot command do not impact code execution, and can improve readability. The following commands all produce the same plot:  
+
+This command is entirely horizontal, and does not use best practice spacing.
+```{r, echo = TRUE, eval = FALSE, tidy = FALSE}
+ggplot(data=surv,mapping=aes(x=age,y=ht_cm))+geom_point()
+```
+
+This approach begins to introduce proper spacing, and some new lines:  
+
+```{r, echo = TRUE, eval = FALSE, tidy = FALSE}
+ggplot(data = surv,
+       mapping = aes(x = age, y = ht_cm)) +
+geom_point()
+```
+
+Finally, here is our recommended approach:  
+
+```{r, echo = TRUE, eval = FALSE, tidy = FALSE}
+ggplot(
+  data = surv,        # use case linelist
+  mapping = aes(      # make aesthetic mappings for all geoms
+    x = age,          # assign x-axis to age column
+    y = ht_cm)) +     # assign y-axis to height
+geom_point()          # display data as points
+```
+
+Note how the third more vertical coding approach looks similar to a "table of contents" and allows explanatory comments to by typed to the left of each specific component of the command.  
+
+
 
 ## Other aesthetics
 
