@@ -429,6 +429,7 @@ Installation and loading of these packages is described in detail in the Epi R H
 
 
 ```{r load-package-solution, echo=T, eval = FALSE}
+# install/load packages for use in the tutorial
 pacman::p_load(
   rio,           # importing data  
   here,          # relative file pathways  
@@ -445,7 +446,7 @@ pacman::p_load(
   plotly,        # interactive plots
   cowplot,       # combine plots
   gghighlight,   # nice highlighting features for ggplot
-  tidyverse      # ggplot2 & data management
+  tidyverse      # includes ggplot2 and other data management packages
 )
 ```
 
@@ -463,65 +464,6 @@ Below we show a command that imports the data into R and saves it as the object 
 linelist <- import("linelist_cleaned.rds")   # import data and save as "linelist"
 ```
 
-
-
-
-
-
-
-## ggplot basics
-
-There are a variety of visualization options within the R software, but in this tutorial and the Epi R Handbook we focus on the {ggplot2} package available within the {tidyverse} family of R packages. This is the visualization package of choice for many epidemiologists because it :  
-
-* Is good for fast data exploration (especially with large numbers of parameters)
-* Produces very high quality outputs which can be used directly in publications or reports
-* Has well structured and consistent syntax (easy to apply to many plots once you learn the basics)  
-* Benefits from additional R packages that extend its functionality  
-
-
-### Grammar of graphics
-
-
-The "grammar of graphics" refers to the basic structure of {ggplot2} commands, in which elements of the plot are created and sequentially "added" to one another in individual lines of code. This grammar incorporates actions as basic as specifying the dataset and columns to use, through extremely specific design adjustments.  
-
-
-In {ggplot2} we build a plot by "adding" commands on top of one another with a "+" symbol, which specify plot layers and design elements. A standard plot will follow this order:  
-
-1. **"Open" the plot** with the `ggplot()` command and specify the dataset
-2. **"Map" data columns** to "aesthetic" features of the plot such as axes, color, size, shape fill, transparency etc. 
-3. **Add "geom" layers** to visualize your data in the desired way (geometries such as bars, points, or boxplots)  
-4. **Modify "scales"** such as color choices and axis breaks
-5. **Add "theme" design elements** to your plot such as axis labels, title, captions, fonts, text sizes, background themes and the orientation of different elements
-
-```{r grammar-graphics-pyramid, fig.margin = TRUE, echo = FALSE, fig.width = 3, out.width = "50%", fig.cap = ""}
-knitr::include_graphics("images/gg_pyramid.png", error = F)
-```
-
-
-"Adding" layers to your plot is done literally by ending a line in the ggplot command with the `+` symbol. This indicates that you wish to add further details on the following line. This can be repeated until your complete plot is built.  
-
-Using this line-by-line syntax allows your code to be more readable, both for you to make changes in the future and to others trying to understand your work.  
-
-Additionally we can add line breaks within lines of ggplot code, this is useful to highlight when you are specifying a different argument of the plot and leads to more readable plots, you will see examples of this throughout the tutorial. These line breaks are not necessary for the code to run but are useful to help yourself and others understand the code.
-
-```{r quiz1}
-quiz(
-  question("What is the most basic building block of data vizualisation?",
-    answer("Statistics"),
-    answer("Scale"),
-    answer("Data", correct = TRUE),
-    answer("Visualisation type")
-  ),
-  question("Sub-components of ggplot2 commands are linked together by what symbol?",
-    answer("`%>%`", message = "You have selected the 'pipe' operator, which is used in data management generally, but not within ggplot commands."),
-    answer("`*`"),
-    answer("`$`", message = "You can selected an indexing operator used to select a column from a data frame, which is generally not used within ggplot commands."),
-    answer("`+`", correct = TRUE, message = "Yes, the plus symbol is used to link sub-commands within a ggplot command.")
-  )
-)
-```
-
-In the following sections we will put this into practice step-by-step.
 
 
 ## {ggplot2} in RStudio  
@@ -569,6 +511,69 @@ The "Export" button **(4)** allows us to save plots to a file or copy to our cli
 You can export as png, pdf, jpeg, tiff, bmp, svg, or several other file types, by specifying the file extension in the file path.
 
 You can also specify the arguments `width =`, `height =`, and `units =` (either “in”, “cm”, or “mm”). You can also specify `dpi =` with a number for plot resolution (e.g. 300). See the function details by entering `?ggsave` or reading the [documentation online](https://ggplot2.tidyverse.org/reference/ggsave.html).  
+
+
+
+
+
+
+
+## A grammar of graphics
+
+### Why use {ggplot2}  
+
+There are a variety of visualization options within the R software, but in this tutorial and the Epi R Handbook we focus on the {ggplot2} package available within the {tidyverse} family of R packages. This is the visualization package of choice for many epidemiologists because it :  
+
+* Is good for fast data exploration (especially with large numbers of parameters)
+* Produces very high quality outputs which can be used directly in publications or reports
+* Has well structured and consistent syntax (easy to apply to many plots once you learn the basics)  
+* Benefits from additional R packages that extend its functionality  
+
+
+### Grammar of graphics
+
+The "grammar of graphics" refers to the basic structure of {ggplot2} commands, in which elements of the plot are created and sequentially "added" to one another in individual lines of code. This grammar incorporates actions as basic as specifying the dataset and columns to use, through extremely specific design adjustments.  
+
+
+In {ggplot2} we build a plot by "adding" commands on top of one another with a "+" symbol, which specify plot layers and design elements. A standard plot will follow this order:  
+
+1. **"Open" the plot** with the `ggplot()` command and specify the dataset
+2. **"Map" data columns** to "aesthetic" features of the plot such as axes, color, size, shape fill, transparency etc. 
+3. **Add "geom" layers** to visualize your data in the desired way (geometries such as bars, points, or boxplots)  
+4. **Modify "scales"** such as color choices and axis breaks
+5. **Add "theme" design elements** to your plot such as axis labels, title, captions, fonts, text sizes, background themes and the orientation of different elements
+
+```{r grammar-graphics-pyramid, fig.margin = TRUE, echo = FALSE, fig.width = 3, out.width = "50%", fig.cap = ""}
+knitr::include_graphics("images/gg_pyramid.png", error = F)
+```
+
+
+"Adding" layers to your plot is done literally by ending a line in the ggplot command with the `+` symbol. This indicates that you wish to add further details on the following line. This can be repeated until your complete plot is built.  
+
+Using this line-by-line syntax allows your code to be more readable, both for you to make changes in the future and to others trying to understand your work.  
+
+Additionally we can add line breaks within lines of ggplot code, this is useful to highlight when you are specifying a different argument of the plot and leads to more readable plots, you will see examples of this throughout the tutorial. These line breaks are not necessary for the code to run but are useful to help yourself and others understand the code.
+
+```{r quiz1}
+quiz(
+  question("What is the most basic building block of data vizualisation?",
+    answer("Statistics"),
+    answer("Scale"),
+    answer("Data", correct = TRUE),
+    answer("Visualisation type")
+  ),
+  question("Sub-components of ggplot2 commands are linked together by what symbol?",
+    answer("`%>%`", message = "You have selected the 'pipe' operator, which is used in data management generally, but not within ggplot commands."),
+    answer("`*`"),
+    answer("`$`", message = "You can selected an indexing operator used to select a column from a data frame, which is generally not used within ggplot commands."),
+    answer("`+`", correct = TRUE, message = "Yes, the plus symbol is used to link sub-commands within a ggplot command.")
+  )
+)
+```
+
+In the following sections we will put this into practice step-by-step.
+
+
 
 
 
@@ -623,37 +628,39 @@ ggplot(data = linelist)
 
 
 
-## Mapping columns  
+## Mapping columns to aesthetics  
+
+### Aesthetics  
+
+Now that we have a canvas, we must tell R what to plot. We begin by "mapping" columns in our dataset to certain "aesthetics" of the plot.  
+
+"Aesthetics" are plot features related to the displayed data, such as position, color, and shape. Note this word "**aes**thetics" - as the root **aes** becomes part of the R command we will use.  
 
 
-Now that we have a canvas, we need to tell R what we want on the X-axis and on the Y-axis. The columns that we will **map** to the axes are simple examples of the plot's "aesthetics". Note this word "**aes**thetics" - the root **aes** becomes part of the next R command.  
+### Axes  
 
-"Aesthetics" are features whose display could vary or each data point. An obvious example are the X and Y co-ordinates - for example, if we "map" the column `age` to the X-axis, then every row in the data will be evaluated and may be placed on a different X-axis position. But aesthetics can also include the color, shape and other properties of the plot that we will explore further in the tutorial.  
+Typically, the first aesthetic mappings are to *assign columns from the dataset to the axes*. 
 
-The second argument of `ggplot()` is `mapping = aes()`. This is where you **map columns in the data to components of the plot.** Specifically, this is for components of the plot that you **allow to vary for each row of data**.  
+For example, by mapping the column `age` to the X-axis, every row in the data is evaluated and each case may be placed on a different X-axis position according to their age.  
 
-
-### `aes()`  
-
-The `mapping = ` argument of `ggplot()` is atypical in that you must provide the values to it **within the `aes()` function.**  
+As you remember, the first argument of `ggplot()` is `data = `. The second argument is `mapping = aes()`, where you **map columns in the data to plot aesthetics.** The `mapping = ` argument of `ggplot()` is atypical in that you must provide the values to it *within the `aes()` function.*  
 
 > `mapping = aes(x = COLUMN, y = COLUMN)`  
 
-Remember that this code above is occurring *within* the `ggplot()` function. The `mapping = aes()` itself IS the second expected argument to `ggplot()`. Make the column mapping assignments *within* the `aes()` function.  
+Remember that this code above is occurring *within* the `ggplot()` function. The `mapping = aes()` itself IS the second expected argument to `ggplot()`.  
+Below, we set the axes X and Y to the age and height columns from the linelist data. You can see this represented on the axes scales, which now have titles and values. Note that no data is yet displayed.  
 
 ```{r aes, echo=T, eval=T}
 ggplot(data = linelist, mapping = aes(x = age, y = ht_cm))
 ```
 
-Above, we have set the axes X and Y to the age and height columns from the linelist data. You can see this represented on the axes scales above, which now have titles and values. Note that no data is yet displayed.  
-
-The first 25 rows of the linelist data are reproduced below. Try changing the Y axis to `temp` rather than `ht_cm` in the **R** window below. You can use the arrows to scroll left and right through the table and find the correct column. 
+The first 25 rows of the linelist data are reproduced below. In the **R** window below, try changing the Y axis to temperature rather than `ht_cm`. You can use the arrows to scroll left and right through this table and find the correct column. 
 
 ```{r linelist-data}
 head(linelist, 25)
 ```
 
-Below is an R exercise where you can edit and write your own code. Using "Run code" will run what you have entered and produce an output, to check your answer against the solution click "Submit Answer". If you get stuck be sure to click the "Hints" button above the code chunk to get a hint to the solution.
+Below is an R exercise where you can edit and write your own code. Clicking "Run code" will run what you have entered and produce an output. To check your answer against the solution click "Submit Answer". If you need help, click the "Hints" button above the code chunk to get a hint to the solution. You can also ask a question in our [Community Forum](www.community.appliedepi.org).    
 
 ```{r axes-plot, exercise = TRUE}
 ggplot(data = linelist, mapping = aes(x = age, y = ht_cm))
@@ -671,63 +678,69 @@ The temperature column is named temp
 ggplot(data = linelist, mapping = aes(x = age, y = temp))
 ```
 
-*Note: You may see `aes()` called in ggplot code without the `mapping = ` argument being specified, as with any R function the arguments do not need to be specifically named as long as they are passed in the order expected by the function. For clarity here we include `mapping = ` but if you see code elsewhere without this it achieves the same result.*
+*Note: You may see `aes()` written in ggplot code without the `mapping = ` argument name. As with any R function the argument names do not need to be written as long as they are written in the order expected by the function. For clarity here we include `mapping = ` but if you see code elsewhere without this, it achieves the same result.*
 
 
 
 
 ## Add geoms  
 
-As we have seen above, running our `ggplot()` command with the data attached and X and Y coordinates determined does not give us a completed plot. 
-To do this we need to add geometry with "geom" commands. These all follow a common format of `geom_XXXX()` where XXXX is replaced with a plot type such as `geom_line()` or `geom_bar()` or more general objects to be plotted such as text: `geom_text()` or a horizontal line: `geom_hline()`. A full list of available **ggplot2** geoms can be found in the [ggplot reference document](ggplot2.tidyverse.org/reference/) and many more can be added by loading additional packages.
-Some common "geoms" for epidemiology are listed below:
+Next we need to declare *how* we want our data to be visualized - that is, which geometric shapes to use (e.g. points, bars, boxplots, lines, etc.).  
 
-* Histograms `geom_histogram()`
-* Bar charts `geom_bar()` or `geom_col()` (These are covered later in the tutorial)
-* Box plots `geom_boxplot()`
-* Points (eg. scatter plots) `geom_point()`
-* Line graphs `geom_line()` (points joined in order of the x-axis variable) or `geom_path()` (points joined in the order given in the data)
-* Trend lines `geom_smooth()`
+To "add" geometry, we extend our `ggplot()` command with a `+` symbol and write one of the "geom" functions, such as `geom_point()` below. Adding (`+`) the function `geom_point()` to our previous `ggplot()` command plots each row in the data as a point, using the X and Y mappings we defined earlier. Note that the `+` appears after the close of the `ggplot()` parentheses.  
 
-Adding (`+`) `geom_point()` to our previous `ggplot()` call will plot points using the X and Y variables we defined:
-```{r simple plot, echo=T, message = T, warning = T}
-ggplot(
-  data = linelist,
-  mapping = aes(
-    x = age,
-    y = wt_kg))+
+```{r simple_plot, echo=T, message = T, warning = T}
+ggplot(data = linelist, mapping = aes(x = age, y = wt_kg))+
   geom_point()
 ```
 
-You will see a warning when running this code reproduced above. This is due to missing data in the linelist. **ggplot2** will automatically drop rows with missing values from simple plots.
+*You will see a warning when running this code reproduced above. This is {ggplot2} is warning you that it is dropping rows with missing values from the plot.*  
 
 
-We can also plot other simple plots with the same data by switching out the `geom_point()` for another geom. Below we plot a histogram  of ages included in the linelist. This type of plot only requires a single variable. Can you spot what is missing from the code below?
+### Other geom functions  
+
+There are many "geom" functions that you can use, each displaying the data using different shapes.  
+
+All follow a common format of `geom_XXXX()` where XXXX is replaced with a plot type such as `geom_line()` or `geom_bar()` or more general objects to be plotted such as text: `geom_text()` or a horizontal line: `geom_hline()`. A full list of available {ggplot2} geoms can be found in the [ggplot reference document](ggplot2.tidyverse.org/reference/) and many more can be added by loading additional packages.  
+
+Some common "geoms" for epidemiology are listed below:
+
+
+Shape           |{ggplot2} geom function                
+----------------|--------------------
+Histograms      |`geom_histogram()`
+Points          |`geom_point()`  
+Lines           |`geom_line()` or `geom_path()`  
+Bar plots       |`geom_bar()` or `geom_col()`  
+Box plots       |`geom_boxplot()`  
+Violin plots    |`geom_violin()`  
+Trend lines     |`geom_smooth()`
+
+
+We can easily make other simple plots using the same data by replacing `geom_point()` with another geom function.  
+
+Below we use `geom_histogram()` to show the distribution the continuous variable age. A histogram plot only requires a single column of data, so we map `age` to the x-axis. But something is missing from the code below, preventing the histogram from being displayed - can you spot what is missing and fix it?  
 
 ```{r axis-plot, exercise = TRUE, warning=F, message=F}
-ggplot(
-  data = linelist,
-  mapping = aes(x = age))
-geom_histogram()
+ggplot(data = linelist, mapping = aes(x = age))
+  geom_histogram()
 ```
 
 ```{r axis-plot-check}
-grade_this_code("correct, we need to link the commands together with a '+'")
+grade_this_code("Correct, we need to link the commands together with a '+'")
 ```
 
 ```{r axis-plot-hint}
-remember we need to add layers to our ggplot
+remember we need to add layers to our ggplot with a specific symbol
 ```
 
 ```{r axis-plot-solution, eval= FALSE}
-ggplot(
-  data = linelist, 
-  mapping = aes(x = age)) +
-geom_histogram()
+ggplot(data = linelist, mapping = aes(x = age)) +
+  geom_histogram()
 ```
 
 
-### A note on newlines and indentations  
+### Newlines and indentations  
 
 As in much of **R** code, indentations, spaces, and newlines within a ggplot command do not impact code execution, and can improve readability. The following commands all produce the same plot:  
 
@@ -755,54 +768,72 @@ ggplot(
 geom_point()          # display data as points
 ```
 
-Note how the third more vertical coding approach looks similar to a "table of contents" and allows explanatory comments to by typed to the left of each specific component of the command.  
+Note how the third more vertical coding approach looks similar to a "table of contents". It makes clear which argument belong to parts of the greater ggplot command, and allows explanatory comments to be typed to the left of each specific component.  
 
 
 
-## Other aesthetics
 
-In the previous section we saw examples of plots that assigned columns in the data to both the x-axis and y-axis (e.g. scatterplots) and plots that used only an x-axis (e.g. histograms). As well as these simple aesthetics, we can also adjust elements specific to the type of plot we are using (the `geom_*()`):
+## More aesthetics
 
-* shape = Display a point with geom_point() as a dot, star, triangle etc.
-* fill = The interior color (e.g. of a bar or boxplot)
-* color = The exterior line of a bar, boxplot, etc., or the point color if using geom_point()
-* size = Size (e.g. line thickness, point size)
-* alpha = Transparency (1 = opaque, 0 = invisible)
-* binwidth = Width of histogram bins
-* width = Width of “bar plot” columns
-* linetype = Line type (e.g. solid, dashed, dotted)
+Recall that ggplot "aesthetics" are elements of the plot that control how the data are displayed. In the previous section we saw examples win which columns in the data were mapping to the x-axis and y-axis (e.g. scatter plots) and a plot that used only an x-axis (e.g. histograms). 
 
-These plot object aesthetics can be assigned values in two ways:
+Aside from axes, other common aesthetics include:
 
-1. Static values (e.g. fill = "orange") to apply across all plotted observations
-    * Assigned _outside_ `aes()`
-    * same display for all data
+Aesthetic    |What it controls                
+-------------|---------------------------------------------------
+`shape`      |Display of point as dot, star, triangle, square...
+`fill`       |The *interior* color (e.g of bar or boxplot)  
+`color`      |The color of points and lines, or the outline of bars and boxplots  
+`size`       |Line thickness, point size...
+`alpha`      |Transparency: 0 (invisible) to 1 (opaque) 
+`width`      |Width of "bar plot" bars
+`linetype`   |Either solid, dashed, dotted, etc.  
+`binwidth`   |Width of histogram bins  
+
+
+Importantly, aesthetics can be assigned values **statically**, or **dynamically***. Let's explore each of these:  
+
+### Static aesthetic assignments  
+
+We use the term "static" because in this approach the aesthetic is assigned to a single, static value (e.g. `"orange"`, `2`, or `0.5`) *that results in the same display for all data in the plot*. To apply the same display for all plotted observations:  
+
+1. The static assignment is made to a single value (can be character, numeric, etc.)  
+2. The assignment must occur _outside_ the `mapping = aes()` argument  
+
+Below, the `color` aesthetic of the points is assigned the value `"orange"`, so *all the points* are colored orange. This assignment is done within the `geom_point()` function, **not** within the `mapping = aes()`.  
 
 ```{r plot-color, echo=T, warning=F, message=F}
 ggplot(
   data = linelist,
-  mapping = aes(x = age)) +
-geom_histogram(
+  mapping = aes(
+    x = age,
+    y = ht_cm)) +
+geom_point(
   fill = "orange")
 ```
+
 *NOTE: when we assign a character value such as the fixed color orange, we need to use quotation marks (`"orange"`) whereas when we are mapping an aesthetic to a column name we do not use quotation marks*
 
 
-2. A data column (e.g. color = gender) such that display of each observation depends on its value in that column
-    * Assigned _inside_ `aes()`
-    * Dispalys data grouped by selected column
+### Dynamic aesthetic assignments  
+
+Alternatively, we can provide a *column name* for the aesthetic assignment, resulting in the aesthetic display being dynamic - potentially different for every observation in the data. To have a dynamic aesthetic:  
+
+1. The assignment is made to a *column name*, without quotes  
+2. Write the assignment *within* the `mapping = aes()` argument in the top `ggplot()` command  
+
+We have already made dynamic assignments for the x-axis (and y-axis), but this can also be done for aesthetics like `color`. In the plot below, `color = gender` is added to the `mapping = aes()` argument. Now the `color` of each point depends on the value for `gender` in that specific row. In effect, this "groups" the data by gender and also produces a legend on the right side of the plot.  
   
 ```{r dynamic-aes, warning=F, message=F, echo=T}
 ggplot(
   data = linelist,
   mapping = aes(
     x = age,
-    y = wt_kg)) +
-geom_point(
-    mapping = aes(color = gender))
+    fill = gender)) +
+geom_point()
 ```
 
-Try changing the histogram plot code below to have the bar fill determined by gender.
+Try changing the histogram plot code below to have the `fill` determined by gender.
 
 ```{r gender-plot, exercise = TRUE, warning=F, message=F}
 ggplot(
@@ -822,12 +853,53 @@ aes(fill = gender)
 ```{r gender-plot-solution, eval= FALSE}
 ggplot(
   data = linelist,
-  mapping = aes(x = age)) +
-geom_histogram(
-  mapping = aes(fill = gender))
+  mapping = aes(
+    x = age,
+    fill = gender)) +
+geom_histogram()
 ```
 
-### More examples
+### Both static and dynamic aesthetics  
+
+You may have both static and dynamic aesthetic in the same plot. Try changing this points plot such that:  
+
+* The point `color` is determined dynamically by gender  
+* The point `size` is 3 for all points  
+* The `alpha` is 0.5 for all points  
+
+```{r both-plot, exercise = TRUE, warning=F, message=F}
+ggplot(
+  data = linelist,
+  mapping = aes(
+    x = age,
+    y = ht_cm)) +
+geom_point(fill = "orange")
+```
+
+```{r both-plot-check}
+grade_this_code("Correct, you need color within aes(), and alpha and size outside aes()")
+```
+
+```{r both-plot-hint}
+aes(color = gender)
+geom_point(size = 3, alpha = 0.5)
+```
+
+```{r both-plot-solution, eval= FALSE}
+ggplot(
+  data = linelist,
+  mapping = aes(
+    x = age,
+    y = ht_cm,
+    color = gender)) +
+geom_point(size = 3, alpha = 0.5)
+```
+
+
+
+
+### More examples  
+
 For dot and line plots we assign the color using *color* rather than *fill* as they are outlines rather than filled objects. Here we also adjust the size (`size = `) of the points and the opacity (`alpha = `)(make them more see through; useful for overlaid plots)
 ```{r static-col, warning=F, message=F, echo=T}
 ggplot(
