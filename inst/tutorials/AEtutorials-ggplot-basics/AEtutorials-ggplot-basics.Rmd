@@ -36,6 +36,7 @@ library(scales)
 library(plotly)
 library(cowplot)
 library(ggpubr)
+library(flair)
 library(gghighlight)
 library(RColorBrewer)
 library(Hmisc)
@@ -636,31 +637,33 @@ Now that we have a canvas, we must tell R what to plot. We begin by "mapping" co
 
 "Aesthetics" are plot features related to the displayed data, such as position, color, and shape. Note this word "**aes**thetics" - as the root **aes** becomes part of the R command we will use.  
 
+The first argument of `ggplot()` is `data = `. The second argument is `mapping = aes()`, in which you **map columns in the data to plot aesthetics.** The `mapping = ` argument of `ggplot()` is atypical in that you must provide the values to it *within the `aes()` function.*  
+
+> `mapping = aes(x = COLUMN, y = COLUMN)`  
+
+Remember that this code above is occurring *within* the `ggplot()` function. The `mapping = aes()` itself IS the second expected argument to `ggplot()`.  
+
 
 ### Axes  
 
 Typically, the first aesthetic mappings are to *assign columns from the dataset to the axes*. 
 
-For example, by mapping the column `age` to the X-axis, every row in the data is evaluated and each case may be placed on a different X-axis position according to their age.  
+For example, by mapping the column `age` to the x-axis, every row in the data is evaluated and each case may be placed on a different x-axis position according to their age.  
 
-As you remember, the first argument of `ggplot()` is `data = `. The second argument is `mapping = aes()`, where you **map columns in the data to plot aesthetics.** The `mapping = ` argument of `ggplot()` is atypical in that you must provide the values to it *within the `aes()` function.*  
-
-> `mapping = aes(x = COLUMN, y = COLUMN)`  
-
-Remember that this code above is occurring *within* the `ggplot()` function. The `mapping = aes()` itself IS the second expected argument to `ggplot()`.  
 Below, we set the axes X and Y to the age and height columns from the linelist data. You can see this represented on the axes scales, which now have titles and values. Note that no data is yet displayed.  
 
 ```{r aes, echo=T, eval=T}
 ggplot(data = linelist, mapping = aes(x = age, y = ht_cm))
 ```
 
-The first 25 rows of the linelist data are reproduced below. In the **R** window below, try changing the Y axis to temperature rather than `ht_cm`. You can use the arrows to scroll left and right through this table and find the correct column. 
+Below is an R exercise where you can edit, write, and run your own code. Try editing the code such that the y-axis reflects temperature rather than height. Clicking "Run code" will run what you have entered and produce an output. To check your answer against the solution click "Submit Answer". If you need help, click the "Hints" button above the code chunk to get a hint to the solution. You can also ask a question in our [Community Forum](www.community.appliedepi.org).  
+
+The first 25 rows of the linelist data are reproduced below. You can use the arrows to scroll left and right through this table and find the correct column.  
 
 ```{r linelist-data}
 head(linelist, 25)
 ```
-
-Below is an R exercise where you can edit and write your own code. Clicking "Run code" will run what you have entered and produce an output. To check your answer against the solution click "Submit Answer". If you need help, click the "Hints" button above the code chunk to get a hint to the solution. You can also ask a question in our [Community Forum](www.community.appliedepi.org).    
+ 
 
 ```{r axes-plot, exercise = TRUE}
 ggplot(data = linelist, mapping = aes(x = age, y = ht_cm))
@@ -687,23 +690,23 @@ ggplot(data = linelist, mapping = aes(x = age, y = temp))
 
 Next we need to declare *how* we want our data to be visualized - that is, which geometric shapes to use (e.g. points, bars, boxplots, lines, etc.).  
 
-To "add" geometry, we extend our `ggplot()` command with a `+` symbol and write one of the "geom" functions, such as `geom_point()` below. Adding (`+`) the function `geom_point()` to our previous `ggplot()` command plots each row in the data as a point, using the X and Y mappings we defined earlier. Note that the `+` appears after the close of the `ggplot()` parentheses.  
+To "add" geometry, we extend our `ggplot()` command with a `+` symbol and write one of the "geom" functions below, such as `geom_point()`. Adding the function `geom_point()` to the `ggplot()` command visualizes each row in the data as a point, using the defined X and Y aesthetic mappings. Note that the `+` appears after the close of the `ggplot()` parentheses.  
 
 ```{r simple_plot, echo=T, message = T, warning = T}
 ggplot(data = linelist, mapping = aes(x = age, y = wt_kg))+
   geom_point()
 ```
 
-*You will see a warning when running this code reproduced above. This is {ggplot2} is warning you that it is dropping rows with missing values from the plot.*  
+*You will see a warning when running this code reproduced above. This is {ggplot2} warning you that it is dropping rows with missing values from the plot.*  
 
 
 ### Other geom functions  
 
-There are many "geom" functions that you can use, each displaying the data using different shapes.  
+There are many "geom" functions that you can use, and each displays the data using different shapes.  
 
-All follow a common format of `geom_XXXX()` where XXXX is replaced with a plot type such as `geom_line()` or `geom_bar()` or more general objects to be plotted such as text: `geom_text()` or a horizontal line: `geom_hline()`. A full list of available {ggplot2} geoms can be found in the [ggplot reference document](ggplot2.tidyverse.org/reference/) and many more can be added by loading additional packages.  
+All these functions follow the common format of `geom_XXXX()`, where XXXX is replaced with a type of geometry. For example, `geom_line()` for lines, `geom_bar()` for bar plots. Geom functions can also create auxiliary plot components, such as `geom_text()` for text labels, or `geom_hline()` for horizontal lines (e.g. to mark a threshold). A full list of available {ggplot2} geoms can be found in the [ggplot reference document](ggplot2.tidyverse.org/reference/) and many more can be added by installing additional packages.  
 
-Some common "geoms" for epidemiology are listed below:
+Some common "geoms" for epidemiological data are listed below:
 
 
 Shape           |{ggplot2} geom function                
@@ -717,9 +720,7 @@ Violin plots    |`geom_violin()`
 Trend lines     |`geom_smooth()`
 
 
-We can easily make other simple plots using the same data by replacing `geom_point()` with another geom function.  
-
-Below we use `geom_histogram()` to show the distribution the continuous variable age. A histogram plot only requires a single column of data, so we map `age` to the x-axis. But something is missing from the code below, preventing the histogram from being displayed - can you spot what is missing and fix it?  
+Below, we replace `geom_point()` with `geom_histogram()`, to show the distribution of the continuous variable `age`. A histogram only requires a single column of data, so we map `age` to the x-axis. But something is missing from the code below, preventing the histogram from being displayed - can you spot what is missing and fix it?  
 
 ```{r axis-plot, exercise = TRUE, warning=F, message=F}
 ggplot(data = linelist, mapping = aes(x = age))
@@ -742,7 +743,7 @@ ggplot(data = linelist, mapping = aes(x = age)) +
 
 ### Newlines and indentations  
 
-As in much of **R** code, indentations, spaces, and newlines within a ggplot command do not impact code execution, and can improve readability. The following commands all produce the same plot:  
+Indentations, spaces, and newlines within a ggplot command do not impact code execution, and can improve readability. The following commands all produce the same plot:  
 
 This command is entirely horizontal, and does not use best practice spacing.
 ```{r, echo = TRUE, eval = FALSE, tidy = FALSE}
@@ -770,37 +771,39 @@ geom_point()          # display data as points
 
 Note how the third more vertical coding approach looks similar to a "table of contents". It makes clear which argument belong to parts of the greater ggplot command, and allows explanatory comments to be typed to the left of each specific component.  
 
+Ultimately, your approach is a stylistic choice. Try a few approaches until you find a style that makes the most sense for you.  
+
 
 
 
 ## More aesthetics
 
-Recall that ggplot "aesthetics" are elements of the plot that control how the data are displayed. In the previous section we saw examples win which columns in the data were mapping to the x-axis and y-axis (e.g. scatter plots) and a plot that used only an x-axis (e.g. histograms). 
+Recall that ggplot "aesthetics" are elements of the plot that control how the data are displayed. In the previous section we saw examples in which columns in the data were mapped to the x-axis and y-axis (e.g. scatter plots) and a plot that only had an x-axis mapping (e.g. histograms). 
 
-Aside from axes, other common aesthetics include:
+Aside from the plot axes, other common aesthetics include:
 
 Aesthetic    |What it controls                
 -------------|---------------------------------------------------
-`shape`      |Display of point as dot, star, triangle, square...
-`fill`       |The *interior* color (e.g of bar or boxplot)  
-`color`      |The color of points and lines, or the outline of bars and boxplots  
-`size`       |Line thickness, point size...
-`alpha`      |Transparency: 0 (invisible) to 1 (opaque) 
-`width`      |Width of "bar plot" bars
-`linetype`   |Either solid, dashed, dotted, etc.  
-`binwidth`   |Width of histogram bins  
+`shape =`      |Display of point as dot, star, triangle, square...
+`fill =`       |The *interior* color (e.g of bar or boxplot)  
+`color =`      |The color of points and lines, or the outline of bars and boxplots  
+`size =`       |Line thickness, point size...
+`alpha =`      |Transparency: 0 (invisible) to 1 (opaque) 
+`width =`      |Width of "bar plot" bars
+`linetype =`   |Either solid, dashed, dotted, etc.  
+`binwidth =`   |Width of histogram bins  
 
 
-Importantly, aesthetics can be assigned values **statically**, or **dynamically***. Let's explore each of these:  
+Importantly, plot aesthetics can be assigned values **statically**, or **dynamically**. Let's explore each of these:  
 
 ### Static aesthetic assignments  
 
-We use the term "static" because in this approach the aesthetic is assigned to a single, static value (e.g. `"orange"`, `2`, or `0.5`) *that results in the same display for all data in the plot*. To apply the same display for all plotted observations:  
+We use the term "static" because in this approach the aesthetic is assigned to a single, unchanging value (e.g. `"orange"`, `2`, or `0.5`). This results in *the same display for all plotted data*. To make a static aesthetic assignment:  
 
-1. The static assignment is made to a single value (can be character, numeric, etc.)  
-2. The assignment must occur _outside_ the `mapping = aes()` argument  
+1. The assignment is made to **a single value** (can be character, numeric, etc.)  
+2. The assignment must occur **outside the `mapping = aes()` argument**  
 
-Below, the `color` aesthetic of the points is assigned the value `"orange"`, so *all the points* are colored orange. This assignment is done within the `geom_point()` function, **not** within the `mapping = aes()`.  
+Below, the `color = ` aesthetic of the points is assigned the value `"orange"`, and as a result *all the points* are colored orange. Note that this assignment is **not** made within the `mapping = aes()`, but rather with the `geom_point()` function.  
 
 ```{r plot-color, echo=T, warning=F, message=F}
 ggplot(
@@ -809,7 +812,7 @@ ggplot(
     x = age,
     y = ht_cm)) +
 geom_point(
-  fill = "orange")
+  color = "orange")
 ```
 
 *NOTE: when we assign a character value such as the fixed color orange, we need to use quotation marks (`"orange"`) whereas when we are mapping an aesthetic to a column name we do not use quotation marks*
@@ -819,21 +822,22 @@ geom_point(
 
 Alternatively, we can provide a *column name* for the aesthetic assignment, resulting in the aesthetic display being dynamic - potentially different for every observation in the data. To have a dynamic aesthetic:  
 
-1. The assignment is made to a *column name*, without quotes  
-2. Write the assignment *within* the `mapping = aes()` argument in the top `ggplot()` command  
+1. The assignment is made to a **column name**, without quotes  
+2. The assignment is written **within the `mapping = aes()` argument** of the `ggplot()`  
 
-We have already made dynamic assignments for the x-axis (and y-axis), but this can also be done for aesthetics like `color`. In the plot below, `color = gender` is added to the `mapping = aes()` argument. Now the `color` of each point depends on the value for `gender` in that specific row. In effect, this "groups" the data by gender and also produces a legend on the right side of the plot.  
+We have already made dynamic assignments for the x-axis (and y-axis), but this can also be done for aesthetics like `color`. In the plot below, `color = ` is written in the `mapping = aes()` argument, as is assigned to the column `gender`. Now the `color` of each point depends on the value for `gender` in that specific row of data. In effect, this "groups" the data by gender and also produces a legend on the right side of the plot.  
   
 ```{r dynamic-aes, warning=F, message=F, echo=T}
 ggplot(
   data = linelist,
   mapping = aes(
     x = age,
-    fill = gender)) +
+    y = ht_cm,
+    color = gender)) +
 geom_point()
 ```
 
-Try changing the histogram plot code below to have the `fill` determined by gender.
+Now, apply this knowledge to a histogram. Change the code below to have the `fill ` aesthetic of the histogram determined by gender.  
 
 ```{r gender-plot, exercise = TRUE, warning=F, message=F}
 ggplot(
@@ -847,7 +851,8 @@ grade_this_code("correct, we need to put the fill inside aes()")
 ```
 
 ```{r gender-plot-hint}
-aes(fill = gender)
+Try adding fill = gender within the aes()
+Remember that you will need to also remove the static aesthetic assignment to "orange"
 ```
 
 ```{r gender-plot-solution, eval= FALSE}
@@ -873,7 +878,7 @@ ggplot(
   mapping = aes(
     x = age,
     y = ht_cm)) +
-geom_point(fill = "orange")
+geom_point(color = "orange")
 ```
 
 ```{r both-plot-check}
@@ -895,25 +900,9 @@ ggplot(
 geom_point(size = 3, alpha = 0.5)
 ```
 
+*NOTE: Here you assign `size` and `alpha` to fixed values outside of the `mapping = aes()` argument, but these can also be mapped to columns if desired.*
 
 
-
-### More examples  
-
-For dot and line plots we assign the color using *color* rather than *fill* as they are outlines rather than filled objects. Here we also adjust the size (`size = `) of the points and the opacity (`alpha = `)(make them more see through; useful for overlaid plots)
-```{r static-col, warning=F, message=F, echo=T}
-ggplot(
-  data = linelist,
-  mapping = aes(
-    x = age,
-    y = wt_kg)) +
-geom_point(
-  mapping = aes(color = outcome),
-  size = 2,
-  alpha = 0.5)
-```
-
-*NOTE: here we assign size and alpha to fixed values outside of the `mapping = aes()` argument, these can also be mapped to columns in our data by placing them inside the argument and specifying a column name to map them to.*
 
 We will cover different color options later and how to change the colors assigned to your data. Basic colors for static mapping are built-in with **ggplot2**:
 
@@ -925,84 +914,58 @@ scale_y_continuous(name="", breaks=NULL, expand=c(0, 0)) +
 scale_fill_identity() +
 geom_rect(data=d, mapping=aes(xmin=x, xmax=x+1, ymin=y, ymax=y+1), fill="white") +
 geom_rect(data=d, mapping=aes(xmin=x+0.05, xmax=x+0.95, ymin=y+0.5, ymax=y+1, fill=c)) +
-geom_text(data=d, mapping=aes(x=x+0.5, y=y+0.5, label=c), colour="black", hjust=0.5, vjust=1, size=3)
+geom_text(data=d, mapping=aes(x=x+0.5, y=y+0.5, label=c), colour="black", hjust=0.5, vjust=1, size=2)
 ```
 
-A range of point shapes are also available in R, these can be used to set point shapes. The ones with blue centers below have a fill and so can be filled with a different argument to their colour (outline)
+A range of point shapes are also available in R, these can be used to set point shapes. Note that the shapes with blue centers can have both `fill` (interior) and `color` (outline) aesthetics specified.
 
 ```{r shapes}
 ggpubr::show_point_shapes()
 
 ```
 
-As with the other aesthetics we have seen shape can be dynamic:
+As with the other aesthetics, we have seen that `shape` can be dynamic. Below the point `shape` is assigned to the column `gender`, and the color to `age_cat`. Note the two legends that appear on the right.  
 
 ```{r dynamic-shape, warning=F, message=F, echo=T}
 ggplot(
   data = linelist,
   mapping = aes(
     x = age,
-    y = wt_kg)) +
+    y = wt_kg,
+    shape = gender,      # shape by gender
+    color = age_cat)) +  # color by age category
 geom_point(
-  mapping = aes(
-    shape = gender,
-    color = age_cat), 
-  size = 3, 
-  alpha = 0.3)
+  size = 3,              # all points are size 3
+  alpha = 0.3)           # all points are mostly transparent
 ```
 
-or static:
+Below the points are all assigned to shape 21 - the circle with both an exterior `color` and an interior `fill`. Below we assign the color as "black" and the fill to the column `age_cat`.  
 
 ```{r static-shape, warning=F, message=F, echo=T}
 ggplot(
   data = linelist,
   mapping = aes(
     x = age,
-    y = wt_kg)) +
+    y = wt_kg,
+    fill = age_cat)) +   # interior fill of points by age category
 geom_point(
-  mapping = aes(fill = age_cat),
-  color = "black",
-  shape = 21,
-  size = 3,
-  alpha = 0.3)
+  shape = 21,            # all points are circles that can be filled
+  color = "black",       # all points have black outline
+  size = 3,              # all points are size 3
+  alpha = 0.3)           # all points are mostly transparent
 ```
 
-Here we use a shape with fill to allow each point to have a black outline with categorical fill.
 
-### Static aesthetics
-An aesthetic is static if it applies the same display to all data points in the geom or plot. Static aesthetics are defined *outside* `aes()` to a *number or character value*.
-egs.
-`color = seagreen`
-`size = 3`
-`alpha = 0.5`
+### Inheritance of aesthetic mappings  
 
-```{r plot-with-those-aes, warning=F, message=F}
-ggplot(
-  data = linelist,
-  mapping = aes(
-    x = age,
-    y = wt_kg)) +
-geom_point(color = "seagreen",
-           size = 3,
-           alpha = 0.5)
-```
+Below are some rules about how aesthetic assignments are inherited (or not) by lower components of a ggplot command:  
 
-### Assigned (dynamic) aesthetics
-*Dynamic* aesthetics are mapped to a column name, and defined *inside* `aes()`. This creates "groups" in the plot and generates a legend. The display varies for each data point.
-
-### Combining both types
-As we have shown in the examples, both types of aesthetic can be combined in one plot to generate the desired outcome.
-
-### Placement of `aes()`
-1. Dynamic mappings in the initial `ggplot()` call will apply to subsequent geoms, *unless otherwise indicated*
-2. Static aesthetics (e.g. color = "blue") are not inherited by subsequent geoms
+1. Dynamic mappings in the initial `ggplot()` call will apply to subsequent geoms, *unless otherwise overwritten*  
+2. Static aesthetics (e.g. color = "blue") are not inherited by subsequent geoms  
 3. Mappings written within one geom apply only to that geom
 
+Point 3 above alludes to a variation in ggplot coding that we have not yet shown you - the fact that the `mapping = aes()` can be placed in multiple geoms. For simplicity, in the above examples we have written the `mapping = aes()` only in the top part of the `ggplot()` command. In truth, this argument can be written in any of the geoms, but typically this is only done in complex ggplot commands involving multiple data frames.  
 
-
-
-
-It is good practice to add global option sin the initial `ggplot()` call such as the coordinates used in the plot. This makes reading the code more easy for others and yourself. The data is also usually global but in some cases you may load different data for individual geoms inside those geoms
 
 ```{r quiz_aes}
 quiz(
@@ -1022,8 +985,11 @@ quiz(
 ```
 
 
-## Facets
-Aesthetics are a good way of showing groups in your data, another way is by *faceting*. `facet_wrap()` can be used to produce an individual plot for each unique value of the column passed to it. Put a "~" before the column name in the command
+## Facets  
+
+While dynamic aesthetics are a good way of showing groups in your data, another way is by *faceting*. Also called "small-multiples", faceting produces individual plots for each unique value in a column passed to the function `facet_wrap()`. Place a tilde "~" before the column name in the command.  
+
+Below, we create facets the source of infection (the column `souce`). Note that we write a "~" before the column name we want to facet by, otherwise we will get an error message. This symbol can be interpreted as the word "by".  
 
 ```{r facet-wrap, echo=T, warning=F, message=F}
 ggplot(
@@ -1033,11 +999,12 @@ geom_histogram() +
 facet_wrap(~source)
 ```
 
-Here we split out the linelist data by source of infection. A key thing to see here is that we must put a "~" before the column name we want to facet by otherwise we will get an error message. 
 
 You will also notice that the date axes in these facet plots look terrible by default! We will address this in the scales section of the tutorial.
 
-By default `facet_wrap()` automatically matches scales between plots. This can be turned off with "free" options passed to `scales =` 
+### Free axes  
+
+By default, `facet_wrap()` uses the same axes scales in all of the plots. This behavior can be turned off using the `scales = ` argument with one of the following values:  
 
 1. "free_y"
 2. "free_x"
@@ -1053,15 +1020,18 @@ facet_wrap(
   scales = "free_y")
 ```
 
-**Free axes are generally not recommended as they can mislead an audience not carefully checking your plots**
+**Free axes are generally not recommended as they can mislead an audience not carefully checking your plots** Note how in the plot above, a casual glance at the epidemic curves might lead you to think that they represent similar numbers of cases, when in fact the scales are quite different!  
 
-you can also set the number of columns or rows of plots produced with `ncol = ` and `nrow = `
 
-Try fixing the below code splitting cases by reporting hospital to plot a facet:
+### Facet rows and columns  
 
-1. Without a free y axis
-2. With 2 columns of plots
-3. With fill set by the source of infection (calls back to aesthetic mapping section)
+Within the `facet_wrap()` function, you can also control the number of columns or rows of plots produced with `ncol = ` and `nrow = `.  
+
+Try editing the below code, which facets the histogram by the column `hospital`:
+
+1. Add a "free_y" free y axis
+2. Have only 2 columns of plots
+3.Assign `fill` to the column `source` of infection (tip: review the aesthetic mapping section above)  
 
 ```{r facet-test, exercise = TRUE, warning=F, message=F}
 ggplot(
@@ -1070,7 +1040,6 @@ ggplot(
 geom_histogram() +
 facet_wrap(
   ~hospital,
-  scales = "free_y",
   ncol = 4)
 ```
 
@@ -1079,9 +1048,9 @@ grade_this_code("correct, we remove the scales argument, change ncol to 2 and ad
 ```
 
 ```{r facet-test-hint}
-1. We can remove the scales argument completely as we want to use the default.
-2. adust ncol = 
-3. we want to specify fill = source inside the aes mapping for the histogram
+1. Add the argument scales = "free_y" to facet_wrap()
+2. Adust ncol = 
+3. We want to specify fill = source inside the aes() mapping for the histogram
 ```
 
 ```{r facet-test-solution, eval= FALSE}
@@ -1091,15 +1060,17 @@ ggplot(
 geom_histogram(mapping = aes(fill = source)) +
 facet_wrap(
   ~hospital,
+  scales = "free_y",
   ncol = 2)
 ```
 
- We will fix the date (x) axis label overlap later in the tutorial.
- 
+
+
 ### Facet by two variables
 
-The "~" signifies "by". You can place columns on either side.
-With `facet_wrap()`, levels are combined into facet titles, appearing alphabetically/by factor level.
+As mentioned before, the tilde "~" signifies the word "by". This means that you actually facet by *two columns*, by writing their names on either side of the ~.  
+
+If you do this within `facet_wrap()`, the levels of the two columns are combined into facet titles appearing alphabetically or by factor level.  
 
 ```{r multidimension facet wrap, echo=T, warning=F, message=F, fig.height=7}
 ggplot(
@@ -1109,7 +1080,8 @@ geom_histogram(mapping = aes(fill = source)) +
 facet_wrap(hospital ~ gender)
 ```
 
-To improve on this layout we can instead use the `facet_grid()` command:
+To improve on this layout you can instead use the `facet_grid()` command:  
+
 ```{r multidimension facet grid, echo=T, warning=F, message=F, fig.height=7}
 ggplot(
   data = linelist,
@@ -1122,107 +1094,120 @@ facet_grid(hospital ~ gender)
 
 The easiest way to drop unwanted levels from your facet plot is to remove them in advance with `filter()` or `drop_na()`, functions you will have seen in the data cleaning tutorial.
 
-For ease we can also pipe this amended data straight into `ggplot()` rather than saving the changes as a new object for plotting.
+For ease we can pipe this amended data straight into `ggplot()` rather than saving the changes as a new object for plotting.
 
-```{r dropping, echo=T, warning=F, message=F, fig.height=7}
+```{r dropping, echo=T, warning=F, message=F, fig.height=10}
+# begin with the linelist
 linelist %>% 
-   drop_na(gender, hospital) %>% 
-   filter(hospital != "Missing") %>% 
-  
-ggplot(
-  mapping = aes(x = date_onset)) +
-geom_histogram(mapping = aes(fill = source)) +
+   drop_na(gender, hospital) %>%        # drop rows that are missing (NA) gender and hospital 
+   filter(hospital != "Missing") %>%    # drop rows where hospital is "Missing" 
+
+# pipe filtered linelist into the ggplot() command
+# note: no data= argument needed
+ggplot(mapping = aes(x = date_onset, fill = source)) +
+geom_histogram() +
 facet_grid(hospital ~ gender)
 ```
-*NOTE: here we are piping (`%>%`) into our plotting function after filtering with `dplyr`. *
+
 
 ### `gghighlight()`
 
-It can be useful to show facets in context of other data for comparison. `gghighlight()` from the package **gghighlight** can be used in combination with facets to have this effect.
+{ggplot2} can be accompanied by extension packages such as {gghighlight}. This package has a useful function `gghighlight()` when used with facets and epidemic curves, can serve to show faceted epidemics within the context of the larger epidemic.  
 
 ```{r gghighlight, echo=T, warning=F, message=F}
 ggplot(
   data = linelist,
-  mapping = aes(x = date_onset)) +
-geom_histogram(mapping = aes(fill = hospital)) +
+  mapping = aes(
+    x = date_onset,
+    fill = hospital)) +
+geom_histogram() +
 facet_wrap(~hospital) +
 gghighlight()
 
 ```
 
-gghighlight can also be added to other types of ggplot. Here we specify we want to highlight the 15-19 year olds in some data grouped from the linelist in this tutorial.
+`gghighlight()` can also be added to other types of plots. Here we specify we want to highlight the 15-19 year olds in some data grouped from the linelist.
 
 
 
 ```{r gghighlight-other, echo=T, warning=F, message=F}
+# begin with the linelist
 linelist %>% 
-  # get daily counts by age group
-  group_by(age_cat, date_onset) %>%
-  count() %>% 
+  
+  # create daily counts by age group
+  count(date_onset, age_cat) %>%
+  drop_na(date_onset) %>% 
 
+  # create line plot
   ggplot(
     mapping = aes(
-      x = date_onset,
-      y = n,
-      color = age_cat)) +
+      x = date_onset,                    # x-axis is date
+      y = n,                             # y-axis determined by the daily counts
+      color = age_cat)) +                # lines colored by age category
   geom_line() +
-  gghighlight::gghighlight(
-    age_cat %in% c("15-19"))+
-  theme(legend.position = "none")
+  gghighlight(age_cat %in% c("15-19"))+  # highlight the 15-19 year olds
+  theme(legend.position = "none")        # remove legend for clarity
 ```
 
 Check the handbook for [more information on grouping data](https://epirhandbook.com/en/grouping-data.html)
 
-Editing the facet title strips is touched on in the themes section of this tutorial, see [This short tutorial](https://www.datanovia.com/en/blog/how-to-change-ggplot-facet-labels/) for more information on this. 
+Editing the facet title strips is touched on in the themes section of this tutorial, see [this short tutorial](https://www.datanovia.com/en/blog/how-to-change-ggplot-facet-labels/) for more information on this. 
 The order of the facets can be adjusted by faceting by a factor and [reordering the levels](https://forcats.tidyverse.org/reference/fct_relevel.html). This is covered for barplots in the barplot section of the tutorial.
 
 facet quiz - ways to group data - aesthetic and facet
 can you think of situations where facets are preferred?
 facet_wrap vs facet_grid
 
-Below is a short quiz on facets, these are free text questions so there are no wrong answers, let us know what you think! 
+Below is a short quiz on facets, these are free text questions so there are no wrong answers, let us know what you think!  
+
 ```{r facet-quiz}
 quiz(
   question_text("When would you use a facet rather than an aesthetic?",
     answer("Facets are useful to contrast and compare subsets of the data, sometimes this cannot be done efficiently with aesthetics alone as there is a large amount of overlap between different datasets. Sometimes we are already using multiple aesthetics to show different properties of the data and a facet gives us an additional diffentiation without further cluttering the plot.", correct = T), incorrect  = "Facets are useful to contrast and compare subsets of the data, sometimes this cannot be done efficiently with aesthetics alone as there is a large amount of overlap between different datasets. Sometimes we are already using multiple aesthetics to show different properties of the data and a facet gives us an additional diffentiation without further cluttering the plot."
     ),
     question_text("When would we use facet_wrap rather than facet_grid?",
-    answer("Facet grid is most useful for 2 discrete variables, where you are seeall or most combinations of these two variables in your data. To split by one variable with a lot of levels or just to provide an additional aesthetic without cluttering the plot facet_wrap may be more useful.", correct = T), incorrect  = "Facet grid is most useful for 2 discrete variables, where you are seeall or most combinations of these two variables in your data. To split by one variable with a lot of levels or just to provide an additional aesthetic without cluttering the plot facet_wrap may be more useful. "
+    answer("Facet grid is most useful for 2 discrete variables, where you are see all or most combinations of these two variables in your data. To split by one variable with a lot of levels or just to provide an additional aesthetic without cluttering the plot facet_wrap may be more useful.", correct = T), incorrect = "Facet grid is most useful for 2 discrete variables, where you are see all or most combinations of these two variables in your data. To split by one variable with a lot of levels or just to provide an additional aesthetic without cluttering the plot facet_wrap may be more useful. "
     )
   
 )
 ```
 
 
-## Scales
-Scale commands replace defaults of how the aesthetic mappings manifest, such as:
+## Scales  
 
-* Which colors or shapes to display
-* The min/max of point sizes
-* The min/max and frequency of axes breaks
+Scale commands replace defaults for how aesthetics are displayed such as:  
 
-As a generic formula, these commands are written as: `scale_AESTHETIC_METHOD()`.
+* *Which* colors or shapes to display  
+* *How* date or proportions are written in axis labels  
+* The min/max and frequency of axes breaks  
+
+As a generic formula, these commands are written as: **scale**_*aesthetic*_*method*().
 
 1. `scale_` : this prefix never changes
-2. AESTHETIC: `_fill_` , `_color_` , `_x_` , `_y_` , etc.
-3. METHOD: `_continuous()`, `_discrete()`, `_manual()`, `_date()`, etc.
+2. *aesthetic*: `_fill_` , `_color_` , `_x_` , `_y_` , etc.
+3. *method*: `_continuous()`, `_discrete()`, `_manual()`, `_date()`, etc.
 
 Some examples of scale commands:  
 
-You want to adjust  |Scale command
+What you want to adjust  |Scale command
 --------------------|-------------------
 continuous y-axis   |`scale_y_continuous()`
 date x-axis         |`scale_x_date()`  
 categorical x-axis  |`scale_x_discrete()`  
 fill, continuous    |`scale_fill_continuous()`
 fill, continuous    |`scale_fill_gradient()`  
-color, manual assign|`scale_color_manual()`  
+color, manual assignment|`scale_color_manual()`  
 
-here we show two different ways to create a continuous color gradient. `scale_*_continuous` works with pre-built gradient palettes, `scale_*_gradient()` creates a 2 color gradient, `scale_*_gradient2` allows you to also set a midpoint color between these two and `scale_gradientn()` allows you to create more complex palettes. More information on these functions is [available here](r-graphics.org/recipe-colors-palette-continuous).
+You may notice that above we show two different ways to create a continuous color gradient. `scale_*_continuous` works with pre-built gradient palettes, `scale_*_gradient()` creates a 2 color gradient, whereas `scale_*_gradient2` allows you to also set a midpoint color between these two, and `scale_gradientn()` allows you to create more complex palettes. More information on these functions is [available here](r-graphics.org/recipe-colors-palette-continuous).  
+
+Let's practice adjusting scales in the following sections of this tutorial.  
 
 
 
 ### Default scales
+
+
+Below, we create a bar plot using `geom_bar()`, which creates bars reflecting the number of rows per unique `outcome`, with the `fill` (internal bar color) by `gender`. You can see the default fill colors and y-axis breaks.  
 
 ```{r, eval=T, echo=T, warning = F, message = F}
 ggplot(
@@ -1233,11 +1218,15 @@ ggplot(
 geom_bar()
 ```
 
-Above, the fill of a bar plot uses the **default colors and axis breaks**. We can adjust the elements of this plot with a `scale_AESTHETIC_METHOD()` function added (`+`) to the end of our `ggplot()`
+We can adjust the color and y-axis scales of this plot with their respective scale functions, added with a `+` to the end of our `ggplot()`.  
+
 
 ### Adjust fill
 
-Here we adjust the *fill* color of the bars *manually* (`scale_fill_manual()`). We provide assingments to the values in our dataset ("m" and "f") within a vector (`c()`). To assign a colour to the na values we need to specify this with the seperate argument `na.value = `
+Below, we adjust the `fill` color of the bars *manually* with `scale_fill_manual()`. Manual means that we provide manual color assignments for each of the `fill` values, which in this case come from the column `gender` ("m" and "f"). We provide these assignments to the argument `values = `, wrapped within a vector created with `c()`.  
+
+Note that to assign a color to the `NA` values we specify this with the separate argument `na.value = ` within `scale_fill_manual()`. 
+
 
 ```{r, eval=T, echo=T, warning = F, message = F}
 ggplot(
@@ -1253,7 +1242,8 @@ scale_fill_manual(
    na.value = "green")
 ```
 
-Here we have chosen some ugly colors to highlight what we are changing! Try changing the color for "m" to "dodgerblue" and "f" to "tomato" for a nicer color combination in the code below. Also set NA to be "grey", a common standard plot color.
+
+Wow! The colors above are quite ugly! Edit the code below, and try changing the color for "m" to "dodgerblue" and "f" to "tomato" for a nicer color combination. Also set the color for `NA` to be "grey".  
 
 ```{r manual-color, exercise = TRUE, warning=F, message=F}
 ggplot(
@@ -1287,16 +1277,18 @@ scale_fill_manual(
   na.value = "grey")
 ```
 
-#### Built-in palettes
 
-**R** and **ggplot2** come with a number of built-in palettes. As we are working here with discrete data we can use `scale_fill_brewer()` to access the following palettes rather than specifying our own colors:
 
-```{R brewerpal, fig.height=6}
+#### Built-in color palettes
+
+R and {ggplot2} come with a number of built-in color palettes. We can use `scale_fill_brewer()` to access the following palettes for the `fill`, rather than manually specifying our own colors. Within `scale_fill_brewer()` you can provide one of the following abbreviations to the `palette = ` argument, and again choose a color for `na.value = ` if you wish.  
+
+```{R brewerpal, fig.height=8}
 RColorBrewer::display.brewer.all()
 
 ```
 
-As we are working with a discrete scale the middle group of color palettes are most appropriate.
+The middle group of palettes are most appropriate for discrete values like those in our bar chart.
 
 ```{r brewer_eg, eval= T, echo=T, warning = F, message = F}
 ggplot(
@@ -1309,7 +1301,7 @@ scale_fill_brewer(palette = "Pastel2",
                   na.value = "grey")
 ```
 
-A color-blind friendly palette is also available known as `viridis`. This comes in discrete and continuous forms `scale_fill_viridis_d()` and `scale_fill_viridis_c()`:
+A color-blind friendly palette is also available in the package {viridis}. This comes in discrete and continuous forms `scale_fill_viridis_d()` and `scale_fill_viridis_c()`:
 
 ```{r viridis_eg, eval= T, echo=T, warning = F, message = F}
 ggplot(
@@ -1321,7 +1313,7 @@ geom_bar() +
 scale_fill_viridis_d(na.value = "grey")
 ```
 
-Try applying what you have learned to add a continuous viridis palette to the following plot. Be aware that here we are dealing with a *color* rather than *fill* aesthetic. It is best practice to also specify an `na.value = `
+Try applying what you have learned to add a continuous viridis palette to the following plot. Be aware that here we are dealing with a `color` rather than `fill` aesthetic, so you will need to modify your scale command slightly. It is best practice to also specify an `na.value = `
 
 ```{r pal-color, exercise = TRUE, warning=F, message=F}
 ggplot(
@@ -1353,12 +1345,24 @@ geom_point() +
 scale_color_viridis_c(na.value = "grey")
 ```
 
-[Viridis](https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html) (try with `option = "plasma"` or "inferno"), and [colorbrewer](https://www.r-graph-gallery.com/38-rcolorbrewers-palettes.html) palette functions can be added to any ggplot.  
+Want to learn more? Read about the [viridis](https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html) functions and try with `option = "plasma"` or "inferno". Viridis and [colorbrewer](https://www.r-graph-gallery.com/38-rcolorbrewers-palettes.html) palette functions can be added to any ggplot.  
+
+
+
+
 
 
 ### Adjusting y-axis
 
-We can edit axes in a similar way. In a barplot such as this one we have a continuous y-axis and discrete x-axis. Here we might decide that the counts on the y-axis are not descriptive enough so we wish to supply our own break points. In `scale_y_continuous()` we adjust the y-axis breaks using `seq()` to define a numeric sequence:   
+Axis scales can be edited in a similar way. In our bar plot, we have a continuous y-axis and discrete x-axis. We might decide that the intervals on the y-axis are not descriptive enough, so we wish to supply our own break points. 
+
+By adding `scale_y_continuous()` we can adjust the y-axis breaks using the {base} function `seq()` to define a numeric sequence. The function `seq()` accepts a `from = `, `to = `, and `by = ` values, and produces a vector of values that are used by the scale command. For example:  
+
+```{r, echo=T, eval=T}
+seq(from = 0, to = 3000, by = 500)
+```
+
+We can supply this vector to the argument `breaks = ` in the `scale_y_continuous` function to achieve exactly the breaks that we want.  
 
 ```{r axis-breaks, eval= T, echo=T, warning = F, message = F}
 ggplot(
@@ -1373,9 +1377,14 @@ scale_y_continuous(breaks = seq(from = 0,
                                 by = 500))
 ```
 
+
+
+
 ### Starting scales at 0 
 
-You may have noticed that **ggplot2** has a behaviour of expanding your axis beyond the data, with a gap between the values and the axis at the bottom. This can be fixed with the axes scales using the `expand = ` argument.
+You may have noticed that by default, your plots can appear to be "floating in the air". {ggplot2} has a behavior of expanding your y-axis beyond the data, with a gap between the values and the axis at the bottom. This can be fixed within a scales command by using the `expand = ` argument.  
+
+Below, we add `expand = c(0,0)` in the `scales_y_continuous()` function. Note the subtle difference between the outcome and the previous plot.  
 
 ```{r axis-end, eval= T, echo=T, warning = F, message = F}
 ggplot(
@@ -1391,7 +1400,7 @@ scale_y_continuous(breaks = seq(from = 0,
                    expand = c(0,0))
 ```
 
-Try applying the same `expand = c(0,0)` to the *discrete* x-axis:
+Below, try applying the same `expand = c(0,0)` to the *discrete* x-axis. You will need to add another scale command...
 
 ```{r expand, exercise = TRUE, warning=F, message=F}
 ggplot(
@@ -1426,9 +1435,16 @@ scale_y_continuous(breaks = seq(from = 0,
 scale_x_discrete(expand = c(0,0))
 ```
 
+
+
+
+
+
 ### Date axis labels
 
-The default scale for date axis labels will vary by the range of your data. Here is an example plot:
+The default scale for date axis labels will vary by the range of your data. Here is an example plot, which has such a wide range of data that the axis breaks are given every 3 months:  
+
+
 ```{r date-x, eval= T, echo=T, warning = F, message = F}
 ggplot(
   data = linelist,
@@ -1436,14 +1452,11 @@ ggplot(
 geom_histogram()
 ```
 
-Adjust axis labels with `scale_x_date()`.  
+Adjustment of this date axis can be done with `scale_x_date()`. The first step is to supply the `date_breaks =` argument with values like "1 week", "2 weeks", or "3 months".  
 
-Use `date_breaks=` values like "1 week", "2 weeks", or "3 months". 
+Note: these are the axis *label* breaks - they do not impact the bins of the histogram (bar widths). To adjust the histogram bins, see the [Epidemic curves](https://epirhandbook.com/en/epidemic-curves.html) chapter of the Epi R Handbook.  
 
-Note: these are the *axis* label breaks, the don't affect the bins of the histogram (bar widths), for tips on geom_histogram() bins, see Epi R Handbook epicurves page
-
-
-Try setting the date axis breaks to 2 months on the plot from above:
+For practice, try setting the date axis breaks in this plot to appear every 2 months:
 
 ```{r date-break, exercise = TRUE, warning=F, message=F}
 ggplot(
@@ -1464,11 +1477,26 @@ geom_histogram() +
 scale_x_date(date_breaks = "2 months")
 ```
 
+You may notice that the labels now appear in a defauly format: YYYY-MM-DD. We will show you how to change this in the next section...  
+
+
+
 ### Date axis labels
 
-We can specify the date labels format with `date_labels = ` using ["strptime" syntax - see R documentation for more information on this](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/strptime)  
+Exactly *how* the dates are displayed we can do in one of two ways:  
 
-`"%d %b %Y"` for DD MMM YYYY. Below we also include a new line with `\n` to move the year below the day and month.
+1) Specify the display format with `date_labels = ` using ["strptime" syntax](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/strptime)  
+2) Use the `label_date_short()` for quick automated and efficient date labels  
+
+#### Using "strptime" syntax  
+
+This syntax uses abbreviations within a quotes string to organize the date elements for display. For example:  
+
+* %d for day of the month (e.g. 21)  
+* %b for 3-letter abbreviation of the month (use %B for full month name)  
+* %Y for 4-digit year  
+
+You would combine these within quote marks like this: `"%d %b %Y"`, to achieve the display DD MMM YYYY. In the example below, we also include a new line with `\n` to place the year below the day and month.
 
 ```{r date-labs, eval= T, echo = T, warning = F, message = F}
 ggplot(
@@ -1479,9 +1507,14 @@ scale_x_date(date_breaks = "2 months",
              date_labels = "%d %b \n %Y" )
 ```
 
-See Epi R Handbook [Epicurves](https://epirhandbook.com/epidemic-curves.html) and [Strings](https://epirhandbook.com/characters-and-strings.html) pages for more tips
+See the Epi R Handbook [Epicurves](https://epirhandbook.com/epidemic-curves.html) and [Strings](https://epirhandbook.com/characters-and-strings.html) chapters for more tips.
 
-There is also a built-in simplification for date labels using the scales package. Confusingly this is applied using the `labels = ` rather than `date_labels = ` argument. Assigning `labels=` to `label_date_short()` from [**the scales package**](https://scales.r-lib.org/) means the year is not repeated on each label anymore.  
+
+#### Auto-efficient date labels  
+
+There is also a simple way of setting date label display, using the [{scales}](https://scales.r-lib.org/) package. Confusingly, this is applied using the `labels = ` argument, rather than `date_labels = `, but now you know.  
+
+Assigning `labels = ` to `label_date_short()` ensures that only the minimum necessary information is shown - in this case it means that the year is not repeated on each label.  
 
 ```{r date-short-labs, eval= T, echo = T, warning = F, message = F}
 ggplot(
@@ -1492,22 +1525,25 @@ scale_x_date(date_breaks = "2 months",
              labels = scales::label_date_short() )
 ```
 
-### Display percentages
-We can easily display proportions as percents with `percent()` from **scales** within `scale_y_continuous()`. 
+### Display percentages  
 
-Here we plot some case fatality data adapted from the linelist:
+The {scales} package also offers useful function to help us display percentages. The easiest approach is to store your data in decimal proportions, and then convert them to percents within the ggplot command with the function `percent()`, as supplied to the `labels = ` argument of `scale_y_continuous()`.  
+
+To create an example, we summarise the linelist data to arrive at the monthly case fatality ratio:  
+
 
 ```{r CFR, echo = F, eval = T}
+# Create new data frame of monthly case fatality ratios
 CFR_data <- linelist %>% 
-  group_by(month = floor_date(
-    date_outcome,
-    "month")) %>% 
+  
+  # group the data by month
+  group_by(month = floor_date(date_outcome, "month")) %>% 
+  
+  # create new summary table with statistics for each month 
   summarise(
-    cases = n(),
-    deaths = sum(
-      outcome == "Death",
-      na.rm=T),
-    CFR = deaths / cases)
+    cases  = n(),
+    deaths = sum(outcome == "Death", na.rm=T),
+    CFR    = deaths / cases)
 ```
 
 ```{r, echo = F, eval = T}
@@ -1516,17 +1552,21 @@ CFR_data %>%
   knitr::kable()
 ```
 
+Conveniently, we can simply write `labels = percent`, and ggplot will know to use this function (assuming you have installed and loaded the {scales} package).  
+
 ```{r , echo = TRUE, eval = T, warning = F, message = F}
 ggplot(
   data = CFR_data,
   mapping = aes(
     x = month,
-   y = CFR)) +
+    y = CFR)) +
 geom_line(
   size = 2,
   color = "brown") +
 scale_y_continuous(labels = percent)
 ```
+
+
 
 ## Plot labels
 
