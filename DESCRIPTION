@@ -10,15 +10,14 @@ License: What license is it under?
 Encoding: UTF-8
 LazyData: true
 Imports: 
-    basket,
     dplyr,
     emo (>= 0.0.0.9000),
-    etude (>= 0.3.0.9001),
     flair,
     flextable,
     fontawesome,
     gghighlight,
     ggplot2,
+    ggpubr,
     learnr (>= 0.10.1.9019),
     gradethis (>= 0.2.5.9000),
     gtsummary,
@@ -32,7 +31,5 @@ Imports:
 Remotes: 
     rstudio/learnr,
     rstudio/gradethis,
-    rstudio/fontawesome,
-    dtkaplan/etude,
     hadley/emo
 RoxygenNote: 7.1.2

@@ -16,25 +16,16 @@ description: >
 # load packages ----------------------------------------------------------------
 library(learnr)
 library(gradethis)
-library(etude) # helper functions for gradethis
-library(basket) # not sure if we need this
-library(DT)
 library(janitor)
 library(stringr)
 library(dplyr)
 library(magrittr)
 library(tidyr)
-library(skimr)
 library(epikit)
 library(lubridate)
-library(incidence2)
 library(ggrepel)
 library(ggExtra)
-library(esquisse)
-library(apyramid)
 library(scales)
-library(plotly)
-library(cowplot)
 library(ggpubr)
 library(flair)
 library(gghighlight)
@@ -245,7 +236,7 @@ This dataset contains `r nrow(linelist)` rows and `r ncol(linelist)` columns. Be
 
 ```{r}
 head(linelist) %>% 
-  DT::datatable()
+  knitr::kable()
 ```
 
 
@@ -434,18 +425,12 @@ Installation and loading of these packages is described in detail in the Epi R H
 pacman::p_load(
   rio,           # importing data  
   here,          # relative file pathways  
-  skimr,         # review data
   janitor,       # data cleaning and tables
   epikit,        # age categories
   lubridate,     # working with dates
-  incidence2,    # epidemic curves
-  ggrepel,       # smart plot labels
   ggExtra,       # extra functions for plotting
-  esquisse,      # point-and-click for simple ggplots
   apyramid,      # age pyramids
   scales,        # formatting of plot scales
-  plotly,        # interactive plots
-  cowplot,       # combine plots
   gghighlight,   # nice highlighting features for ggplot
   tidyverse      # includes ggplot2 and other data management packages
 )
