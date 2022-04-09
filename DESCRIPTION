@@ -29,7 +29,8 @@ Imports:
     stringr,
     tidyr,
     kableExtra,
-    datasets
+    datasets,
+    cowplot
 Remotes: 
     rstudio/learnr,
     rstudio/gradethis,
