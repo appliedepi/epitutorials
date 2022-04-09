@@ -18,6 +18,7 @@ Imports:
     gghighlight,
     ggplot2,
     ggpubr,
+    Hmisc,
     learnr (>= 0.10.1.9019),
     gradethis (>= 0.2.5.9000),
     gtsummary,
@@ -27,7 +28,8 @@ Imports:
     rio,
     stringr,
     tidyr,
-    kableExtra
+    kableExtra,
+    datasets
 Remotes: 
     rstudio/learnr,
     rstudio/gradethis,
