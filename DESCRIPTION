@@ -29,6 +29,7 @@ Imports:
     stringr,
     tidyr,
     kableExtra,
+    DT,
     datasets,
     cowplot
 Remotes: 
