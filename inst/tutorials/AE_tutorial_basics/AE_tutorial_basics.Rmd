@@ -20,6 +20,8 @@ description: >
 ```{r setup, include=FALSE}
 library(learnr)          # create lessons from rmd
 library(gradethis)       # evaluate exercises
+library(sortable)        # questions on choosing order of commands
+library(skimr)        # dataset summary
 library(dplyr)           # wrangle data
 library(flair)           # highlight code
 library(ggplot2)         # visualise data
@@ -98,17 +100,16 @@ gradethis::gradethis_setup(
 # }
 # 
 # options(tutorial.event_recorder = recorder_function)
-```
 
-```{r, include=FALSE}
+# data prep (must be in setup chunk) --------------------------------------------------------------------
+linelist <- rio::import(system.file("dat/surveillance_linelist_20141201.csv", package = "epitutorials"))
+
 # hide non-exercise code chunks ------------------------------------------------
 knitr::opts_chunk$set(echo = FALSE)
+
 ```
 
-```{r, include=FALSE}
-# data prep --------------------------------------------------------------------
-linelist <<- rio::import(system.file("dat/surveillance_linelist_20141201.csv", package = "epitutorials"))
-```
+
 
 
 ## Introduction to R for Applied Epidemiology and Public Health
@@ -370,6 +371,7 @@ tbl_cross(data = linelist, row = gender, col = case_def)
 grade_this_code("Correct, you should see a cross-tabulation of the linelist, in which gender is in the rows and case definition is in the columns.")
 ```
 
+`r fontawesome::fa("exclamation", fill = "red")` If you get the error: `It looks like this might not be valid R code...` try typing the code instead of copy/pasting into the codebox.  
 
 
 
@@ -444,6 +446,13 @@ Our other site [Applied Epi Community](www.community.appliedepi.org) is a public
 ## Understand R and RStudio  
 
 
+This section of the tutorial will help you better understand R and RStudio.
+
+**This tutorial does not assume that you have R and RStudio on your computer - it focuses on teaching you R syntax within R coding portals that are built into the tutorial**.
+
+If you want support installing and troubleshooting R code on your computer, consider taking one of our live courses or contacting us about a personal session.  
+
+
 ### Understand R   
 
 **R is a language** used for statistical computing and graphics, developed in 1991 and based on the language S ([read more of the history here](https://bookdown.org/rdpeng/rprogdatascience/history-and-overview-of-r.html#what-is-r)). 
@@ -487,7 +496,7 @@ knitr::include_graphics("images/r_popularity.png")
 
 R is known for its brilliant data visualizations. It is capable of producing deeply customized tables, maps, and epidemic curves. With a bit more advanced knowledge you can visualize contact tracing patterns, phylogenetic trees, and publication-ready plots.  
 
-```{r appliedepi-viz, fig.margin = TRUE, echo = FALSE, fig.width = 3, out.width = "50%", fig.cap = ""}
+```{r appliedepi-viz, fig.margin = TRUE, echo = FALSE, fig.width = 3, out.width = "75%", fig.cap = ""}
 knitr::include_graphics("images/visualization.png")
 ```
 
@@ -605,13 +614,6 @@ grade_this({
 
 
 
-
-
-
-
-## Setup R and RStudio  
-
-This section of the tutorial will help you better understand R and RStudio. If you are unable to install R and RStudio on your computer, you can still complete this tutorial.  
 
 ### R is the engine  
 
@@ -821,7 +823,7 @@ You can read more about RStudio projects in [this chapter of the Epi R Handbook]
 
 ### To open an R script
 
-**Although creating a script is not taught and is not necessary for this tutorial, you typically work in R by drafting and running your commands from an R script.**  
+**Although creating a script is not taught and is not necessary for this tutorial, you will typically work in R by drafting and running your commands from an R script.**  
 
 If you have RStudio and R running on your computer, you would click *File -> New file -> R script*.  
 
@@ -929,6 +931,10 @@ grade_this({
 Simply type the numbers into the console, with the appropriate operators between then, such as + or -. Do not forget that the second value is NEGATIVE.
 ```
 
+```{r simple-math-hint-2}
+12 + -99 + 2 + 147 + 29
+```
+
 ```{r simple-math-solution, eval=FALSE}
 12 + -99 + 2 + 147 + 29
 ```
@@ -1014,7 +1020,7 @@ You can see how changing the equation to account for updated might get difficult
 
 Any text written to the right of a "hash" symbol (#) is ignored by R as it runs commands in a script. So, you can use these symbols to write "comments" throughout the script. 
 
-If you were writing a proper R script, it might look like the code below:  
+If you were writing a proper R script in RStudio, it might look like below:  
 
 - A header that describes the purpose of the command  
 - Some detailed instructions about the command  
@@ -1079,21 +1085,6 @@ By running the command with the assignment operator, you can **create** an objec
 
 The keyboard shortcut to create the `<-` is Alt and - (Windows) or Option and - (Mac).  
 
-
-#### R Environment  
-
-`r fontawesome::fa("eye", fill = "darkblue")` In RStudio, the upper-right pane is called the "Environment". In this tutorial, we only practice the coding, but you will still be creating objects and saving them into a virtual environment.  
-
-Here is an image of an empty RStudio environment:  
-
-```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
-# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
-# It dynamically creates the ../../etc filepath.
-
-knitr::include_graphics("images/empty_environment.png", error = F)
-```
-
-
 See this command below:  
 
 ```{r, echo=TRUE, eval=F}
@@ -1112,7 +1103,7 @@ Write your command(s) here
 
 **What is the output printed below the codebox?** The correct output is... **nothing**.  
 
-`r fontawesome::fa("bookmark", fill = "orange")` **Remeber this!** You are now learning the difference between two fundamentally different types of R commands:  
+`r fontawesome::fa("bookmark", fill = "orange")` **Remember this!** You are now learning the difference between two fundamentally different types of R commands:  
 
 1) Commands that *assign a value* and,  
 2) Commands that *ask R to print something*  
@@ -1123,28 +1114,7 @@ Are you asking R to print something, or assign a value to something?
 If your command includes the assignment operator `<-`, then you are asking R to assign a value, and R will not return a printed output. Instead, the value may be stored, updated, and ready for use in a later command.  
 
 
-#### Naming objects  
-
-`r fontawesome::fa("pen", fill = "brown")` A quick note about naming objects:  
-
-* **Object names must not contain spaces**, but you should use underscore (_) or a period (.) instead of a space.
-* **Object names are case-sensitive** (meaning that Dataset_A is different from dataset_A).
-* **Object names must begin with a letter** (cannot begin with a number like 1, 2 or 3).  
-* Typically, coders write object names in all lowercase, but this is a stylistic choice  
-* Keep your object names short - it is much easier to code with short names  
-
-`r emo::ji("cross mark")` `my object name`  
-`r emo::ji("cross mark")` Having both `dataset` and `Dataset`  
-`r emo::ji("cross mark")` `2nd_wave_of_cases_from_Santa_Clara_County`  
-
-`r emo::ji("check")` `cases_zambia`  
-`r emo::ji("check")` `linelist_raw`  
-`r emo::ji("check")` `lab_20140216`  
-
-Note: in R literature, you may often see people using `df` as an object name. This is a shorthand way to refer to the fact that the object they are saving is a "data frame" (R's name for a dataset with columns and rows).  
-
-
-1) Write the same command that you ran above, but this time add a *second command* on a new line that is only the name `confirmed_cases`. Then click the "Run Code" button.
+Write the same command that you ran above, but this time add a *second command* on a new line that is only the name `confirmed_cases`. Then click the "Run Code" button.
 
 ```{r confirmed-cases-print, exercise = TRUE}
 confirmed_cases <- 34
@@ -1168,10 +1138,40 @@ grade_this_code("Correct, you are running one statment that assigned the name co
 See how this new command, `confirmed_cases`, tells R to print the current value of the object `confirmed_cases`.  
 
 
-3) **Now, using the same approach, define an object named `suspect_cases`, assign the value `12`, and in a separate command, ask R to print the value.**  
 
 
-```{r suspect-cases, exercise = TRUE, exercise.lines = 4}
+
+
+
+
+### Naming objects  
+
+`r fontawesome::fa("pen", fill = "brown")` A quick note about naming objects:  
+
+* **Object names must not contain spaces**, but you should use underscore (_) or a period (.) instead of a space.
+* **Object names are case-sensitive** (meaning that Dataset_A is different from dataset_A).
+* **Object names must begin with a letter** (cannot begin with a number like 1, 2 or 3).  
+* Typically, coders write object names in all lowercase, but this is a stylistic choice  
+* Keep your object names short - it is much easier to code with short names  
+
+`r emo::ji("cross mark")` `my object name`  
+`r emo::ji("cross mark")` Having both `dataset` and `Dataset`  
+`r emo::ji("cross mark")` `2nd_wave_of_cases_from_Santa_Clara_County`  
+
+`r emo::ji("check")` `cases_zambia`  
+`r emo::ji("check")` `linelist_raw`  
+`r emo::ji("check")` `lab_20140216`  
+
+Note: in R literature, you may often see people using `df` as an object name. This is a shorthand way to refer to the fact that the object they are saving is a "data frame" (R's name for a dataset with columns and rows).  
+
+
+
+### Defining multiple objects  
+
+**Now, build upon your previous command. Define an object named `suspect_cases` and assign the value `12`. Then in another command, ask R to print the value.**  
+
+
+```{r suspect-cases, exercise = TRUE, exercise.lines = 5}
 confirmed_cases <- 34
 confirmed_cases
 Write your next commands here
@@ -1196,36 +1196,72 @@ grade_this_code("Correct, you have added a command that defines the object suspe
 ```
 
 
-**Now, write and run the following command in the codebox below.** See how you can now reference the values by calling only the assigned names.   
+`r fontawesome::fa("exclamation", fill = "red")` If you get the error: `It looks like this might not be valid R code...` try typing the code instead of copy/pasting into the codebox.  
+
+
+
+
+
+
+
+
+
+### Referencing objects  
+
+In R it is best to write commands in a logical sequence - a specific order that builds from one step to the next. By default, R runs written commands from top-to-bottom.
+
+**Let us use the two values we have already defined, to create a new object `total_cases` with this command.** 
 
 ```{r, echo=TRUE, eval=F}
 total_cases <- confirmed_cases + suspect_cases
 ```
 
-Add the above command to define `total_cases`, and add a final command to print the value of `total_cases`. Your input should contain 6 lines of code.  
+Do you see how we can reference the values `confirmed_cases` and `suspect_cases`? Importantly, this final command will only work if the other two commands have been run previously, so that R knows what the values of `confirmed_cases` and `suspect_cases` are.  
+
+```{r sort}
+# Define the answer options
+commands <- c(
+    "confirmed_cases <- 44",
+    "suspect_cases <- 12",
+    "total_cases <- confirmed_cases + suspect_cases"
+  )
+
+# Initialize the question
+question_rank(
+  "Click and move the commands into their correct order:",
+  answer(commands, correct = TRUE, message = "Yes, you must assign the values of `confirmed_cases` and `suspect_cases`, then finally assign the value of `total_cases` using the two previously-assigned values."),
+  answer(c(commands[2], commands[1], commands[3]), correct = TRUE, message = "Yes, you must assign the values of `confirmed_cases` and `suspect_cases`, then finally assign the value of `total_cases` using the two previously-assigned values."),
+  answer(rev(commands), correct = FALSE, message = "Other direction!"),
+  allow_retry = TRUE
+)
+```
+
+**Note that it does not matter the order that you assign the values of `confirmed_cases` and `suspect_cases`**, as long as they are both assigned *and run* prior to being used to create `total_cases`.  
+
+
+Now, add the following two commands to the code below:  
+
+1) Add the command to define `total_cases`  
+2) Add a final command to print the value of `total_cases`  
+
+Your input should contain 4 lines of code.  
 
 ```{r total-cases-print, exercise = TRUE, exercise.lines = 6}
 confirmed_cases <- 34
-confirmed_cases
 suspect_cases <- 12
-suspect_cases
 Write your next commands here
 ```
 
 ```{r total-cases-print-hint}
 confirmed_cases <- 34
-confirmed_cases
 suspect_cases <- 12
-suspect_cases
 total_cases <- confirmed_cases + suspect_cases
 total_cases
 ```
 
 ```{r total-cases-print-solution, eval=FALSE}
 confirmed_cases <- 34
-confirmed_cases
 suspect_cases <- 12
-suspect_cases
 total_cases <- confirmed_cases + suspect_cases
 total_cases
 ```
@@ -1245,22 +1281,18 @@ grade_this_code("Correct!")
 
 ### Re-defining objects  
 
-What happens if you receive news that there are 10 additional confirmed cases?  
+What happens if you receive news that there are 10 additional confirmed cases? How would you update the value of `total_cases`?  
 
-In these codeboxes, all of the R code written in the box is run at the same time - this means that you can edit the first command to read `confirmed_cases <- 44`, re-run the code, and the value of `total_cases` will also increase by 10.
-
-However, if you are running the command in a script in RStudio, you must be careful to re-run all the commands as well. Simply changing the first command to `confirmed_cases <- 44` does **not** update the value `total_cases` to `56`. Just because you change a written value in your code, it does **not automatically update** the rest of your script, nor does it change any values stored in R!  
-
-**You must re-run the commands** in order for the changes to be registered by R.  
+**In order for an object to obtain a new value, the command that assigns its value must be re-run**.  
 
 ```{r, quiz-case2-math, echo=F}
 quiz(
    question_checkbox("Select all the steps that must happen for total_cases to be updated to 56?",
     answer("Run the command: confirmed_cases <- 44",
-           message = "Yes, first the confirmed_cases must be re-defined",
+           message = "First the confirmed_cases must be re-defined",
     correct = T),
     answer("Run the command: total_cases <- confirmed_cases + suspect_cases",
-           message = "Yes, second, the total must be updated with the new number of confirmed cases",
+           message = "Second, the total must be updated with the new number of confirmed cases",
     correct = T),
     answer("Send a donation to Applied Epi",
            message = "No, donating to Applied Epi will not make your R code update."),
@@ -1269,7 +1301,12 @@ quiz(
 )
 ```
 
-You must update two commands to update the value of `total_cases` (and they must be run in the correct order!). Thankfully in these codebox tutorials this simply is done by revising the commands and pressing "Run Code". Try it below (we have removed some of the printing commands, for clarity):  
+You must re-run **two commands** to update the value of `total_cases` (and they must be run in the correct order!):  
+
+1) Edit your command so that the value of `confirmed_cases` will be assigned as 44  
+2) Re-run all your commands so that the value of `total_cases` is re-defined using the *new* value of `confirmed_cases`  
+
+Try revising the commands below to update the value of `total_cases`:  
 
 ```{r total-cases-update, exercise = TRUE, exercise.lines = 6}
 confirmed_cases <- 34
@@ -1304,22 +1341,7 @@ grade_this_code("Correct!")
 ```
 
 
-
-
-
-### Running commands in RStudio scripts:  
-
-If you are typing commands in RStudio, you might wonder - "why do I need to run each line of my script one-by-one?". Well, you don't have to! You have two options to run multiple commands at once:  
-1) Use your mouse to highlight both commands in the script, and run  
-2) If you want to run ALL the commands in your script, from top-to-bottom, select all the commands by pressing Ctrl + a (Cmd + a for Mac), and click "Run"  
-
-
-Before you run the entire script, consider whether you have any unfinished code above your current selection that might cause an Error. Remember, you are asking R to run *every command in the entire script*, and R will stop if it encounters an error.   
-
-If there is one command you want to temporarily remove, place a # symbol at the beginning of this line to the left of the code. R will ignore this line. 
-
-
-
+`r fontawesome::fa("exclamation", fill = "red")` These tutorial codeboxes are a unique and atypical situation - all of the R code written in the box is run at the same time when you click "Run code". If you are working in RStudio and running commands one-at-a-time from your R script, be careful to re-run all the necessary previous commands as well. Simply changing the first command to read `confirmed_cases <- 44` does **not** update the value of `total_cases` to `56`. Just because you change a written value in your code, it does **not automatically update** the rest of your R script!  
 
 
 
@@ -1359,13 +1381,11 @@ Your final equation will look like this...  ((site1 + site2 + site3) * 1.1) - ex
 
 
 ```{r supply-update-solution, eval=FALSE}
-# define values (objects) for use in the calculation
 site1 <- 200
 site2 <- 550
 site3 <- 925 * 2
 extra <- 420
 
-# run this command to print the amount needed to order
 ((site1 + site2 + site3) * 1.1) - extra
 ```
 
@@ -1379,6 +1399,8 @@ grade_this_code("Correct! You practiced creating series of commands that assign 
   #pass_if(exists("total_cases", .envir_result) && .result == 46, "Correct, your total_cases is equal to 46"),
 #)
 ```
+
+`r fontawesome::fa("exclamation", fill = "red")` If you get the error: `It looks like this might not be valid R code...` try typing the code instead of copy/pasting into the codebox.  
 
 
 Now that you have organized your commands, it will be easier to re-run the command at a later date, and to share it with a colleague who needs to run it.
@@ -1409,7 +1431,7 @@ For extra credit, further modify your code to address the following two question
 ```{r, quiz-adjust-calc, echo=F}
 quiz(
    question("If you wanted to assign the final output value to an object, for later reference, what operator would you add, and where?",
-    answer("Add a plus symbol to the end", message = "No, there is no need for an additional plus symbol. Assigning is done with the assignment operator?"),
+    answer("Add a plus symbol to the end", message = "No, there is no need for an additional plus symbol. Assigning is done with the assignment operator"),
     answer("Add a new object name and the assignment operator to the left of the final equation.", correct = TRUE, message = "Nice work!"),
     answer("Add the & symbol to the left of the final equation.", message = "There is no need for an & symbol, assigning is done with the assignment operator."),
     allow_retry = TRUE
@@ -1420,36 +1442,23 @@ quiz(
 
 ```{r, quiz-adjust-calc2, echo=F}
 quiz(
-   question("Select the ways that you could modify your script if the two sub-sites of site 3 needed different numbers of tests?",
+   question("Select ALL the ways that you could modify your commands if the two sub-sites of site 3 needed different numbers of tests?",
     answer("Give each site its own object name and command, and adjust the equation accordingly.", correct = TRUE, message = "Yes you could split them out into their own commands."),
     answer("Multiply the site3 value by 4", correct = FALSE, message = "No this would not be correct."),
-    answer("Define site3 as one value plus another distinct value", correct = TRUE, message = "Yes, you could also define site3 as the sum of two distinct numbers."),
+    answer("Define site3 as one value plus another distinct value", correct = TRUE, message = "You could also define site3 as the sum of two distinct numbers."),
     allow_retry = TRUE
   )
 )
 ```
 
 
+### Using the # (hash) for comments  
 
+Any text written to the *right* of a hash # symbol is ignored by R as it runs commands. We call this "commenting" your code. As a result, you can strategically use the hash symbol to inform future readers of your code. This is not useful in this online tutorial, but is very very useful when writing R code in an R script on your local computer.  
 
-### Commenting  
+You can place the hash in three useful ways:  
 
-In RStudio, you will have now begun to write a useful script to calculate the number of tests to order! But what if your colleague wants to use it? Will they be able to understand your logic and commands?  
-
-Here is an example of a well-documented script. Note how clear it is to read - each section is clearly demarcated with plentiful spaces and newlines.  
-
-```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
-knitr::include_graphics("images/example_script.png", error = F)
-```
-
-Together, we will make your R script well-documented.  
-
-
-#### Using the # (hash) for comments  
-
-As demonstrated earlier, any text written to the *right* of the hash symbol is ignored by R as it runs commands. As a result you can place the hash symbol:  
-
-* At the beginning of a line to prevent the entire line from being run. For example, at the top of your script you can write an informative section:  
+1) To write an entire line of informatve text. For example, at the top of your code you can write an informative section:  
 
 ```{r eval = F, echo=T}
 # Purpose: Calculate monthly order for testing supplies
@@ -1468,7 +1477,7 @@ extra <- 420
 
 ```
 
-* You can also place the # to the left of some code, to write comments on the same line as the code:  
+2) You can also place the # to the left of some code, to write comments on the same line as the code:  
 
 ```{r, eval=F, echo=T}
 # Purpose: Calculate monthly order for testing supplies
@@ -1480,6 +1489,27 @@ extra <- 420
 site1 <- 200         # needs for site 1
 site2 <- 550         # needs for site 2 
 site3 <- 925 * 2     # needs for site 3 subsites
+extra <- 420         # number of tests remaining from last month
+
+# run this command to print the amount needed to order
+((site1 + site2 + site3) * 1.1) - extra
+
+
+```
+
+3) You can also place the # to the left of some code, to prevent it from being run. Below, `site 4` is no longer in use, so the hash prevents its line from being run.
+
+```{r, eval=F, echo=T}
+# Purpose: Calculate monthly order for testing supplies
+# Author: (your name)
+# Last updated: (date)  
+# Contact email: (your email)
+
+# define values (objects) for use in the calculation
+site1 <- 200         # needs for site 1
+site2 <- 550         # needs for site 2 
+site3 <- 925 * 2     # needs for site 3 subsites
+# site4 <- 120       # ! site 4 is no longer being operated
 extra <- 420         # number of tests remaining from last month
 
 # run this command to print the amount needed to order
@@ -1502,23 +1532,6 @@ extra <- 420
 
 
 
-#### Sections headings  
-
-**If you are working in RStudio**, you can utilize a keyboard shortcut to insert a section header into your script. You would place your cursor where the new section should start and press Ctrl, Shift, and R at the same time (or Cmd Shift R on a Mac). The new section header should look something like this:  
-
-```{r, eval = F, echo=T, results = "asis"}
-# Monthly supply needs ----------------------------------------------
-
-```
-
-RStudio will recognize this section, and it will appear in the script "Outline". This clickable Outline tool can be very useful to navigate scripts with hundreds or even thousands of lines.  
-
-```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
-knitr::include_graphics("images/section_headings.png", error = F)
-```
-
-
-
 
 ### Character objects  
 
@@ -1528,13 +1541,14 @@ Note that the character objects can be created with, like "exposed", or can be c
 
 Note that thirty-four could be written in R as:  
 
-* `34` (a numeric value, capable of being used in mathematic calculations), or  
-* "34" (a character value, not capable of calculations)  
+* `34` (a numeric value with no quotes, capable of being used in mathematic calculations), or  
+* "34" (a character value in quotes, not capable of calculations)  
      
 When your R script recognizes that something you have written is a character value (once the first and last quote marks are written) it will turn a different color. See below.  
 
 Write commands in the codebox below to define some objects as character values, followed by commands that prints their values, like we did with `confirmed_cases`.  
-Experiment a bit - what happens if you try to add `30` + "12"?  
+
+Experiment a bit - there is no right answer. E.g. what happens if you try to add `30` + "12"?  
 
 ```{r, echo=T, eval=F}
 # Try these commands
@@ -1556,41 +1570,138 @@ Try writing some code here
 ```
 
 
+
+
+
+
+## Running commands in RStudio
+
+This tutorial does not involve the use of RStudio on your computer, but below are some helpful tips if you are trying to translate your learning to your local computer.  
+
+Please also consider registering for one of our live courses in which we can truly help you learn R as you are going to be using it in real life (on your local computer).  
+
+
+### Running commands in RStudio scripts:  
+
+If you are typing commands in RStudio, you might wonder - "why do I need to run each line of my script one-by-one?". Well, you don't have to! You have two options to run multiple commands at once:  
+
+1) Use your mouse to highlight both commands in the script, and run  
+2) If you want to run ALL the commands in your script, from top-to-bottom, select all the commands by pressing Ctrl + a (Cmd + a for Mac), and click "Run"  
+
+
+Before you run the entire script, consider whether you have any unfinished code above your current selection that might cause an Error. Remember, you are asking R to run *every command in the entire script*, and R will stop if it encounters an error.   
+
+If there is one command you want to temporarily remove, place a # symbol at the beginning of this line to the left of the code. R will ignore this line. 
+
+
+### The RStudio environment  
+
+`r fontawesome::fa("eye", fill = "darkblue")` In RStudio, the upper-right pane is called the "Environment". In this tutorial, we only practice the coding (not in RStudio), but you will still be creating objects and saving them into a virtual environment.  
+
+Here is an image of an empty RStudio environment:  
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics("images/empty_environment.png", error = F)
+```
+
+
+
+
+### Commenting  
+
+In RStudio, you will have now begun to write a useful script to calculate the number of tests to order! But what if your colleague wants to use it? Will they be able to understand your logic and commands?  
+
+Here is an example of a well-documented script. Note how clear it is to read - each section is clearly demarcated with plentiful spaces and newlines.  
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics("images/example_script.png", error = F)
+```
+
+Together, we will make your R script well-documented.  
+
+
+
+### Section headings  
+
+**If you are working in RStudio**, you can utilize a keyboard shortcut to insert a section header into your script. You would place your cursor where the new section should start and press Ctrl, Shift, and R at the same time (or Cmd Shift R on a Mac). The new section header should look something like this:  
+
+```{r, eval = F, echo=T, results = "asis"}
+# Monthly supply needs ----------------------------------------------
+
+```
+
+RStudio will recognize this section, and it will appear in the script "Outline". This clickable Outline tool can be very useful to navigate scripts with hundreds or even thousands of lines.  
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+knitr::include_graphics("images/section_headings.png", error = F)
+```
+
+
+
+
+
+
+
+
+
+
+
+
 ## Functions  
 
 The previous exercises have been relatively simple coding. We used mathematical operators to perform calculations. But this is not really showcasing R's abilities! Those exercises were simply to have you practice running commands and creating simple objects.  
 
 **The real power of R comes from *functions***. Functions are at the core of using R. Functions are how you perform tasks and operations.  
 
-### A function is like a machine  
+### A function is like a tool to complete a task  
 
-A function receives inputs, does some action with those inputs, and produces an output. What the output is depends on the function.  
+Like a machine, a function receives inputs, does some action with those inputs, and produces an output. What the output is depends on the function.  
+
+```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+knitr::include_graphics("images/function_tools_pliers.png", error = F)
+```
 
 
 ### Simple functions  
 
-Functions typically operate upon an object placed within the function’s parentheses. For example, the function `sqrt()` returns the square root of a number:
+The concept of functions in R is very similar to *equations* in Excel. The function has **a name**, it includes **parentheses**, then **inputs are placed inside the parentheses**, and if there are multiple inputs, **multiple inputs are separated by commas**. In the image below, the Excel function SUM() accepts numbers within the parentheses and returns their sum.  
+
+```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+knitr::include_graphics("images/excel_functions.png", error = F)
+```
+
+
+R functions also operate upon an object placed within the function’s parentheses. For example, the function `sqrt()` returns the square root of a number:
 
 ```{r, echo=T}
 sqrt(64)
 ```
 
-Likewise, the function `sum()` accepts an unlimited number of numeric values and returns the sum. 
+Likewise, the function `sum()` accepts an unlimited number of numeric values separated by commas, and returns the sum. 
 
 ```{r, echo=T}
 sum(2, 5, 10, -8, 100)
 ```
 
-`r fontawesome::fa("terminal", fill = "black")` Time for you to practice this coding in RStudio! In your R script (named "demo.R"), use the function `min()` and `max()` to find the minimum and maximum of the numbers 3, 55, 9, -4, and 33.  
+`r fontawesome::fa("terminal", fill = "black")` It is  time for you to practice this coding! In the codebox below, use the function `min()` to return/print the **minimum** of the numbers 3, 55, 9, -4, and 33.  
 
-We won't do a quiz, because the answers should be quite easy... but did your code work?  
+```{r min-ex, exercise = TRUE, exercise.lines = 2}
 
-```{r, echo=T}
-# calculate the minimum value
+```
+
+```{r  min-ex-hint}
+Write the function min() and place the number inside the parentheses, separated by commas
+```
+
+```{r  min-ex-solution, eval=FALSE}
 min(3, 55, 9, -4, 33)
+```
 
-# calculate the maximum value
-max(3, 55, 9, -4, 33)
+```{r  min-ex-check}
+grade_this_code("Correct!")
 ```
 
 
@@ -1598,28 +1709,59 @@ max(3, 55, 9, -4, 33)
 
 ### Vectors  
 
-Try the function `c()`. What does that function do? The "c" represents the term "concatenate", because this function combines the values within its parentheses into one unit.
+Try using the function `c()`. The "c" represents the term "concatenate", because this function combines the values within its parentheses into one unit.
 
 We call this unit a **vector**. A vector is a unit of several values, *which must be of the same class* (either all numeric, all character, all logical, etc.) and *must be separated by commas*.   
 
-Vectors may seem abstract right now, but will be useful in later modules of this course. For example, you may need to create a vector of column names that will be printed in a table, or a vector of colors to use in a plot.  
-
-See this example, where we create a named vector of numeric values (the ages of 5 patients).  
+Let us practice handling vectors for a moment, using the function `c()`. In this example, we create a named vector of numeric values (the ages of 5 patients).  
 
 ```{r, echo=T}
 # create a vector of patient ages
 patient_ages <- c(5, 10, 60, 25, 12)
 ```
 
-Try the above command in your R script. Now, what happens when you run the command `patient_ages`? All the numbers appear in the R Console.  
+Try typing the command in the codebox below, and click "Run code".  
 
-It is useful that these numbers can be referenced by one name, because now we can apply changes to all of them with just one step:  
+Does any output print when you run this command? It should not, because it is an *assignment command*. Remember the difference between a command that ask R to *assign* a value (using `<-`), and one that asks R to *print* a value.  
 
-```{r, echo=T}
+Next, add another command afterwards, which prints the value of `patient_ages`, and re-run the code.  
+
+```{r concat-ex, exercise = TRUE, exercise.lines = 3}
+
+```
+
+By printing just the single name `patient_ages` we are able to print all of the values in that vector.  
+
+It is useful that these numbers can be referenced by one name, because now we can apply changes to all of them with just one step. Add the following command to the codebox below and run the command. What is printed?  
+
+```{r, echo=T, eval=F}
 patient_ages * 2
 ```
 
-Now, I'm not sure why we would need to multiply all the patient ages by 2, but it sure was easy, wasn't it?!
+
+```{r age-ex, exercise = TRUE, exercise.lines = 4}
+patient_ages <- c(5, 10, 60, 25, 12)
+patient_ages
+Write the new command here
+```
+
+
+Two outputs are printed - the original patient ages, and the modified ones. Now, I'm not sure why we would need to multiply all the patient ages by 2, but it sure was easy, wasn't it?!
+
+
+>Right now, vectors may seem abstract and not very useful, but they will be useful in your later use of R. 
+
+Vectors that "stand alone" like these are useful when creating lists. For example:  
+
+* A vector of two numeric values may be used to specify the minimum and maximum range for a plot's y-axis  
+* A vector containing column names may be used to tell R to clean them all at one time.  
+* A vector containing names of colors may be used when creating a plot.  
+
+**In fact, in any dataset imported into R (called a "data frame" in R), the columns are each considered "vectors" (e.g. age, gender, case definition, etc.)**. So, learning how to handle and manipulate vectors now will help you clean, edit, and create new columns later.  
+
+
+
+### Vector of jurisdictions  
 
 Try creating your own vector - make a vector of some names of districts/cities/counties in your home region. Name it `jurisdictions`. Does your command look similar to this?  
 
@@ -1628,16 +1770,181 @@ Try creating your own vector - make a vector of some names of districts/cities/c
 jurisdictions <- c("Maputo", "Inhambane", "Gaza", "Zambezia", "Manica", "Sofala")
 ```
 
-What can we do with a character vector? We cannot multiply it by 2... for fun, let us **put this vector in another function**: `toupper()`, which changes all of the characters to upper case:  
 
-```{r, echo=T, eval=F}
+```{r juris-ex, exercise = TRUE}
+
+```
+
+```{r juris-ex-hint}
+Write jurisdictions (the name of your new object), then the assignment operator, then open the function c() and within the parentheses, write your jurisdiction names, each within quotation marks, and separated by commas. See the example above the codebox for reference. Be sure to end your command with the closing parentheses of the c() function.
+```
+
+```{r juris-ex-check}
+gradethis::grade_this({
+  # custom checking code appears here
+  if (exists("jurisdictions", .envir_result)) {
+    if (length(.result) < 2) {
+      fail("Include at least 2 values in your vector.")
+    }
+    pass("You created an vector object named jurisdictions!")
+  }
+  fail("Try again! Check your spelling and capitalization of the object jurisdictions")
+})
+
+# these also work, sometimes. The above is better. Use .result and not the object name.
+  #pass_if(exists("jurisdictions", .envir_result), "Excellent, you created an object named jurisdictions"),
+  #fail_if(!exists("jurisdictions", .envir_result))
+```
+
+`r fontawesome::fa("exclamation", fill = "red")` If you get an error like: `Object not found...` remember to place your jurisdiction names within parentheses. This way R knows to treat them as character values (e.g. "words") and not to look for them as R objects.  
+
+Also remember that this command asks R to *assign* a value to the object `jurisdictions`. No printed output is expected.  
+
+### Class of the vector  
+
+You should be able to run the function `class()` on this new vector to verify that it is recognized by R as class "character" - this requires that all the values inside it are character (within quotation marks).  
+
+```{r, eval=F, echo=T}
+class(jurisdictions)
+```
+
+
+```{js echo=FALSE}
+// https://community.rstudio.com/t/learnr-clipboard-extension/107812/2
+// A custom Shiny message handler that updates the code in any exercise
+// From R you'll send a list(label = "exercise-chunk-label", code = "new code for editor"))
+//
+Shiny.addCustomMessageHandler('set-exercise-code', function(x) {
+  var el = $(`.tutorial-exercise[data-label="${x.label}"] .tutorial-exercise-code-editor`)
+  var exerciseInput = Shiny.inputBindings.bindingNames["tutorial.exerciseInput"].binding
+  exerciseInput.setValue(el, {code: x.code})
+})
+```
+
+Press the button below to add your `jurisdictions` command from the previous codebox, then add a command that runs the `class()` command on your `jurisdictions` vector. Is it class "character"? If you get an error or a different class, try to revise and re-submit.  
+
+```{r use-jurisdictions-button}
+actionButton("use-jurisdictions", "Use your code from the previous exercise")
+```
+
+```{r handle-use-jurisdictions-button, context="server"}
+observeEvent(input[["use-jurisdictions"]], {
+  # get last submission for the "juris-ex" exercise
+  code <- learnr:::get_exercise_submission(session, "juris-ex")$data$code
+  # use last submission in template
+   code <- trimws(code)
+  # code <- paste("{\n", trimws(code), "\n}\n\n")
+  # send a custom message to our handler (see js chunk above)
+  # updates the "add-function" exercise with the new code
+  session$sendCustomMessage("set-exercise-code", list(label = "class-fill", code = code))
+})
+```
+
+```{r class-fill, exercise=TRUE, exercise.lines = 5}
+
+```
+
+
+```{r class-fill-check}
+gradethis::grade_this({
+  # custom checking code appears here
+  if (exists("jurisdictions", .envir_result)) {
+    if (class(.result) != "character") {
+      fail("Your vector is not class character. Revisit your original command.")
+    }
+    pass("You have written a vector and it is class character!")
+  }
+  fail("Try again!")
+})
+```
+
+Note: Even though the vector contains character values, when typing the *name of the vector*, you do not use quotes. It is an R object just like `confirmed_cases`, and so should be written plainly in code.  
+
+What can we do with a *character* vector We cannot multiply it by 2 because it is not numeric... for fun, **put this vector into another function**: `toupper()`, which changes all of the characters to upper case. We have set this code box to remember what you wrote in the previous codebox, so you can reference the `jurisdictions` object that you created.  
+
+```{r use-toupper-button}
+actionButton("use-toupper", "Use your jurisdictions code")
+```
+
+```{r handle-use-toupper-button, context="server"}
+observeEvent(input[["use-toupper"]], {
+  # get last submission for the "juris-ex" exercise
+  code <- learnr:::get_exercise_submission(session, "juris-ex")$data$code
+  # use last submission in template
+   code <- trimws(code)
+  # code <- paste("{\n", trimws(code), "\n}\n\n")
+  # send a custom message to our handler (see js chunk above)
+  # updates the "add-function" exercise with the new code
+  session$sendCustomMessage("set-exercise-code", list(label = "juris-ex2", code = code))
+})
+```
+
+```{r juris-ex2, exercise = TRUE, exercise.lines = 2, exercise.setup = "juris-ex"}
+
+```
+
+```{r  juris-ex2-hint}
+type the function toupper() exactly as written, all lowercase letters. Then place the name of your jurisdictions vector inside the parentheses, again with exactly the same spelling and cases as you defined it in the previous codebox.
+```
+
+```{r  juris-ex2-hint-2}
 toupper(jurisdictions)
 ```
 
-Note: Even though the vector contains character values, when typing the *name* of the vector, you do not use quotes. It is an R object just like `confirmed_cases`, and so should be written plainly in code.  
+```{r  juris-ex2-solution, eval=FALSE}
+toupper(jurisdictions)
+```
 
-**What does the output look like?** What if you try the function `tolower()`? This could be useful to standardize names or other character words when joining two datasets!  
+```{r  juris-ex2-check}
 
+gradethis::grade_this({
+  # custom checking code appears here
+  if (exists("jurisdictions", .envir_result)) {
+    if (.result != toupper(.result)) {
+      fail("Your values do not seem to be uppercase yet, try adding a line that uses the toupper() function.")
+    }
+    pass("Correct, you temporarily modified the vector of jurisdication names to be all upper case!")
+  }
+  fail("Try again! Check your spelling and capitalization of the function, and ensure you are running the command to define jurisdictions before using toupper()")
+})
+
+```
+
+
+
+
+
+#### Saving the modification  
+
+Until now, you have simply been asking R to *print* the modified vector. The actual *stored* values of `patient_ages` and `jurisdictions` have not changed, and if you print their current values you will see that they retain their original values. The commands we have run (`patient_ages * 2` and `toupper(jurisdictions`) have only modified the vector temporarily, and printed the modified version.  
+
+What if you wanted to save this upper-case version of `jurisdictions` for later use?  
+
+You could write a new object name and the assignment operator `<-` to the left. The command below takes the current value(s) of `jurisdictions`, converts them all to upper-case, and then assigns them as the object `jurisdictions_upper`.  
+
+```{r, echo=TRUE, eval=FALSE}
+jurisdictions_upper <- toupper(jurisdictions)
+```
+
+You can also **overwrite** the value of `jurisdictions` with the upper case version, by assigning to the original name:
+
+```{r, echo=TRUE, eval=TRUE}
+jurisdictions <- toupper(jurisdictions)
+```
+
+**Again, practicing how to handle vectors in this way may seem abstract now, but remember that *columns in a dataset* are vectors.** The same transformations we did above can be done to a column in a dataset, once imported into R.  
+
+
+```{r, quiz-toupper, echo=F}
+quiz(
+   question("Select ALL the reasons below which might lead you to convert a character column in a dataset to be all uppercase or all lowercase letters:",
+    answer("To standardize the character values across multiple datasets, before performing a join on matching values", correct = TRUE, message = "Yes, you might do this on jurisdiction, gender, or name before performing a join."),
+    answer("To standardize the character values within one dataset, if some were entered lowercase and others were entered in uppercase.", correct = TRUE, message = "Yes, dataset entries are often messy. These functions can help quickly standardize values."),
+    answer("For aesthetic purposes.", correct = TRUE, message = "Yes, words may be easier to read or parse if they are all lowercase."),
+    allow_retry = TRUE
+  )
+)
+```
 
 
 
@@ -1656,6 +1963,72 @@ Most functions you will encounter in R have *named arguments*, which means you n
 knitr::include_graphics("images/arguments-buttons.png", error = F)
 ```
 
+### In Excel
+
+This concept is not very different than functions in Excel, which also often have named arguments that are also separated by commas. In the below image, the Excel function COUNTIF() is shown to have the named arguments `range` and `criteria`:  
+
+```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics("images/excel_arguments.png", error = F)
+```
+
+
+### Function structure  
+
+Let's take a hypothetical example - pretend that there is an R function called `oven_bake()` that will bake something in an oven. 
+
+What are some possible arguments for this function? **Write your answer within "quotation marks" and press 'Submit answer'.** This question will not be graded, it is simply to make you think.
+
+```{r oven-bake-free-text, exercise=TRUE, exercise.lines = 5}
+"Write some free text here in the quotation marks.
+What (object) needs to go into the oven?
+What oven settings must be adjusted?
+What other instructions must be followed?"
+```
+
+```{r oven-bake-free-text-check}
+grade_this({
+  # custom checking code appears here
+  if (is.character(.result)) {
+    pass("Thank you for trying this mind exercise.")
+  }
+  fail("Put your answer within quotation marks.")
+})
+```
+
+
+<!--
+NOTE: Below is the hint (all within details tags collapsed)
+-->
+<details>
+
+<summary style='text-decoration: underline; color: darkgreen;'>`r fontawesome::fa("lightbulb", fill = "gold")` Click here to reveal the oven_bake() function!</summary>
+</br>
+
+```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics("images/Function_Bread_Example.png", error = F)
+```
+
+Above, the object that we want to create (bread) is written first, one the far left. Then, the assignment operator is list.  
+
+On the right side of the assignment operator is the `oven_bake()` function. Inside its parentheses, the first argument is the object to be operated upon (dough to be baked), followed by various arguments.  
+
+The arguments are separated by commas, and each have an equals sign before the value being assigned to them. Finally, the parentheses of the function are closed.  
+
+</br>
+</details>
+
+</br>
+
+Of course `oven_bake()` is not a real R function (yet!), but it serves to show you the purpose and typical order of function arguments. 
+
+
+### In R
 
 Let's return to the character vector `jurisdictions` that you defined earlier. We will use the names from the example, but your vector may include other jurisdictions local to your home region.  
 
@@ -1665,9 +2038,9 @@ Imagine you have this vector of jurisdiction names, but when you run `jurisdicti
 jurisdictions
 ```
 
-You know that R has the ability to make automated reports (which you will learn later in this course). It is very possible that you will want to combine these jurisdiction names in a way that they can be printed in a report - with commas between them for proper punctuation.
+You know that R has the ability to make automated reports. It is very possible that you will want to combine these jurisdiction names in a way that they can be printed in a report - with commas between them for proper punctuation.
 
-The function `paste()` will accept a vector of multiple character values, and combine them into **one** character value. Even better, with your help it will insert some characters *in between* each of the old values (e.g. a space, or a comma, or both!).  
+The function `paste()` will accept a vector of multiple character values, and combine them into **one** character value. Even better, with your help it can insert some punctuation characters *in between* each of the old values (e.g. a space, or a comma, or both!).  
 
 The function `paste()` has an **argument** that is named `collapse`.  
 
@@ -1688,7 +2061,7 @@ Let's understand what is going on:
   cat()
 ```
 
-Often, the first argument of a function is data to be operated upon, and does not require a name nor an equals sign.  
+Often, the first argument of a function is data to be operated upon. In many cases, this first argument does not require a name nor an equals sign. You can simply write the name of the object to be used/modified.  
 
 ```{r, results = "asis", echo = FALSE}
 "The second argument is collapse =, to which we provide a character value to appear between each of the words." %>%
@@ -1697,8 +2070,7 @@ Often, the first argument of a function is data to be operated upon, and does no
   cat()
 ```
 
-
-In the example above, we have chosen ", " which is a comma. The quotation marks ensure that R understands that this is a character value.  
+In the example above, we have chosen the character value "," for the `collapse=` argument, which is a comma. The quotation marks ensure that R understands that this is a character value.  
 
 ```{r arguments, include = F}
 paste(jurisdictions, collapse = ",")
@@ -1712,35 +2084,59 @@ flair::decorate("arguments") %>%
   flair::knit_print.with_flair()
 ```
 
-`r fontawesome::fa("terminal", fill = "black")` 
-Replicate the code above with your `jurisdictions` vector in RStudio. 
 
-**How would you adjust the code to add a space after each comma?**
+```{r quiz-comma-add}
+quiz(
+  question("How would you modify the command to add a space after each comma (note that single quotes are equivalent to double quotes)?",
+    answer("paste(jurisdictions, space = YES, collapse = ','", correct = FALSE, "No, space is not an argument of the paste() function"),
+    answer("paste(jurisdictions, collapse = ',_')", correct = FALSE, message = "No, an underscore is its own character, and will not insert a space."),
+    answer("paste(jurisdictions, collapse = ', ')", correct = TRUE, message = "That is correct. Placing a single space after the comma will make the space appear between words as well."),
+    answer("paste(jurisdictions, collapse = ',')", correct = TRUE, message = "No, this is the original."),
+    allow_retry = T
+  )
+  )
+```
 
+Now use the codebox below to try the `paste()` function and its `collapse=` argument on your object `jurisdictions` (press the button to bring in your old command).  
 
-<!--
-NOTE: Below is the solution (all within details tags collapsed)
--->
+See how `paste()` knows to not place the comma after the last value in `jurisdictions` - this is a special feature of using `collapse = `.  
 
-<details>
-<summary style='text-decoration: underline; color: red;'>`r fontawesome::fa("check", fill = "red")`Click to see a solution (try it yourself first!)</summary>
-</br>
+```{r use-paste-button}
+actionButton("use-juris-paste", "Use your jurisdictions code")
+```
 
-```{r eval = F, echo=T}
-# Note the space after the comma, within the quotation marks
+```{r handle-use-paste-button, context="server"}
+observeEvent(input[["use-juris-paste"]], {
+  # get last submission for the "juris-ex" exercise
+  code <- learnr:::get_exercise_submission(session, "juris-ex")$data$code
+  # use last submission in template
+   code <- trimws(code)
+  # code <- paste("{\n", trimws(code), "\n}\n\n")
+  # send a custom message to our handler (see js chunk above)
+  # updates the "add-function" exercise with the new code
+  session$sendCustomMessage("set-exercise-code", list(label = "juris-paste", code = code))
+})
+```
+
+```{r juris-paste, exercise = TRUE, exercise.lines = 2, exercise.setup = "juris-ex"}
+
+```
+
+```{r  juris-paste-hint}
 paste(jurisdictions, collapse = ", ")
 ```
 
-Note how this function knows to not place a comma after the last value in `jurisdictions`.  
-
-</br>
-</details>
-<!--
-NOTE: End of solution
--->
+```{r  juris-paste-solution, eval=FALSE}
+paste(jurisdictions, collapse = ", ")
+```
 
 
-#### Optional arguments  
+
+
+
+
+
+### Optional arguments  
 
 Often, functions have many arguments... you must become familiar with each function in order to know what it expects. Don't worry! R coders do not have encyclopedic brains - we look up this information all the time while coding.  
 
@@ -1752,9 +2148,55 @@ In the `paste()` exercise above, `collapse = ` is an optional argument. You can 
 
 
 
-#### Getting help  
+### `na.rm = TRUE`  
 
-A function's arguments and any default values can be read in the function's *documentation*. To read the documentation, search the name of the function in the **Help pane** in the lower-right of RStudio. Alternatively, type `?` before the function name in the RStudio **Console** pane (for example, `?paste`).  
+It is worthwhile to take a minute to discuss the optional argument `na.rm = TRUE`.  
+
+This is an argument that can be used for many statistical functions, such as `sum()`, `min()`, `max()`, and `mean()`. You will use it often in R. It adjusts how R handles missing values when performing calculations. Let us show you why this matters:  
+
+`r fontawesome::fa("pen", fill = "brown")` Note this! The value `NA` (capital letters N and A) is a special value in R that means "missing". In this example, the missing value could be a missing patient age, or some other information. In other software, "missing" data might be represented by a period (.) or by an empty space. In R, missingness is properly represented by the special value `NA`.  
+
+Let's show you:  
+
+In the codebox below, use the function `max()` to return/print the **maximum** of the numbers 4, 29, 18, `NA`, and -4. This sequence has a missing value `NA` in it (write `NA` in capital letters).  
+
+```{r max-ex, exercise = TRUE, exercise.lines = 2}
+
+```
+
+```{r  max-ex-hint}
+max(4, 29, 18, NA, -4)
+```
+
+The outcome is and will always be `NA`. Even if you ran `min()` on the same values, the outcome will be `NA`.  
+
+These functions have this default behavior because **they want to alert you that you have missing values in your calculation**. 
+
+Now, in the box below, modify the command to add an argument after the last value named `na.rm = ` and set it equal to `TRUE` (written in all capital letters). The argument `na.rm=` stands for "NA remove".  
+
+```{r max-ex2, exercise = TRUE, exercise.lines = 2}
+max(4, 29, 18, NA, -4)
+```
+
+```{r  max-ex2-hint}
+Add a comma after the last value, and write the argument na.rm = and assign it to the special value TRUE (written in all capital letters)
+```
+
+```{r  max-ex2-solution, eval=FALSE}
+max(4, 29, 18, NA, -4, na.rm = TRUE)
+```
+
+```{r  max-ex2-check}
+grade_this_code("Correct!")
+```
+
+Now, the missing values (`NA`) have been "removed" from the calculation, and the maximum value is returned.    
+
+
+
+### Getting help  
+
+A function's arguments and any default values can be read in the function's *documentation*. To read the documentation in RStudio, search the name of the function in the **Help pane** in the lower-right of RStudio. Alternatively, type `?` before the function name, with no parentheses, in the R **Console** pane (for example, `?paste`).  
 
 The documentation details will look something like this (we can help you interpret, as they can be difficult to understand at first):  
 
@@ -1762,7 +2204,13 @@ The documentation details will look something like this (we can help you interpr
 knitr::include_graphics("images/r-help.png", error = F)
 ```
 
+In this tutorial, you can run a command with the question mark from any codebox to launch the function documentation in a new window, for example: `?max`. Try it below:  
 
+```{r help-doc, exercise = TRUE, exercise.lines = 2}
+
+```
+
+Here are some final quiz questions to check your comprehension:  
 
 ```{r quiz-args-identify}
 quiz(
@@ -1791,8 +2239,6 @@ quiz(
 
 
 
-
-
 ### Creating functions  
 
 The magic of R really happens when you **create your own functions**. This is an advanced skill that we do not cover in this course, and you do not typically need to create functions until you are a more experienced R user. You do not need to try this code, unless you want to. This is purely background information.  
@@ -1808,7 +2254,7 @@ For demonstration purposes, below, the testing supply chain script from the prev
 # create the function calc_test()
 calc_tests <- function(site1, site2, site3, extra){   # list the arguments, and open the function
      
-     needs <- ((site1 + site2 + site3)*1.1) - extra   # We embed the equation inside the function
+     needs <- ((site1 + site2 + site3) * 1.1) - extra # We embed the equation inside the function
      return(needs)                                    # the function returns the result
 }                                                     # close the function
 
@@ -1827,182 +2273,25 @@ See how we've wrapped up all the code into a function! Very cool. Think of the p
 If you write a function that is useful to others, you can publish it in an **R package** - a unit of multiple related functions. Everyone else can test and try your functions, and your work can help people around the world! ***This is the beauty of open-source software***.  
 
 
+**You do not need to try this code, unless you want to. This is purely background information.**  
 
+Be aware that code within functions can operate quite differently than basic R code. Do not try to modify the function code, but only the last line which runs the function.  
 
-## Packages
+```{r try-function-write, exercise = TRUE}
+# create a function that accepts 4 inputs (1 is optional) and returns the 
+# needs, based on the equation  
 
-Until now, you have used R functions that come installed with R. For example, `sum()`, `c()`, and `min()`.  
+# create the function calc_test()
+calc_tests <- function(site1, site2, site3, extra){   # list the arguments, and open the function
+     
+     needs <- ((site1 + site2 + site3) * 1.1) - extra # We embed the equation inside the function
+     return(needs)                                    # the function returns the result
+}                                                     # close the function
 
-These are called {base} R functions, and they represent a very small portion of all R functions available to you.  
-
-An **R package** is a shareable bundle of related functions that you can download and use. Packages typically have a theme, for example:  
-
-* The {stringr} package provides functions for working with "strings" (character values)  
-* The {lubridate} package provides functions that make it easier to work with dates  
-* The {epikit} package provides functions useful in epidemiological analysis  
-
-You can see that the names of packages are often clever puns - the fun spirit of the R community is evident.  
-
-
-
-### CRAN  
-
-**To install most R packages, use R commands to download the package from "CRAN" to your computer's "R library".**
-
-Many R users create specialized functions, which they share in packages with the R community to verify.  
-
-For packages to be widely distributed, they must be shared on the **Comprehensive R Archive Network (CRAN)**, which is R's central software repository - an archive of R packages that have passed basic scrutiny.  
-
-As of March 2022, there are 19,020 packages available on CRAN. Some of these are immensely popular, with hundreds of thousands of downloads each month. 
-
-
-
-### Security  
-
-Are you worried about viruses and security when downloading a package from CRAN? Read [this article](https://support.rstudio.com/hc/en-us/articles/360042593974-R-and-R-Package-Security) on the topic.
-
-
-### Install and load packages  
-
-Once a package is **installed**, it is stored in **your R “library”**. You can then access the functions it contains by **“loading”** the package for use during your current R session .
-
-Think of R as your personal library: *when you install a package, your library gains a new "book" of functions. But each time you want to use a function from that book, you must borrow (“load”) it from your library.*
-
-```{r, fig.margin = TRUE, echo = FALSE, fig.width = 3, out.width = "50%", fig.cap = ""}
-knitr::include_graphics("images/bookshelf1.png", error = F)
+# run the new function that we created above
+calc_tests(site1 = 200, site2 = 550, site3 = (925*2), extra = 420)
 ```
 
-In summary: to use the functions available in an R package, 2 steps must be implemented:
-
-1. The package must be installed (once), and
-2. The package must be loaded (each R session)
-
-
-#### Code for installing packages
-
-Remember how we said there are {base} R** functions? There is a {base} R function to install packages, and it is `install.packages()` (note that "packages" is written in plural).  
-
-The name of the package to install must be provided in the parentheses and in quotes. If you want to install multiple packages in one command, they must be listed within a character vector `c()`. Note that package names are case sensitive.  
-
-```{r packages-base, echo=T, eval=F}
-# install a single package with base R
-install.packages("tidyverse")
-
-# install multiple packages with base R
-install.packages(c("tidyverse", "rio", "here"))
-```
-
-`r fontawesome::fa("exclamation", fill = "red")` 
-Note: this command installs a package, but does not load it for use in the current session.
-
-
-`r fontawesome::fa("terminal", fill = "black")` **Now you try it: install the package "pacman".** If a pop-up window asks if you want to re-start R, say "No".  
-
-
-<!--
-NOTE: Below is the solution (all within details tags collapsed)
--->
-
-<details>
-<summary style='text-decoration: underline; color: red;'>`r fontawesome::fa("check", fill = "red")`Click to see a solution (try it yourself first!)</summary>
-</br>
-
-```{r eval = F, echo=T}
-install.packages("pacman")
-```
-
-</br>
-</details>
-<!--
-NOTE: End of solution
--->
-
-#### Code for loading packages  
-
-Do you remember how often you need load a package? Every time you start R. 
-
-You can do this using the {base} R function `library()`.  
-
-**Try this command in RStudio.**  
-
-```{r, echo=T, eval = FALSE}
-# Loads the package pacman for use in the current R session
-library(pacman)
-```
-
-
-### pacman  
-
-**We had you install the package "pacman" because it contains functions to make it easier to quickly install and load other functions**.  
-
-Its name refers to "**pac**kage **man**ager", not the video game character.  
-
-Can you imagine the potential complications caused when sharing R scripts with someone else? Do they have the same R packages that you have?  
-
-You don't want them to have to search through the script to find which packages you used in the script... so should you write `install.packages()` commands at the top of the script? And then all of the `library()` commands as well? If you use 15 packages, that is a lot of lines... and potentially a lot of unnecessary installations...
-
-One solution is {pacman}'s function `p_load()`. You can list the names of packages inside, and it will install each package *only if it is not already installed*. Additionally, it will load each package for use in the R session. It is a very efficient option - you can include it at the top of your script. If your colleague receives the script, as long as they have {pacman} already, the script will only install the packages they do not already have, and will load all of them for use.  
-
-Here is what a {pacman} command can look like. The syntax is quite simple. Just list the names of the packages within the `p_load()` parentheses, separated by commas. Note that package names are case-sensitive.  
-
-**Write this command at the top, as the first command in your R script.**   
-
-```{r, echo=T, eval=F}
-pacman::p_load(rio, here, janitor, lubridate, tidyverse)
-```
-
-The syntax `pacman::p_load()` explicitly writes the package name (`pacman`) prior to the function name (`p_load()`), connected by two colons `::`. This syntax is useful because it also loads the {pacman} package (assuming it is already installed). 
-
-This command can also be written vertically. **In any R command, the newlines and indenting will not impact the execution of the code.** But it can dramatically improve readability!  
-
-**Edit your command so that it looks like this.**  
-
-```{r, echo=T, eval=F}
-# Load all the packages needed, installing if necessary
-pacman::p_load(
-     rio,          # for importing data
-     here,         # for file paths
-     janitor,      # for data cleaning
-     lubridate,    # for working with dates
-     tidyverse     # for data management
-)
-```
-
- 
-
-
-```{r quiz-packages-install}
-quiz(caption = "Quiz - packages",
-  question("How often do you need to install a package on your computer?",
-    allow_retry = T,
-    answer("Every time you restart R", message = "Packages only need to be installed once. There is no relation to restarting R."),
-    answer("Only once", correct = TRUE, message = "Packages must be installed once. After a long time, you may want to update them by re-installing."),
-    answer("Never (assuming you are connected to the internet)", message = "Packages must be installed once. You can not access them dynamically through the internet."),
-    answer("Each time you restart your computer", message = "Packages only need to be installed once. There is no relation to restarting your computer.")
-  ),
-
-  question("How often do you need to load a package?",
-    allow_retry = T,
-    answer("Every time you start or restart R", correct = TRUE, message = "Packages must be loaded each time you start an R session."),
-    answer("Only once", message = "Packages must be installed only once, but must be loaded at the beginning of each R session."),
-    answer("Never (assuming you are connected to the internet)", message = "Packages must be installed once and loaded at the beginning of each R session. You can not access them dynamically through the internet."),
-    answer("Each time you restart your computer", message = "Packages only need to be installed once and loaded at the beginning of each R session. There is no relation to restarting your computer.")
-  ),
-
-  question("Newlines and indents can be used to improve readability without impacting code execution.",
-    allow_retry = T,
-    answer("True", correct = TRUE),
-    answer("False")
-  ),
-
-  question("The pacman function p_load() does which of the following (select ALL that apply).",
-    allow_retry = T,
-    answer("Installs the packages if it is not yet installed", correct = TRUE),
-    answer("Loads the packages for use", correct = TRUE),
-    answer("Produces a small yellow pacman emoji that eats your code line-by-line")
-  )
-)
-```
 
 
 
@@ -2101,7 +2390,7 @@ Note: See [this page in the Epi R Handbook](https://epirhandbook.com/en/r-basics
 
 ### Statistical functions  
 
-[***CAUTION:*** The functions below will, by default, include missing values in calculations. Missing values in the vector (which in R are written as `NA`) will result in an output of `NA`, unless the argument `na.rm = TRUE` is specified. Setting this argument to `TRUE` is specifying that **NA**s be **removed** (rm) from the calculation. This can be written shorthand as `na.rm = T`.  
+[***CAUTION:*** As described above, the statistical functions below will, by default, include missing values in calculations. Missing values in the vector (which in R are written as `NA`) will result in an output of `NA`, unless the argument `na.rm = TRUE` is specified. Setting this argument to `TRUE` is specifying that **NA**s be **removed** (rm) from the calculation. This can be written shorthand as `na.rm = T`.  
 
 
 | Objective               | Function           |
@@ -2121,7 +2410,7 @@ Notes:
 * *`quantile()`: `x` is the vector of numbers to consider, and `probs =` is a numeric vector with probabilities within 0 and 1.0, e.g `c(0.5, 0.8, 0.85)`
 * **`summary()`: gives a summary on a numeric vector including mean, median, and common percentiles
 
-[***DANGER:*** If providing a vector of numbers to one of the above statistical functions, be sure to wrap the numbers within `c()` .]{style="color: red;"}
+[***DANGER:*** If providing a vector of numbers to one of the above statistical functions, be sure to wrap the numbers within `c()` .]{style="color: red;"} (This scenario does not happen very often, see below).
 
 ```{r, eval=T, echo=T}
 # If supplying raw numbers to a statistical function, wrap them in c()
@@ -2129,6 +2418,297 @@ mean(1, 6, 12, 10, 5, 0)    # !!! INCORRECT !!!
 
 mean(c(1, 6, 12, 10, 5, 0)) # CORRECT
 ```
+
+The above scenario does not happen very often, because most of the time you are applying the function on a *column* in the data as below:  
+
+```{r, eval=FALSE, echo=TRUE}
+# mean of the column age in dataset linelist
+mean(linelist$age, na.rm = TRUE)
+```
+
+In this case you do not need to worry about `c()` at all.  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Packages
+
+Until now, you have used R functions that come installed with R. For example, `sum()`, `c()`, and `min()`.  
+
+These are called {base} R functions, and they represent a very small portion of all R functions available to you.  
+
+But the vast majority of R functions that you will use must be downloaded in an **R package**. For example, the `tbl_cross()` function that you used at the very beginning of this tutorial is contained in the R package named {gtsummary}.  
+
+An **R package** is a shareable bundle of related functions that you can download and use. Packages typically have a theme, for example:  
+
+* {ggplot2} is the most common data visualization package  
+* {lubridate} makes it easier to work with dates  
+* {janitor} help clean and summarize data  
+* {rmarkdown} help you write documents and make dashboards  
+
+R packages are often referred to in {brackets} and have "hex" logos.  
+
+
+```{r, eval = TRUE, echo = FALSE, out.height="75%", out.width = "25%", fig.show='hold'}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics("images/ggplot2.png", error = F)
+knitr::include_graphics("images/lubridate.png", error = F)
+knitr::include_graphics("images/janitor.png", error = F)
+knitr::include_graphics("images/rmarkdown.png", error = F)
+
+```
+
+
+You can see that the names of packages are often clever puns - the fun spirit of the R community is evident.  
+
+
+
+### CRAN  
+
+**To install most R packages, use R commands to download the package from "CRAN" to your computer's "R library".**
+
+Many R users create specialized functions, which they share in packages with the R community to verify.  
+
+For packages to be widely distributed, they must be shared on the **Comprehensive R Archive Network (CRAN)**, which is R's central software repository - an archive of R packages that have passed basic scrutiny.  
+
+As of March 2022, there are 19,020 packages available on CRAN. Some of these are immensely popular, with hundreds of thousands of downloads each month. 
+
+
+
+### Security  
+
+Are you worried about viruses and security when downloading a package from CRAN? Read [this article](https://support.rstudio.com/hc/en-us/articles/360042593974-R-and-R-Package-Security) on the topic.
+
+
+
+
+
+
+
+
+
+### Install and load packages  
+
+
+Once a package is **installed**, it is stored in **your R “library”**. You can then access the functions it contains by **“loading”** the package for use during your current R session .
+
+Think of R as your personal library: *when you install a package, your library gains a new "book" of functions. But each time you want to use a function from that book, you must borrow (“load”) it from your library.*
+
+```{r, fig.margin = TRUE, echo = FALSE, fig.width = 3, out.width = "50%", fig.cap = ""}
+knitr::include_graphics("images/bookshelf1.png", error = F)
+```
+
+In summary: to use the functions available in an R package, 2 steps must be implemented:
+
+1. The package must be installed (once), and
+2. The package must be loaded (each R session)
+
+
+`r fontawesome::fa("exclamation", fill = "red")` **In this tutorial, all the packages that you need are pre-loaded and trying to install packages by running a command in one of the codeboxes will not work.** 
+
+However, we will still show you some of the important functions and approaches that we recommend for installing and loading packages.  
+
+
+
+
+
+
+
+### {base} command for installing packages
+
+Remember how we said there are {base} R functions that come installed when you download R on your computer? There is a {base} function to install packages, and it is `install.packages()` (note that "packages" is written in plural).  
+
+The name of the package to install must be provided in the parentheses and in quotes. If you want to install multiple packages in one command, they must be listed within a character vector `c()` *within* the parentheses of `install.packages()`. Note that package names are case sensitive.  
+
+```{r packages-base, echo=T, eval=F}
+# install a single package with base R
+install.packages("tidyverse")
+
+# install multiple packages with base R
+install.packages(c("tidyverse", "rio", "here"))
+```
+
+`r fontawesome::fa("exclamation", fill = "red")` 
+Note: the `install.packages()` command installs a package (step 1), but does not load it for use in the current session (step 2).
+
+#### {base} command for loading packages  
+
+Do you remember how often you need load a package? Every time you start R. 
+
+You can do this using the {base} R function `library()`.  
+
+```{r, echo=T, eval = FALSE}
+# Loads the package pacman for use in the current R session
+library(pacman)
+```
+
+
+
+
+
+### {pacman}
+
+The below command uses `install.packages()` to install the package {pacman}.
+
+```{r eval = F, echo=T}
+install.packages("pacman")
+```
+
+
+**We are showing you the package {pacman} because it contains functions to make it easier to quickly install and load other packages**. Its name refers to "**pac**kage **man**ager" - not the video game character pacman.  
+
+
+
+#### Things to consider  
+
+There are a lot of potential complications when sharing R scripts with someone else - you want to succinctly ensure that they have the R packages installed and loaded that are needed for the analysis.  
+
+1) Do not make the reader of your script search through the entire script to find which packages you used... write your packages commands all together near the top of the script.  
+2) If you use `install.packages()`, you have to follow it with many `library()` commands, because `library()` only loads one package per command. If the script uses 15 packages, that is a lot of lines of code!  
+3) The `install.packages()` command will install any package listed in it, regardless if it is already installed - that would mean a lot of unnecessary re-installations everytime someone tries to run your script!  
+
+#### The benefits of {pacman}
+
+One solution is the R package {pacman}, and its function `p_load()`. 
+
+You can list the names of all the packages inside, and it will install each package *only if it is not already installed* (step 1 of the package process). Additionally, `p_load()` will automatically **load** each package for use in the R session (step 2 of the package process) - there is no need for `library()` commands.  
+
+It is a very efficient option - you can include this function at the top of your script. If your colleague receives the script, **as long as they have {pacman} already installed**, the script will only install the packages they do not already have, and will load all of them for use.  
+
+Here is what a {pacman} command can look like. The syntax is quite simple. Just list the names of the packages within the `p_load()` parentheses, separated by commas. Note that package names are case-sensitive.  
+
+**You would typically write a command like this at the top of your R script, as the first command.**   
+
+```{r, echo=T, eval=F}
+pacman::p_load(rio, here, janitor, lubridate, tidyverse)
+```
+
+The particular syntax used at the beginning of the command, `pacman::p_load()`, explicitly writes the package name (`pacman`) prior to the function name (`p_load()`), connected by two colons `::`. This syntax is useful because it also **loads** the {pacman} package (assuming it is already installed). 
+
+#### Vertical coding style  
+
+As with the other R commands you have been introduced to, this command can also be written vertically. *In any R command, the newlines and indenting will not impact the execution of the code.* But it can dramatically improve readability!  
+
+**The command at the top of an R script can be written more vertically like this, allowing informative comments to the right of each package listed.**  
+
+```{r, echo=T, eval=F}
+# Load all the packages needed, installing if necessary
+pacman::p_load(
+     rio,          # for importing data
+     here,         # for file paths
+     janitor,      # for data cleaning
+     lubridate,    # for working with dates
+     tidyverse     # for data management
+)
+```
+
+
+See this comparison of {base} code as compared to with {pacman}:  
+
+
+::: {style="display: flex;"}
+<div>
+
+Using {base} functions:  
+
+```{r, eval=F, echo=T}
+# force install of packages
+# note the need for quotation marks
+install.packages(
+     c("rio",
+       "janitor",
+       "gtsummary",
+       "here",
+       "tidyverse"))
+
+# load each package for use
+library(rio)
+library(janitor)
+library(gtsummary)
+library(here)
+library(tidyverse)
+```
+
+</div>
+
+::: {.col data-latex="{0.05\\textwidth}"}
+  <!-- an empty Div (with a white space), serving as
+a column separator -->
+:::
+
+<div>
+Using {pacman} with `p_load()`  
+
+```{r, eval=F, echo=T}
+# install only if necessary, and load
+pacman::p_load(
+  rio,
+  janitor,
+  gtsummary,
+  here,
+  tidyverse)
+```
+
+</div>
+
+::: 
+
+
+
+
+```{r quiz-packages-install}
+quiz(caption = "Quiz - packages",
+  question("How often do you need to install a package on your computer?",
+    allow_retry = T,
+    answer("Every time you restart R", message = "Packages only need to be installed once. There is no relation to restarting R."),
+    answer("Only once", correct = TRUE, message = "Packages must be installed once. After a long time, you may want to update them by re-installing."),
+    answer("Never (assuming you are connected to the internet)", message = "Packages must be installed once. You can not access them dynamically through the internet."),
+    answer("Each time you restart your computer", message = "Packages only need to be installed once. There is no relation to restarting your computer.")
+  ),
+
+  question("How often do you need to load a package?",
+    allow_retry = T,
+    answer("Every time you start or restart R", correct = TRUE, message = "Packages must be loaded each time you start an R session."),
+    answer("Only once", message = "Packages must be installed only once, but must be loaded at the beginning of each R session."),
+    answer("Never (assuming you are connected to the internet)", message = "Packages must be installed once and loaded at the beginning of each R session. You can not access them dynamically through the internet."),
+    answer("Each time you restart your computer", message = "Packages only need to be installed once and loaded at the beginning of each R session. There is no relation to restarting your computer.")
+  ),
+
+  question("Newlines and indents can be used to improve readability without impacting code execution.",
+    allow_retry = T,
+    answer("True", correct = TRUE),
+    answer("False")
+  ),
+
+  question("The pacman function p_load() does which of the following (select ALL that apply).",
+    allow_retry = T,
+    answer("Installs the packages if it is not yet installed", correct = TRUE),
+    answer("Loads the packages for use", correct = TRUE),
+    answer("Produces a small yellow pacman emoji that eats your code line-by-line")
+  )
+)
+```
+
+
+
 
 
 
@@ -2252,100 +2832,57 @@ quiz(caption = "Quiz - file names",
 )
 ```
 
-### Clean file names  
-
-`r fontawesome::fa("window-restore", fill = "darkgrey")` In your File Explorer, view the "intro_course" folder that we gave to you at the beginning of the course, in which you have created the R project.  
-
-Here is how your folder structure should look:  
-
-* `r emo::ji("folder")` project ("intro_course")  
-     * `r emo::ji("folder")` data
-          * `r emo::ji("folder")` clean  
-            * `r emo::ji("folder")`backup  
-          * `r emo::ji("folder")` raw  
-            * `r emo::ji("folder")`backup  
-          * `r emo::ji("folder")`pop  
-          * `r emo::ji("folder")` shp  
-     * `r emo::ji("folder")` scripts
-          * `r emo::ji("folder")`backup  
-     * `r emo::ji("folder")` outputs  
-     * `r emo::ji("folder")` learning materials  
-          * `r emo::ji("folder")` slides
-          * `r emo::ji("folder")` covid_case_study  
-     * `r emo::ji("document")` surveillance_linelist_20141201.csv
-     * intro_course.Rproj  
-
-`r emo::ji("warning")` You may also have some other files like ".Rhistory" - do NOT delete these. Just leave them.  
-
-
 #### Clean file names  
 
-`r fontawesome::fa("window-restore", fill = "darkgrey")` **Now enter the folder "data/raw/hospital".**  
+Below are some file names of case linelists that are arriving from several hospitals.  
 
-Regard the files - these are linelists of Ebola patients admitted for care, as sent to you on the 1st of December 2014, from 4 different hospitals (**Port Hospital**, **Military Hospital**, **St. Mark's Maternity Hospital (SMMH)**, and **Central Hospital**). There are also files containing records from **"Other" hospitals**, and of patients for whom the **hospital is "Missing"**.  
+Revise the file names to align with naming best-practices. **Leave the names in quotation marks**:  
 
-How can these file names be improved? Both for human readability, but also to facilitate standardized code that we may write to import them into R?  
+```{r rename-central, exercise=TRUE, exercise.lines = 2}
+"Central Hospital 12012014.csv"
+```
 
-**Edit the file names to that they are standardized with best practices above**  
-
-**When finished, view the "solution" below.** We suggest that you align your file names with these.  
-
-<!--
-NOTE: Below is the solution (all within details tags collapsed)
--->
-
-<details>
-<summary style='text-decoration: underline; color: red;'>`r fontawesome::fa("check", fill = "red")`Click to see a solution (try it yourself first!)</summary>
-</br>
-
-* 20141201_hosp_central.csv  
-* 20141201_hosp_military.csv  
-* 20141201_hosp_port.csv  
-* 20141201_hosp_smmh.csv  
-* 20141201_hosp_other.csv  
-* 20141201_hosp_missing.csv  
-
-</br>
-</details>
-<!--
-NOTE: End of solution
--->
+```{r rename-central-check}
+grade_this({
+  # custom checking code appears here
+  if (is.character(.result)) {
+    pass("Thanks for your answer. We suggest: 20141201_hosp_central.csv")
+  }
+  fail("Ensure your answer is within quote marks to be correctly submitted")
+})
+```
 
 
+```{r rename-military, exercise=TRUE, exercise.lines = 2}
+"Dec 1 2014 Military Hospital.csv"
+```
 
-### Project structure
-
-A few remarks here on folder structure:  
-
-#### Folder structure  
-
-* Typically, public health analysis folders will contain subfolders such as:  
-     * data (often subdivided into "raw" and "clean", or by time period) 
-     * scripts (or sometimes, just called "R")  
-     * outputs  
-     * images (if you are embedding images in your R documents)  
-
-#### README files  
-
-**Most folders should have a README file** that explains what lives in the folder, how it is updated, how it is used, etc.  
-
-* In a finished project, the README should help users navigate and understand the contents.  
-* In a project template, the README contains instructions for you to setup the project!  
+```{r rename-military-check}
+grade_this({
+  # custom checking code appears here
+  if (is.character(.result)) {
+    pass("Thanks for your answer. We suggest: 20141201_hosp_central.csv")
+  }
+  fail("Ensure your answer is within quote marks to be correctly submitted")
+})
+```
 
 
+```{r rename-port, exercise=TRUE, exercise.lines = 2}
+"Ebola Port Hospital December 1st 2014.csv"
+```
 
-**Now, add a .txt file that is named README.txt. Place the brief information that you learned above about where these data come from (the hospitals) in this file, and save it in the "raw" folder as README.txt.**  
+```{r rename-port-check}
+grade_this({
+  # custom checking code appears here
+  if (is.character(.result)) {
+    pass("Thanks for your answer. We suggest: 20141201_hosp_port.csv")
+  }
+  fail("Ensure your answer is within quote marks to be correctly submitted")
+})
+```
 
-You can do this by opening NotePad or a similar software, entering the text, and saving it in the folder. If you cannot find a plain text editor, you can use Microsoft Word.  
 
-
-*Concepts in this section on project structure were borrowed from this [slide deck on project structure](https://slides.djnavarro.net/project-structure/#1) by DJ Navarro.*  
-
-
-
-
-<!-- `r emo::ji("warning")` -->
-<!-- `r emo::ji("bookmark")` -->
 
 
 
@@ -2354,134 +2891,149 @@ You can do this by opening NotePad or a similar software, entering the text, and
 
 ## Importing a dataset  
 
-To begin working with data, you must import it into the R environment as an object.  
+**In this tutorial, all the datasets are pre-loaded. However, we will demonstrate our recommended code approach to importing data into R**. For more personalized coaching live in your computer's RStudio, enroll in our live R courses or contact us about a private R Help Desk session.  
 
-Once imported, the dataset will be saved as a **data frame** object, which consists of columns and rows.  
+We also encourage you to read the chapter on Importing data in the [Epidemiologist R Handbook](https://epirhandbook.com/en/import-and-export.html).  
 
 
-### Script organization  
+#### Importing your dataset as a "data frame"  
 
-Recall that often a script is run from top-to-bottom. Therefore, you will need to organize your script in a logical manner.  
+To begin working with data, you must import it into the R environment as an object. 
+Once imported, the dataset will be saved as a "data frame" object, which consists of columns and rows.  
 
-Typically, you begin with loading packages, and then continue to importing data.  
+
+#### Script organization  
+
+Recall that often a script is run from top-to-bottom. Therefore, you will need to organize your script in a logical manner. Typically, you begin with loading packages, and then continue to importing data.  
 
 
 ### Location of the data  
 
 **In order to import data into R, you must tell R where to access the data file on your computer (e.g. a specific folder).**  
 
-This can be surprisingly difficult (e.g. when data are stored on shared drives). However, by saving the data *within our R project* the whole process becomes much easier.  
+This can be surprisingly difficult (e.g. when data are stored on shared drives). However, by saving the data *within our RStudio project* the whole process becomes much easier.  
+
+For the sake of this tutorial, let's pretend that we are working in an RStudio project called "intro_course", as organized below:
+
+* `r emo::ji("folder")` intro_course (R project folder)  
+     * intro_course.Rproj  
+     * `r emo::ji("document")` *linelist.csv*
+     * `r emo::ji("document")` **my_analysis.R**
+
+Note the linelist dataset that is currently in the "root"/"top" level of the RStudio project, and the "my_analysis.R" R script also in the same folder.  
+
+#### Our recommended approach:
+
+To make your life easy importing and exporting data, we suggest using the following 3 tools together:  
+
+1) The {rio} package for importing data  
+2) RStudio projects for portable working environments  
+3) The {here} package for relative file paths  
+
+Let's walk through each of these tools...  
 
 
 
 
-### rio - the easy package for importing data  
 
-There are **base R** functions for importing data, but they can be confusing and difficult to remember - there are separate functions for each type of file (e.g. .xlsx, .csv, .tsv, .txt, etc).  
+### {rio} - the easy package for importing data  
 
-**Thankfully, there is one function that works for almost all file formats**, which is the `import()` function from the package **rio**.  
+There are **base R** functions for importing data, but they can be confusing and difficult to remember - there are separate functions for each type of file (e.g. `read.csv()`, `read_excel()`, `read_xlsx()`, etc).  
 
-**Let us find our data file**  
+**Thankfully, there is one function that works for almost all file formats**, which is the `import()` function from the package {rio}. This function *reads the file extension* that you provide (e.g. .csv, .txt, .xlsx, etc) and automatically imports the data in the correct way.  
 
-Do you see the file "*surveillance_linelist_20141201.csv*" that is saved in the "root" project folder? This is the baseline folder - the same folder as the "*intro_course.Rproj*" file. To access the root folder from the R project file you do *not* need to click into any sub-directories (sub-folders).  
+```{r, fig.margin = TRUE, echo = FALSE, fig.width = 3, out.width = "25%", fig.cap = ""}
+knitr::include_graphics("images/rio.png", error = F)
+```
 
-**Run the `import()` command**  
 
-In its most simple form, the `import()` function accepts a character value - the file path to the data that you wish to import. In this case, the data file which we want to import is saved in the root folder, so you only need to provide the file name and extension, in quotation marks, as below:  
+Did you see the file "*linelist.csv*" saved in the "root"/"top" folder of the RStudio project? This is the baseline folder - the same folder as the "*intro_course.Rproj*" file. To access the root folder from the R project file you do *not* need to click into any sub-directories (sub-folders).  
 
+* `r emo::ji("folder")` intro_course (R project folder)  
+     * intro_course.Rproj  
+     * `r emo::ji("document")` *linelist.csv*
+     * `r emo::ji("document")` **my_analysis.R**
+     
+In its most simple form, the `import()` function accepts a character value - the file path (in quotation marks) to the data that you wish to import. In this case, the data file which we want to import is saved in the root folder of the RStudio, so you only need to provide the file name and extension, in quotation marks, as below:  
 
 ```{r, echo=T, eval=F}
-import("surveillance_linelist_20141201.csv")
+linelist <- import("linelist.csv")
+```
+
+Let's explain why this works...
+
+
+
+### RStudio projects  
+
+Any importing function needs to know *where* to look for the file that you want to import - this is the **file path**. A typical file path ("absolute" file path, or a "full" file path) may look like this (in the green quoted text):  
+
+```{r, echo=T, eval=F}
+linelist <- import("C:/Users/Laura/Documents/intro_course/linelist.csv")
+```
+
+The problem with this file path is that all of the path before "intro_course" ... the C: ... the "Laura" ... etc. None of these may be present in the computer of Laura's colleagues, and this command would not run. The file path would "break" and not work. Or, the next user may be using a Mac, so the slashes would all need to be reversed!  
+
+Thankfully, housing your work within an RStudio project has immense advantages for simply importing your data. As mentioned before, the project becomes a portable working environment. This means that you do not need to worry as much about the "file path" (sequence of folders/directories).  
+
+```{r, eval = TRUE, echo = FALSE, out.width = "25%"}
+# adding xfun::relative_path() creates a dynamic file path between the Rmd location and the here() path.
+# It dynamically creates the ../../etc filepath.
+
+knitr::include_graphics("images/project_briefcase.png", error = F)
 ```
 
 
-`r fontawesome::fa("exclamation", fill = "red")` Did you see this error?  
+**The RStudio project in a computer will automatically know the file path *up to its location*.** Therefore, the project is portable and automatically adapts to whichever computer is currently hosting it.  
 
->Error in import("surveillance_linelist_20141201.csv") :  could not find function "import"  
->  
->If so, it means that you did not install and load the **rio** package. If you need help, review the previous section and look for the `pacman::p_load()` command that loads several packages including **rio**.  
+Here is the outline of our RStudio project again:  
 
-Once you get the command to run successfully, you probably saw a lot of text appear in the **Console**. That was the dataset!
+* `r emo::ji("folder")` intro_course (R project folder)  
+     * intro_course.Rproj  
+     * `r emo::ji("document")` *linelist.csv*
+     * `r emo::ji("document")` **my_analysis.R**
 
-**Think: what did your command ask R to do?** It asked R to import the dataset... and the default action is to print/display it.  
+The command **`import("linelist.csv")`** as run from "my_analysis.R" script in this R project...  
 
-You did not ask R to save the dataset as a named object. How would you do that?  
+...produces this file path when run from Laura's computer:  
 
-**In RStudio, try again to import the data and save it as the object `linelist` (a short name for "surveillance linelist raw").** 
-
-
-
-<!--
-NOTE: Below is the hint (all within details tags collapsed)
--->
-<details>
-
-<summary style='text-decoration: underline; color: darkgreen;'>`r fontawesome::fa("lightbulb", fill = "gold")` Click to read a hint</summary>
-</br>
-
-Use the assignment operator `<-` before the function. Don't forget quotation marks around the name of the file.  
-
-</br>
-</details>
+`"C:\Users\Laura\Documents\`**intro_course\linelist.csv"**  
 
 
-<!--
-NOTE: Below is the solution (all within details tags collapsed)
--->
+...and produces *this* when run from Rajiv's Mac computer:  
 
-<details>
-<summary style='text-decoration: underline; color: red;'>`r fontawesome::fa("check", fill = "red")`Click to see a solution (try it yourself first!)</summary>
-</br>
-
-```{r eval = F, echo=T}
-linelist <- import("surveillance_linelist_20141201.csv")
-```
-
-</br>
-</details>
-<!--
-NOTE: End of solution
--->
+`"home/Rajiv/docs/`**intro_course/linelist.csv"**  
 
 
-You should now see the new object `linelist` appear in the R **Environment pane**, under the subcategory "Data". It should have a short description of the number of observations and variables. Congratulations, you have now imported a dataset into R!  
+
 
 
 ### Importing data from subfolders  
 
-In most cases, it is better organizationally to store data in a subfolder - even perhaps by week, or by status as either "raw" or "clean". In this course, most of the data are initially stored in a subfolder named "data".  
 
-`r fontawesome::fa("window-restore", fill = "darkgrey")` Now, go to your File Explorer to the root folder of the R project.  
+In most cases, it is better organizationally to store data in a subfolder - even perhaps by week, or by status as either "raw" or "clean".  
 
-**Cut the file *"surveillance_linelist_20141201.csv"* from the root folder, and paste it into the "data/raw" subfolder.**  
+Let's say that the RStudio project outline actually looked like this:  
 
-
-And so we are introduced to the topic of file paths.  
-
-Any importing function needs to know *where* to look for the file that you want to import - this is the **file path**.  
-
-A typical file path ("absolute" file path, or a "full" file path) may look like this:  
-
-```{r, echo=T, eval=F}
-linelist <- import("C:/Users/Laura/Documents/intro_course/data/surveillance_linelist_20141201.csv")
-```
-
-The problem with this is all of the path before "intro_course" ... the C: ... the "Laura" ... etc. None of these may be present in the computer of Laura's colleague, and this command would not run. The file path would be "broken". Or, the next user may be using a Mac, so the slashes would all need to be reversed! Thankfully there is a solution:  
+* `r emo::ji("folder")` project ("intro_course")  
+    * intro_course.Rproj  
+    * `r emo::ji("folder")` data
+      * `r emo::ji("folder")` raw
+        * `r emo::ji("document")` *linelist.csv*
+    * `r emo::ji("folder")` scripts
+      * `r emo::ji("document")` **my_analysis.R**
 
 
+#### The {here} package and relative file paths  
 
-### The {here} package and relative file paths  
+The package {here} has a function named `here()` that makes it easy to tell R where to find and to save your files by building *relative file paths*.
 
-The package {here} and its function `here()` make it easy to tell R where to find and to save your files - in essence, it builds *relative file paths*.
+Used in conjunction with an RStudio project, `here()` allows you to describe the location of files in your RStudio project *in relation to the project’s root directory (the top-level folder)*. This is useful when the project may be shared or accessed by multiple people/computers or when a script may be moved around within the project.  
 
-Used in conjunction with an RStudio project, {here} allows you to describe the location of files in your RStudio project *in relation to the project’s root directory (the top-level folder)*. This is useful when the project may be shared or accessed by multiple people/computers or when a script may be moved around within the project.  
-
-Used with an RStudio project, it prevents complications due to the unique file paths on different computers (e.g. "C:/Users/Laura/Documents...") by “starting” the file path in a place common to all users (the project root).  
+Used with an RStudio project, it makes it easy to refer to datasets in subfolders by “starting” the file path in a common place (the project root). To use it, you will need to install the package {here} and load it for use, as with any other package.  
 
 
-`r fontawesome::fa("terminal", fill = "black")` Make sure you have installed and loaded the package {here}. Then try running the command `here()` - leave the parentheses empty. What do you see?  
-
-In "Laura"'s situation, the output might look like this:  
+If "Laura" was to run the command `here()` from her R script, located anywhere in the RStudio project, the output is a filepath that might look like this:  
 
 ```{r, echo=T, eval=F}
 "C:/Users/Laura/Documents/intro_course")
@@ -2504,13 +3056,13 @@ This would produce the file path:
 Ending the `here()` command with a file **name and extension** could look like this:  
 
 ```{r, echo=T, eval=F}
-here("data", "raw", "surveillance_linelist_20141201.csv")
+here("data", "raw", "linelist.csv")
 ```
 
 This would produce the file path:  
 
 ```{r, echo=T, eval=F}
-"C:/Users/Laura/Documents/intro_course/data/raw/surveillance_linelist_20141201.csv")
+"C:/Users/Laura/Documents/intro_course/data/raw/linelist.csv")
 ```
 
 Now comes the secret combination: we insert this `here()` command *into* the `import()` command! We nest one function inside another one! Take a look at this:  
@@ -2522,63 +3074,20 @@ linelist <- import(here("data", "raw", "surveillance_linelist_20141201.csv"))
 
 Note the two parentheses at the end - one for each function. The file path returned by `here()` is passed to the first argument of `import()` as a character value.  
 
+
 #### A note on slashes  
 
 You may wonder - where are the forward slashes and back slashes in the `here()` command? Well, `here()` allows the slack-agnostic entry format above because it can adapt to whether you are working on a Mac or a PC!  
 
 On a PC:  
 
-* project/data/linelist_20141201.csv  
-* project/data/linelist_20141208.csv  
+* project/data/linelist.csv  
 
 On a Mac:  
 
-* project\\data\\linelist_20141201.csv  
-* project\\data\\linelist_20141208.csv  
+* project\\data\\linelist.csv  
 
-You do not know who will be using your script later, or what kind of computer they will have. Therefore, it is easier to simply go with: `here("data", "linelist_20141201.csv")`.  
-
-
-### Import from a subfolder  
-
-
-`r fontawesome::fa("terminal", fill = "black")` Now in RStudio, write a command to import "surveillance_linelist_20141201.csv" from the subfolder "data/raw" (where you moved it, earlier) and save it in R as `linelist` using the assignment operator.  
-
-
-<!--
-NOTE: Below is the hint (all within details tags collapsed)
--->
-<details>
-
-<summary style='text-decoration: underline; color: darkgreen;'>`r fontawesome::fa("lightbulb", fill = "gold")` Click to read a hint</summary>
-</br>
-
-Begin the command with the object name that you want to assign, then the assignment operator, and then the `import()` command. Within the `import()` parentheses, place the `here()` function, which should list the names of the sub-folders (in quotes) and include the file name with extension (.csv).  
-
-</br>
-</details>
-
-
-<!--
-NOTE: Below is the solution (all within details tags collapsed)
--->
-
-<details>
-<summary style='text-decoration: underline; color: red;'>`r fontawesome::fa("check", fill = "red")`Click to see a solution (try it yourself first!)</summary>
-</br>
-
-```{r eval = F, echo=T}
-linelist <- import(here("data", "raw", "surveillance_linelist_20141201.csv"))
-```
-
-</br>
-</details>
-<!--
-NOTE: End of solution
--->
-
-
-
+You do not know who will be using your script later, or what kind of computer they will have. Therefore, it is easier to simply go with: `here("data", "linelist.csv")`.  
 
 
 
@@ -2594,6 +3103,25 @@ quiz(caption = "Quiz - importing",
 )
 ```
 
+One last reminder - **always ask yourself: what did your command ask R to do?** If you ran a command like this:  
+
+```{r, eval=F, echo=T}
+import(here("data", "raw", "linelist.csv"))
+```
+
+Above, you have asked R to import the dataset... and the default action is to *print/display* it.  
+
+You did not ask R to save the dataset as a named object by using the assignment operator `<-` before the function.
+
+```{r eval = F, echo=T}
+linelist <- import(here("data", "raw", "linelist.csv")
+```
+
+
+If you are working RStudio, you will now see the new object `linelist` appear in the R **Environment pane**, under the subcategory "Data". It should have a short description of the number of observations and variables.
+
+
+
 
 
 
@@ -2604,80 +3132,66 @@ quiz(caption = "Quiz - importing",
 
 ## Review a dataset  
 
-Now that you have imported the data, let's take a look!  
+Now that you know how to import a dataset, let's take a look at it!  
 
 
 ### Take a peek  
 
-`r fontawesome::fa("eye", fill = "darkblue")` The dataset is now saved as a data frame object in the RStudio **Environment pane**. Find its name there, and click once on the blue circle next to the name. What do you see?  
+The dataset is now saved in this tutorial as a data frame object called `linelist`. It contains `r nrow(linelist)` rows, but we are only showing you the **first 25 rows** now.  
 
-The expanded area beneath the data frame is an overview of all the columns in the data frame. After the name of the column, there is a colon, then an abbreviation that indicates the "class" of the column (we'll discuss this more later), and then the first few values in the column. How exciting!  
+* Scroll to the right to see all the columns  
+* Use the numbers buttons in the lower-right to page through the additional available rows (25 rows in this case)  
+* Click a column name to sort the rows  
+* Filter rows by clicking/typing in the empty box above the column  
 
-For even more detail, collapse this overview and **click on the name of the data frame itself (`linelist`).**  
-
-This should open a new tab in the upper-left pane, next to the R script. This tab will display the data frame! You can scroll through the data frame, and even apply filters (see the icon in the upper-left of the display).  
-
-Try these exercises:  
-
-```{r quiz-data-review}
-quiz(caption = "Quiz - data review",
-  question("How many columns are there in the data frame?",
-    allow_retry = T,
-    answer("665", message = "No, this is the number of rows/observations"),
-    answer("23", correct = TRUE, message = "Yes this is correct!"),
-    answer("19", message = "This is not correct, try again."),
-    answer("25", message = "No, this is the number of rows shown in the initial display")
-  ),
-
-  question("What is the value in the 4th column and the 50th row?",
-    allow_retry = T,
-    answer("m", correct = TRUE),
-    answer("Port Hospital"),
-    answer("38.3"),
-    answer("West II")
-  ),
-
-  question("How many of the rows include a weight between 40 and 45 kg?",
-    allow_retry = T,
-        answer("112"),
-        answer("65", correct = TRUE),
-        answer("226"),
-        answer("95")
-  )
-)
+```{r, echo=FALSE, eval=TRUE, message = FALSE, warning = FALSE}
+DT::datatable(head(linelist, 25), rownames = FALSE, filter="top", options = list(pageLength = 5, scrollX=T), class = 'white-space: nowrap' )
 ```
+
 
 
 ### Indexing  
 
-Above we asked you to find the value in the 4th column, and the 50th row. Instead of searching manually, you can also write code to isolate and view pieces of the dataframe.  
+There are several ways to inspect a data frame.
 
-**The `$` operator can be used on a dataframe to reference a specific column.** It is one of the indexing operators in R, which returns a sub-part of a larger object. For example, `linelist$gender` will return the entire column `gender`.  
+If you are working in RStudio, try running the function `View()` on the data frame (note capital "V"), such as `View(linelist)`. This will open the linelist in a viewer pane.  
 
-**Try typing and running the following commands**  
+#### The `$` operator  
+
+The `$` operator is frequently used on a data frame to reference a specific column. It is one of the indexing operators in R, which returns a sub-part of a larger object. For example, `linelist$gender` will return the entire column `gender` from the data frame `linelist`.  
+
+
+**In the code box below, try typing and running the following commands**  
 
 * `linelist$hospital`  
 * `linelist$case_id`
 
-As you typed, slowly, did you see anything appear as you arrived at typing the `$`? You should have seen a small menu appear that showed all the columns in the data frame `linelist`. Using your arrow keys you can select a column from that menu - if you do not want to type the rest and potentially make a spelling mistake.  
+```{r dollar, exercise = TRUE}
 
-**Try writing commands to show other columns, and experiment with this pop-up menu**.  
+```
+
+
+
+#### Columns are vectors  
 
 Here is something you should know: columns can also be referred to as "vectors" - vectors are a long line of values of the same class. So in fact, a data frame is simply a collection of vectors (columns!).  
 
 You can also create other, independent vectors, like you have already done with `c()`. But most commonly, you will work with vectors in the context of a data frame. "Vector" is a good term to know.  
 
-Another indexing operator to be aware of is the "square brackets" that look like `[ ]`. These brackets can also be used to isolate/return a sub-part of a larger object: `dataframe[ROW, COLUMN]`  
+Another indexing operator to be aware of is the "square brackets" that look like `[ ]`. This syntax is commonly applied to vectors, which is why we are introducing it now. These brackets can also be used to isolate/return a sub-part of a larger object: `dataframe[ROW, COLUMN]`  
+
 This command would return the value at the 12th row and the 4th column: `linelist[12, 4]`  
 
 You can return an entire column by leaving the ROWS part empty (but don't forget the comma!):  `linelist[ ,4]`  
+
 Or an entire row by doing the opposite: `linelist[12, ]`  
 
-Other objects can be subset as well. For example, the `summary()` function when used on a column returns an object that contains the minimum, median, mean, IQR, etc.  
+### Indexing non-vectors  
 
-Try these three commands in R to see how the output changes as further indexing is applied:  
+Other objects can be subset as well. For example, the `summary()` function, when used on a column, returns an "object" that contains the minimum, median, mean, IQR, etc.  
 
-```{r, echo=T}
+
+```{r, eval=F, echo=T}
 # Return the summary of the column 'age'
 summary(linelist$age)
 
@@ -2691,55 +3205,62 @@ summary(linelist$age)[[3]]
 summary(linelist$age)[[3]] + 4
 ```
 
+Try typing in these four commands in the codebox, one at a time, to see how the output changes as further indexing is applied:  
+
+
+```{r summary-index, exercise = TRUE}
+
+```
+
+
 You will use the `$` very frequently. It is less common to need the brackets. But still - good to know about in case you see them or need to use them.  
 
 
+Try these exercises, using the codebox above as necessary to get the answers:  
+
+```{r quiz-data-review}
+quiz(caption = "Quiz - data review",
+  question("What is the value in the 4th column and the 50th row?",
+    allow_retry = T,
+    answer("m", correct = TRUE),
+    answer("Port Hospital"),
+    answer("38.3"),
+    answer("West II")
+  )
+)
+```
 
 
-### Skim  
 
-You can return a good summary of the dataset using the R package {skimr} and its function `skim()`.  
 
-Use `p_load(skimr)` or `install.packages("skimr")` to install this package and load it for use.  
 
-If you encounter any errors when trying to install the package, notify your facilitator.  
+### {skimr}  
+
+You can return a good summary of the data frame using the R package {skimr} and its function `skim()` (note the difference in spelling!).  
+
 
 Place the name of the linelist in `skim()` and run. What content appears in the R console?
   
-If the output is not easily readable, expand your Console pane to be wider, and run the command again.  
-
-
-
-<!--
-NOTE: Below is the solution (all within details tags collapsed)
--->
-
-<details>
-<summary style='text-decoration: underline; color: red;'>`r fontawesome::fa("check", fill = "red")`Click to see a solution (try it yourself first!)</summary>
-</br>
-
-```{r eval = F, echo=T}
+```{r skimr-ex, exercise = TRUE}
 skim(linelist)
 ```
-
-</br>
-</details>
-<!--
-NOTE: End of solution
--->
+  
 
 
-
-
-
-
-
+**Review the output**. First `skim()` lists the number of each class of column (character, numeric, etc.). Then, it gives more detail for each of the columns. 
 
 **What does the output show?**  
 
 ```{r quiz-skim}
 quiz(caption = "Quiz - reviewing the data",
-  question("How many columns has R classified as numeric?",
+  question("How many columns are there in the data frame?)",
+    allow_retry = T,
+    answer("665", message = "No, this is the number of rows/observations"),
+    answer("23", correct = TRUE, message = "Yes this is correct!"),
+    answer("19", message = "This is not correct, try again."),
+    answer("25", message = "No, this is the number of rows shown in the initial display")
+  ),
+   question("How many columns has R classified as numeric?",
     allow_retry = T,
     answer("32", message = "No, this is more than the columns in the dataset!"),
     answer("8", correct = TRUE, message = "Yes this is correct!"),
@@ -2771,28 +3292,22 @@ quiz(caption = "Quiz - reviewing the data",
 
 ## End  
 
-Congratulations! You have completed the first exercise in this course!  
+Congratulations! You have completed the first tutorial in this series!  
 
-Be sure to save your R script, and check-in with your facilitator.  
+We suggest completing our tutorial on "Tidy data" next.  
 
-
-## Extras  
-
-If you still have time remaining, try some of the activities below.  
-
-### Installing fun packages  
-
-Try installing the R package {praise}, and then see what its function `praise()` does.  
-
-```{r, echo=T, eval=F}
-praise()
-```
+Please consider making a donation to us. We are a nonprofit organization and rely on your contributions to continue supporting frontline epidemiologists around the world.
 
 
+<form target="_blank" action="https://www.paypal.com/donate" method="post" target="_top">
+<input type="hidden" name="hosted_button_id" value="YTEZELC8VBXV6" />
+<input type="image" src="https://github.com/appliedepi/epiRhandbook_eng/raw/master/images/donate_button_long.png" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
+<img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" />
+</form>
 
-### Customizing RStudio  
 
-Read the information at [this link](https://support.rstudio.com/hc/en-us/articles/200549016-Customizing-the-RStudio-IDE#appearance) and adjust the settings of your RStudio via the "Tools" menu and clicking "Global Options". Which Appearance settings do you prefer?  
+  
+If you still have time, try some of the activities below.  
 
 
 ### R user communities  
@@ -2804,6 +3319,16 @@ Look through [this list](https://jumpingrivers.github.io/meetingsR/r-user-groups
 
 Read through the "R Basics" chapter of the [Epi R Handbook](https://epirhandbook.com/en/r-basics.html#r-basics) - it is full of things that you have learned today, but also topics that will be new. 
 
-If you are confused by any section, ask your instructor for clarification.  
+
+### Acknowledgements  
+
+The material in this tutorial is adapted in part from Applied Epi's live course Introduction to R for applied epidemiology.  
+
+* Code from [this post](https://community.rstudio.com/t/learnr-clipboard-extension/107812/2) was used to create the buttons that bring code from one exercise to the next.
+* The {learnr} and {gradethis} R packages make this tutorial possible.  
+* Images created by Applied Epi or used from our Canva account.  
+
+
+
 
 
