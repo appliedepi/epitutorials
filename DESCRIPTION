@@ -19,6 +19,7 @@ Imports:
     gradethis (>= 0.2.5.9000),
     gtsummary,
     skimr,
+    sortable,
     rio,
     tidyr,
     DT
