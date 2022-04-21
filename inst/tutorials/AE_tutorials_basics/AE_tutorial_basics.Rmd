@@ -1,5 +1,5 @@
 ---
-title: "Applied Epi - R basics"
+title: "Applied Epi Tutorials - R basics"
 tutorial:
   id: "AE_tutorial_basics"
 output: 

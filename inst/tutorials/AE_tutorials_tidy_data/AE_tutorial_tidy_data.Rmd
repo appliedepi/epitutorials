@@ -1,7 +1,7 @@
 ---
-title: "Applied Epi - R basics"
+title: "Applied Epi Tutorials - Tidy data"
 tutorial:
-  id: "AE_tutorial_basics"
+  id: "AE_tutorial_tidy_data"
 output: 
   learnr::tutorial:
     progressive: true
@@ -905,7 +905,9 @@ Long datasets are much easier to read in R (even if they contain many rows) and 
 
 The R functions `pivot_longer()`(from package **tidyr**) or `melt()` (from package **reshape2**) transforms data to long formats. 
 
-### Impact of pivoting for plotting
+
+
+### Impact of pivoting for plotting {.tabset}
 
 Let's look at our Ebola linelist again. If we wanted to plot the **evolution of symptoms over time, coloured by symptom**, which of the following data formats do you think would be easiest to work with?
 
@@ -930,15 +932,19 @@ linelist3 <- linelist %>%
   arrange(case_id)
 ```
 
-`linelist1`
+#### Click to see format 1  
+
 ```{r}
 head(linelist1,10)
 ```
-`linelist2`
+
+#### Click to see format 2
 ```{r}
 head(linelist2,10)
 ```
-`linelist3`
+
+#### Click to see format 3
+
 ```{r}
 head(linelist3,10)
 ```

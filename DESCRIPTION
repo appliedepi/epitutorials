@@ -11,6 +11,8 @@ Encoding: UTF-8
 LazyData: true
 Imports: 
     dplyr,
+    tidyr,
+    forcats,
     emo (>= 0.0.0.9000),
     flair,
     fontawesome,
@@ -18,10 +20,11 @@ Imports:
     learnr (>= 0.10.1.9019),
     gradethis (>= 0.2.5.9000),
     gtsummary,
+    janitor,
+    epikit,
     skimr,
     sortable,
     rio,
-    tidyr,
     DT
 Remotes: 
     rstudio/learnr,
