@@ -131,7 +131,7 @@ malaria_counts <- rio::import(system.file("dat/malaria_facility_count_data.rds",
 
 
 
-## Introduction to R for Applied Epidemiology and Public Health
+## Welcome to Applied Epi's free self-paced R tutorial series
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
 knitr::include_graphics("images/applied_epi_banner.png", error = F)
@@ -139,28 +139,120 @@ knitr::include_graphics("images/applied_epi_banner.png", error = F)
 
 </br>
 
-#### Welcome to Applied Epi's free self-paced tutorial series
+#### Tutorial 3: Introduction to data visualization
 
 This is the **third** tutorial in the series.  
 
-* **This tutorial teaches**: Introduction to visualization of data using {ggplot2} and public health examples  
+* **This tutorial teaches**: Introduction to visualization of public health and epidemiological data using the {ggplot2} R package  
 * **Target audience**: Public health practitioners, epidemiologists, clinicians, and researchers who cannot access our live courses  
 * **Format**: R coding is performed *within* this tutorial window  
 * **Offline access**: Follow [these instructions](www.training.appliedepi.org) to download and view offline in your RStudio  
 
 </br>
 
-All of our courses welcome beginners who have never coded before, and use examples and solutions for common public health challenges. Here are the differences between these tutorials and our live courses:  
+#### Our introductory R training materials  
+
+All of our training materials focus on challenges and solutions for frontline practitioners, and are accessible to beginner audiences. Read more about our educational approach [here](training.appliedepi.org/educational-approach) 
 
 :::: {style="display: flex;"}
 
 ::: {}
-**These tutorials:**
+**These self-paced tutorials:**
 
  
-* Help you get started with R  
+* Introduce you to the basics of R coding  
 * R on your computer is **not** required  
-* Help is available at our public [Applied Epi Community](http://community.appliedepi.org) forum  
+* Help is available at our public  
+[Applied Epi Community](http://community.appliedepi.org) forum  
+
+:::
+
+
+::: {.col data-latex="{0.05\textwidth}"}
+\ 
+<!-- an empty Div (with a white space), serving as
+a column separator -->
+:::
+
+
+::: {}
+**Live courses:**  
+
+* A more comprehensive curriculum  
+* We help you navigate and use R on your computer  
+* Personal support and tips from live instructors who have  
+extensive frontline public health experience  
+
+
+:::
+
+::::
+
+See our [live course offerings](www.training.appliedepi.org), [educational philosophy](https://applied-epi-training.netlify.app/educational-approach.html), and [email us](mailto:contact@appliedepi.org) for tutorial personal coaching options.  
+
+</br>
+
+#### About Applied Epi
+
+
+:::: {style="display: flex;"}
+
+::: {}
+
+
+**[Applied Epi](www.appliedepi.org) is a nonprofit organization that supports frontline public health practitioners through accessible tools, training, and support.**  
+
+We are a global team of 150 applied epidemiologists and public health practitioners with extensive ground-level experience.  
+
+We offer a comprehensive ecosystem of R training, tools, and support, including our free [Epidemiologist R Handbook](www.epiRhandbook.com) which has helped over **175,000 people** learn R and remains a vital resource for many practitioners.  
+
+
+
+
+:::: {style="display: flex;"}
+
+::: {}
+```{r, out.width = "55%", fig.align = "left", echo=F}
+knitr::include_graphics("images/teaching_icon.png")
+```
+**Training:**  
+
+* **[Live R courses](www.appliedepi.org)**  
+* **[Self-paced interactive tutorials](https://training.appliedepi.org)**  
+* **[Case studies](www.training.appliedepi.org)**  
+:::
+
+::: {}
+```{r, out.width = "55%", fig.align = "left", echo=F}
+knitr::include_graphics("images/tools_icon.png")
+```
+**Tools:**  
+
+* **[Epi R Handbook](www.epiRhandbook.com)**  
+* **[R packages](https://appliedepi.org/tools/)**  
+* **[Sitrep templates](https://appliedepi.org/tools/)**  
+:::
+
+::: {}
+```{r, out.width = "55%", fig.align = "left", echo=F}
+knitr::include_graphics("images/QA_icon.png")
+```
+**Support:**  
+
+* **[Community forum](www.community.appliedepi.org)**  
+* **[R Help Desk](https://appliedepi.org/helpdesk/)**  
+* **[Mentorship](https://appliedepi.org/join/)**  
+:::
+
+
+::::
+
+<form target="_blank" action="https://www.paypal.com/donate" method="post" target="_top">
+<input type="hidden" name="hosted_button_id" value="YTEZELC8VBXV6" />
+<input type="image" src="https://github.com/appliedepi/epiRhandbook_eng/raw/master/images/donate_button_long.png" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
+<img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" />
+</form>
+
 
 :::
 
@@ -179,94 +271,20 @@ a column separator -->
 
 
 ::: {}
-**Live courses:**  
-
-* A comprehensive curriculum  
-* Use R on your computer (we help with set up)  
-* Immediate support and tips from live instructors with decades of frontline experience  
-
+```{r, out.width = "100%", fig.align = "center", echo=F}
+knitr::include_graphics("images/logo.png")
+```
 
 :::
 
 ::::
 
-See our [educational philosophy](https://applied-epi-training.netlify.app/educational-approach.html), [live course offerings](www.training.appliedepi.org), and [email us](mailto:contact@appliedepi.org) for tutorial coaching options.  
-
-</br>
-
-#### About Applied Epi^TM^
-
-**[Applied Epi](www.appliedepi.org) is a nonprofit organization that supports frontline public health practitioners through open-source tools, training, and support.** We are a team of 150 epidemiologists and public health practitioners with decades of ground-level experience in local public health and outbreak response.  
-
-Our free [Epidemiologist R Handbook](www.epiRhandbook.com) has helped over **175,000 people** learn R and remains a vital resource for many practitioners. We have built a comprehensive ecosystem of tools, training, and support:  
-
-
-:::: {style="display: flex;"}
-
-::: {}
-```{r, out.width = "65%", fig.align = "center", echo=F}
-knitr::include_graphics("images/teaching_icon.png")
-```
-
-* **[Live R training courses](www.training.appliedepi.org)**
-* **[Self-paced R tutorials](https://training.appliedepi.org)**
-* **[Case studies](www.training.appliedepi.org)**
-:::
 
 
 
 
 
-::: {.col data-latex="{0.05\textwidth}"}
-\ 
-<!-- an empty Div (with a white space), serving as
-a column separator -->
-:::
 
-
-
-
-
-::: {}
-```{r, out.width = "65%", fig.align = "center", echo=F}
-knitr::include_graphics("images/tools_icon.png")
-```
-
-* **[Epi R Handbook](www.epiRhandbook.com)**
-* **[R packages](https://appliedepi.org/tools/)**
-* **[Situation report templates](https://appliedepi.org/tools/)**
-:::
-
-
-
-
-::: {.col data-latex="{0.05\textwidth}"}
-\ 
-<!-- an empty Div (with a white space), serving as
-a column separator -->
-:::
-
-::: {}
-```{r, out.width = "65%", fig.align = "center", echo=F}
-knitr::include_graphics("images/QA_icon.png")
-```
-
-* **[Q&A discussion forum](www.community.appliedepi.org)**
-* **[R Help Desk](https://appliedepi.org/helpdesk/)**
-* **Mentorship program**  
-:::
-
-
-
-::::
-
-
-
-<form target="_blank" action="https://www.paypal.com/donate" method="post" target="_top">
-<input type="hidden" name="hosted_button_id" value="YTEZELC8VBXV6" />
-<input type="image" src="https://github.com/appliedepi/epiRhandbook_eng/raw/master/images/donate_button_long.png" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
-<img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" />
-</form>
 
 
 
@@ -279,7 +297,7 @@ Authors of this tutorial include:
 * David Jorgensen  
 * Neale Batra  
 
-Funding for this tutorial was provided by Medicins sans frontieres (MSF) / Doctors without Borders and TEPHINET.  
+Funding for this tutorial was provided by Médecins Sans Frontières (MSF) / Doctors without Borders and TEPHINET.  
 
 **Click "Next Topic" to move to the next section of the tutorial, or navigate using the Table of Contents on the left.**  
 
