@@ -26,6 +26,7 @@ library(dplyr)           # wrangle data
 library(tidyr)           # data handling
 library(janitor)         # tables and clean_names()
 library(forcats)         # factors
+library(lubridate)       # dates
 library(epikit)          # age categories
 library(flair)           # highlight code
 library(ggplot2)         # visualise data
@@ -104,7 +105,10 @@ gradethis::gradethis_setup(
 # options(tutorial.event_recorder = recorder_function)
 
 # data prep (must be in setup chunk) --------------------------------------------------------------------
-linelist_raw <- rio::import(system.file("dat/surveillance_linelist_20141201.csv", package = "epitutorials"))
+linelist_raw <- rio::import(system.file("dat/surveillance_linelist_20141201.csv", package = "epitutorials")) %>% 
+  select(-bmi) %>% 
+  mutate(age = as.numeric(age))
+
 linelist <- rio::import(system.file("dat/surveillance_linelist_clean_20141201.rds", package = "epitutorials"))
 
 # hide non-exercise code chunks ------------------------------------------------
@@ -494,6 +498,10 @@ Note: the {tidyverse} meta-package is very useful because it includes the {dplyr
 
 
 
+
+
+
+
 ## Import data {#import}  
 
 In this tutorial, we have pre-loaded the data. But if you were writing in an R script, your next command would be to import the "raw" or "unclean" data from where it is stored on your computer.  
@@ -507,10 +515,33 @@ Below is an command that imports the file "linelist.xlsx", which is located in t
 * The `<-` assignment operator stores the imported dataset in R as the object `linelist_raw` for later reference  
 
 ```{r import-demo-subfolder, echo=T, eval=F}
-linelist_raw <- import(here("data", "linelist.xlsx"))   # import data and save as named object
+linelist_raw <- import(here("data", "linelist.xlsx"))
 ```
 
 You can read more in the previous tutorial and in the [Epi R Handbook](https://www.epirhandbook.com/en/import-and-export.html) about how RStudio projects, the {here} package, and the {rio} package can be efficiently used together to make the data import process very easy!
+
+
+
+### View the data  
+
+Here is a scollable view of the raw dataset that we just imported:  
+
+```{r, echo=FALSE, eval=TRUE, message = FALSE, warning = FALSE}
+DT::datatable(head(linelist_raw, 25), rownames = FALSE, filter="top", options = list(pageLength = 5, scrollX=T), class = 'white-space: nowrap' )
+```
+
+
+If you want, you can view this dataset in a pop-out window the `View()` command in the codebox below, with the name of the dataset in the parentheses. Try typing `View()` and writing `linelist_raw` in the parentheses (note the capital "V"), and click "Run code".  
+
+```{r viewdata, exercise = TRUE}
+
+```
+
+
+```{r viewdata-solution, eval=FALSE}
+View(linelist_raw)
+```
+
 
 
 
@@ -525,12 +556,13 @@ Before we begin cleaning, you must become familiar with the data. Here are some 
 
 Let's try a few examples:  
 
+
 ### Number of columns and rows  
 
 Try running the command `nrow()`, placing the name of the dataset (`linelist_raw`) inside the parentheses.  
 
 ```{r nrow, exercise = TRUE}
-nrow(linelist_raw)
+
 ```
 
 ```{r nrow-check}
@@ -554,7 +586,7 @@ For example, the analyze the column `bmi` (body mass index) you would run the co
 Now you try - write the command to print a summary of the numeric column `age`:  
 
 ```{r summary, exercise = TRUE}
-summary()
+
 ```
 
 ```{r summary-check}
@@ -593,8 +625,8 @@ quiz(caption = "Quiz - Summary of a numeric column",
 
 Now place the name of the linelist in the `skim()` function and run the code. What content appears?
   
-```{r skim-ex, exercise = TRUE}
-skim()
+```{r skim, exercise = TRUE}
+
 ```
 
 ```{r skim-check}
@@ -677,25 +709,23 @@ As you will type column names often, they should should be "clean" and simple in
 *   Similar style nomenclature (e.g. all date columns named like **date_**onset, **date_**report, **date_**death, ...)
 
 `r emo::ji("cross mark")` `weight (in kilograms)`  
-`r emo::ji("cross mark")` `exposure#1`
+`r emo::ji("cross mark")` `exposure#1`  
 `r emo::ji("cross mark")` `age>5`  
 `r emo::ji("cross mark")` `onset date` and `day of infection` and `reported`  
 
 `r emo::ji("check")` `wt_kg`  
-`r emo::ji("check")` `exp1` 
+`r emo::ji("check")` `exp1`  
 `r emo::ji("check")` `age_over5`  
 `r emo::ji("check")` `date_onset` and `date_inf` and `date_report`  
 
 
-These are often not what real, raw, data and linelists look like, luckily R has a set of very handy and easy to use tools to clean and standardize column names.
-
-We begin by looking at the dataset using the `names()` function:  
+We begin by looking at the column names of our `linelist_raw` dataset by using the `names()` function:  
 
 ```{r, echo = T, eval = T}
 names(linelist_raw)
 ```
 
-We can see that there are numerous violations of this clean syntax. We have names with spaces (`onset date`), different naming patterns for dates (`onset date` vs `date of report`), and names with special characters (`wt (kg)`).  
+We can see that there are numerous violations of this clean syntax. We have names with spaces (`onset date`), different naming patterns for dates (`onset date` vs `date of report`), and names with special characters such as `wt (kg)`.  
 
 ```{r rhetorical1, echo = FALSE}
 question_text(
@@ -726,7 +756,9 @@ Now that you have reviewed the data, you can begin to build a "pipe chain" in yo
 
 A "pipe chain" refers to the use of the "pipe" operator `%>%` to link together several operations for altering a dataset (such as keeping certain rows or column, recoding values, de-duplicating, adding new columns, etc.).  
 
-We "pass" or "pipe" the data frame from one function to the next. **It can be helpful to think of the pipe operator `%>%` as telling the computer "and then" between your functions.** 
+We "pass" or "pipe" the data frame from one function to the next. **It can be helpful to think of the pipe operator `%>%` as telling the computer "and then" between your functions.**  
+
+The below graphic conveys the idea of a dataset becoming more and more clean/standard, step-by-step.  
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "50%"}
 knitr::include_graphics("images/cleaning.png")
@@ -790,23 +822,23 @@ This was a very simple example to practice thinking about combining a sequence o
 
 ### Begin the cleaning pipe chain  
 
-We begin the cleaning pipe chain like this:    
+Below we will guide you though the first steps of building your pipe chain command:    
 
-1) Create a name for your "clean" data frame, e.g. `linelist`  
+1) Begin by writing the name for your "clean" data frame, e.g. `linelist`  
 
 ```{r, echo=TRUE, eval=FALSE}
 linelist
 ```
 
-2) Use the assignment operator `<-` to assign it the value of the "raw" data frame (`linelist_raw`)  
+2) To the right, write the assignment operator `<-` to assign this object the value of the "raw" data frame (`linelist_raw`)  
 
 ```{r, echo=TRUE, eval=FALSE}
 linelist <- linelist_raw
 ```
 
-3) Add a pipe to the right side, and the first cleaning function below
+3) Now add a "pipe" to the right side, and the first cleaning function below
 
-*The below command takes `linelist_raw`, cleans it's column names with `clean_names()`, and stores the result as `linelist`
+*The below command takes `linelist_raw`, cleans it's column names with `clean_names()`, and stores the result as `linelist`*  
 
 ```{r, echo=TRUE, eval=FALSE}
 linelist <- linelist_raw %>% 
@@ -831,7 +863,7 @@ linelist <- linelist_raw %>%    # create clean linelist
             filter(age > 10)    # keep only rows with age greater than 10  
 ```
 
-The placement of new lines and spaces in R does not impact the code execution, but can impact how easy it is to read the code. The default spacing will look more like this:  
+The placement of new lines and spaces in R does not impact the code execution, but can impact how easy it is to read the code. The default indentations will look more like this:  
 
 ```{r, echo=TRUE, eval=FALSE}
 linelist <- linelist_raw %>%   # create clean linelist
@@ -877,14 +909,8 @@ In addition, note that:
 
 Do you remember the column names in the "raw" data frame `linelist_raw`?  
 
-```{r, echo=TRUE, eval=FALSE}
+```{r, echo=TRUE, eval=TRUE}
 names(linelist_raw)
-```
-
-Another way to write the same command, is to pipe `surv_raw` into the function `names()`.  
-
-```{r, echo=T, eval=F}
-linelist_raw %>% names()
 ```
 
 **In the codebox below, begin your pipe chain by piping the `linelist_raw` data frame to the `clean_names()` function, storing the result as `linelist`.**  
@@ -950,23 +976,22 @@ You can see that this has done a lot of the work for us, replacing spaces with "
 
 ### Manual column name cleaning  
 
-To finish cleaning our column names, we also want similar columns to have similar style nomenclature. For example, the date columns should all begin with **date_** so they sort and are easily referencable together in later commands.  
+To finish cleaning our column names, we also want similar columns to have similar style nomenclature. For example, the date columns should all begin with **date_** so they sort and can be easily referenced together in later commands.  
 
 Manual name cleaning can be done through the function `rename()` from the {dplyr} package as part of the pipe chain. Column "headers" in R are called "names" - that is an easy way to remember the `rename()` function.  
 
-The `rename()` function allows you to specify a NEW column name, and the old column name with the syntax `NEW = OLD`. Multiple changes can be separated by commas, within the `recode()` parentheses.  
+The `rename()` function allows you to specify a NEW column name, and the old column name with the syntax NEW = OLD. Multiple changes can be separated by commas, all within the parentheses.  
 
-Below, `rename()` is added to the pipe chain after `clean_names()` (with a pipe operator `%>%`). The column name `onset_date` is changed to `date_onset`, and the column `date_of_report` is changed to `date_report`.  
+Below, `rename()` is added to the pipe chain after `clean_names()` (with a pipe operator `%>%`). Inside the parentheses, the column name `onset_date` is changed to `date_onset`, and the column `date_of_report` is changed to `date_report`.  
 
 ```{r, echo = T, eval = FALSE}
 linelist %>%
-  
   clean_names() %>%
-         
-         # New name   # Old name
   rename(date_onset = onset_date,
          date_report = date_of_report)
 ```
+
+Note that the "old" names are the names *as cleaned by the `clean_names()` function*. Hence they have underscores instead of spaces.  
 
 
 ```{r quiz0}
@@ -977,11 +1002,33 @@ quiz(
     answer("names(aches = malaise)", message = "No, the function names() just prints the names, it does not allow editing."),
     answer("rename(malaise = aches)", correct = TRUE),
     allow_retry = TRUE
+  ),
+    question("Which of these column names follows a clean syntax?",
+    answer("date hospitalisation", message = "No spaces!"),
+    answer("date_of_patient_hospitalisation", message = "This is a really long name..."),
+    answer("date@hospitalisation", message = "No special characters!"),
+    answer("date_hosp", correct = TRUE, message = "Yes, short and concise with no spaces or special characters."),
+    allow_retry = TRUE
+  ),
+  question("Which of these functions can be used to rename columns?",
+           answer("rename()", correct = TRUE),
+           answer("clean_names()", correct = TRUE),
+           answer("head()"),
+           answer("select()", correct = TRUE),
+    allow_retry = TRUE
+           ),
+  question("Why is it useful to follow a similar style nomenclature (all date columns starting *date_*) for column names?",
+    answer("It looks good when you output tables and figures"),
+    answer("It helps us find relevant columns and makes omissions/errors less likely", correct = TRUE),
+    answer("R is very inflexible and only allows certain combinations of words"),
+    answer("It allows us to sort the dataset by alphabetical order"),
+    allow_retry = TRUE
   )
 )
 ```
 
-Note that the "old" names are the names *as cleaned by the `clean_names()` function*. Hence they have underscores instead of spaces.  
+
+### Renaming exercise  
 
 **In the codebox below, can you add a `rename()` command that does the following:**  
 
@@ -1026,7 +1073,7 @@ linelist <- linelist_raw %>%
 ```{r rename-check}
   grade_this({
     # Automatically pass if .result equal to .solution
-    pass_if_equal(message =  "Excellent, you have cleaned the dataset and subset to the columns you want")
+    pass_if_equal(message =  "Excellent, you have cleaned the dataset as expected!")
     # Default to failing grade with feedback
     fail()
   })
@@ -1042,6 +1089,812 @@ names(linelist)
 
 
 
+## Printing vs. assignment commands  
+
+It is worth pausing a moment to ensure that you understand the difference between an R command that *prints* an output, as compared to a command that *makes an assignment*.  
+
+**The difference is the presence or absence of the assignment operator `<-`**  
+
+If the assignment operator is present in a command, **no output is printed**, like in these three examples:  
+
+```{r, eval=FALSE, echo=TRUE}
+# import the data and assigns it to the name linelist_raw
+linelist_raw <- import(here("data", "linelist.xlsx"))
+```
+
+```{r, eval=FALSE, echo=TRUE}
+# cleans raw data, assigns the result to the clean linelist
+linelist <- linelist_raw %>% 
+  clean_names() %>% 
+  rename(date_onset = onset_date,
+         date_report = date_of_report,
+         district_res = adm3_name_res,
+         district_det = adm3_name_det) 
+```
+
+```{r, eval=FALSE, echo=TRUE}
+# creates a new data frame of cases under age 18
+cases_under18 <- linelist %>% 
+  filter(age < 18)
+```
+
+In contrast, the following commands will *print* the output only (*not* save any changes), because there is no assignment operator:  
+
+```{r, eval=TRUE, echo=TRUE}
+# print the current column names of linelist
+names(linelist)
+```
+
+```{r, eval=TRUE, echo=TRUE}
+# modify linelist to show only certain rows and columns
+# print the result
+# note: linelist dataset is NOT permanently changed
+linelist %>% 
+  select(case_id, age, gender, case_def) %>% 
+  filter(age > 65)
+```
+
+
+In particular, note this last example. The pipe operator is used to modify the `linelist` object, but the result is printed and there are no lasting changes made to the `linelist` data frame.  
+
+
+
+
+
+
+
+
+
+## Select columns  
+
+
+The `select()` function is versatile and used to:  
+
+* Keep columns  
+* Drop columns  
+* Re-arrange columns  
+
+
+### Select columns to keep  
+
+The primary purpose of `select()` is to indicate which columns to keep in the dataset.  
+
+Any column name that is not included in the parentheses will be dropped. The command below takes the partially-clean `linelist` data frame and selects only a few columns, printing (not saving) the result.  
+
+```{r, echo=T, eval=TRUE}
+linelist %>% 
+  select(case_def, age, gender)
+```
+
+What did you notice about the new order of the columns? *`select()` also re-orders columns*.  
+
+
+### Drop columns by name  
+
+Use a minus symbol ( - ) to drop a column by name - all other columns are retained.  
+
+```{r, echo=T, eval=F}
+# remove a column by name
+select(-case_def)
+```
+
+Try dropping multiple columns by wrapping all their names in a vector with `c()` - this applies the negative sign to all of them. We learned about the {base} function `c()` in the previous tutorial, which stands for "concatenate". Here it is used to create a vector of column names and the - minus sign is applied to all of them.  
+
+```{r, echo=T, eval=F}
+# removes these three columns
+select(-c(case_def, district_det, age))
+
+# an equivalent command to above
+select(-case_def, -district_det, -age)
+```
+
+
+It may be taxing to list every column individually. Instead you can use "tidyselect" helper functions:  
+
+For example, you can list some columns to move them to the beginning (left) of the data frame. Then write `everything()` to include all the other columns in their original order (note the empty parentheses at the end of `everything()`).  
+
+```{r, echo=TRUE, eval=TRUE}
+# move some columns to front (left) of data frame
+linelist %>% 
+  select(lat, lon, everything())
+```
+
+Some other "tidyselect" helpers:  
+
+* `last_col()` - the last column  
+* `where()` - applies a function to all columns and selects those which are true  
+  * example: `select(where(is.numeric))`  
+  * This would select all columns where the class is numeric  
+* `contains()` - columns containing a character string that you provide  
+  * example: `select(contains("time"))`  
+* `starts_with()` and `ends_with()`- matches to a specified prefix  
+  * example: `select(starts_with("date_"))`  
+* `any_of()` - matches if the column exists, but returns no error if it is not found  
+  * example: `select(any_of(date_onset, date_death, cardiac_arrest))`  
+
+Read more about these helpers in this [Epi R Handbook chapter](https://epirhandbook.com/en/cleaning-data-and-core-functions.html#clean_tidyselect).  
+
+You can also use a colon ( : ) to keep the two named columns and all those in between.  
+
+```{r, echo=T, eval=F}
+# keeps fever, vomit, and the columns in between them 
+linelist %>% 
+  select(fever:vomit)
+
+# selects columns 1 though 5
+linelist %>% 
+  select(1:5)
+```
+
+
+
+
+`r fontawesome::fa("terminal", fill = "black")` Now time to code! In the codebox below, add a command to your pipe chain that removes the column `row_num` from the dataset. Remember because this command has the `<-` operator there will be no output. Check you result with the "Submit answer" button.  
+
+
+```{r select, exercise=TRUE}
+linelist <- linelist_raw %>% 
+  clean_names() %>% 
+  rename(date_onset = onset_date,
+         date_report = date_of_report,
+         district_res = adm3_name_res,
+         district_det = adm3_name_det)
+```
+
+```{r select-hint}
+Place a pipe operator after the close of rename() and on a new line begin your select() command
+```
+
+```{r select-hint-2}
+Remove the row_num column with a minus symbol
+```
+
+
+```{r select-hint-3}
+select(-row_num)
+```
+
+```{r select-solution, eval=FALSE}
+linelist <- linelist_raw %>% 
+  clean_names() %>% 
+  rename(date_onset = onset_date,
+         date_report = date_of_report,
+         district_res = adm3_name_res,
+         district_det = adm3_name_det) %>% 
+  select(-row_num)
+```
+
+```{r select-check}
+  grade_this({
+    # Automatically pass if .result equal to .solution
+    pass_if_equal(message =  "Excellent, you have cleaned the dataset and subset to the columns you want")
+    # Default to failing grade with feedback
+    fail()
+  })
+```
+
+
+```{r, echo=FALSE, eval=TRUE}
+# update the current "demo" data frame
+demo <- linelist_raw %>% 
+  clean_names() %>% 
+  rename(date_onset = onset_date,
+         date_report = date_of_report,
+         district_res = adm3_name_res,
+         district_det = adm3_name_det) %>% 
+  select(-row_num)
+```
+
+
+
+Just for practice, can you write a command that *prints* the dataset `linelist`, but with only `case_id` and all the "date" columns
+
+```{r startswith, exercise = TRUE}
+
+```
+
+```{r startswith-hint}
+start with the linelist, then pipe to select()
+```
+
+```{r startswith-hint-2}
+Within select() write case_id, then use `starts_with()` and then the `everything()` helper function
+```
+
+```{r startswith-check}
+  grade_this({
+    # Automatically pass if .result equal to .solution
+    pass_if_equal(message = "You have correctly linked the functions in order and displayed the names of the cleaned dataset, good work!")
+    # Default to failing grade with feedback
+    fail()
+  })
+```
+
+```{r startswith-solution}
+linelist %>%
+  select(case_id, starts_with("date_"), everything())
+```
+
+
+
+
+
+
+
+
+## Column creation and transformation
+
+Creating new columns and transforming existing ones is easily done in R using the `mutate()` function from the {dplyr} package.  
+
+`mutate()` uses the syntax NEW = TRANSFORMATION inside its parentheses. Let's show you a few examples:  
+
+
+### Create a new, simple column  
+
+The first thing to type within the parentheses is the *name of the column that you want to create or transform*.  
+
+In perhaps the most simple example, the command below could be added to your pipe chain, and would create a new column called `new_col` where each row has the value of 10.  
+
+```{r eval = F, echo = T}
+mutate(new_col = 10)
+```
+
+However more often, we want the value in each row to reference the values in other columns, for that particular row. This can be done on the right side of the equals sign. For example, to calculate the Body Mass Index (BMI) we can use the formula BMI = kg/m^2 using the column `ht_cm` and `wt_kg` through:  
+
+The command below begins with the cleaned `linelist`, uses `mutate()` to create the new column `bmi`, which will appear on the far right side of the data frame. To make it easier for you to see the new column, we then select only the three columns of interest before printing.  
+
+```{r eval = T, echo = T}
+linelist %>%                                   # start with the linelist
+  mutate(bmi = wt_kg / (ht_cm / 100) ^ 2) %>%  # create new column bmi
+  select(wt_kg, ht_cm, bmi)                    # print only a few columns
+```
+
+
+```{r rhetorical2, echo = FALSE}
+question_text(
+  "Can you think of a reason why we would create a new column in R, rather than in the CSV or Excel?",
+  answer_fn(function(value) {
+    if (grepl(paste(letters, collapse = "|"), value)) {
+      correct("")
+    }
+  }, )
+)
+```
+
+
+```{r quiz2}
+quiz(
+  question("Which function can be used to create new columns?",
+    answer("select()"),
+    answer("mutate()", correct = TRUE),
+    answer("rename()"),
+    answer("clean_names()"),
+    allow_retry = TRUE
+  ))
+```
+
+
+
+### Changing existing columns  
+
+
+`mutate()` can also be used on existing columns. This is often to modify them in some way, which can also be thought of as "re-defining" the values in the column.  
+
+The right side of the `mutate()` equals sign is often a *function*. The function will look at values in each row, and return some output to the existing/new column based on those other values.  
+
+> mutate(**column name** = *a function* used to create/modify the column's values) 
+
+The function `ifelse()` is a simple, flexible tool that evaluates a logical statement for each row in the data frame, and provides either one value or another. It has the following arguments:  
+
+1) `test = ` Provide a logical statement that evaluates to either `TRUE` or `FALSE` for each row  
+2) `yes = `  Provide what should be written in the column for this row, if the statement evaluates to `TRUE`  
+3) `no = `   Provide what should be written in the column for this row, if the statement evaluates to `FALSE`  
+
+
+#### Cleaning negative weights  
+
+```{r, eval=FALSE, echo=TRUE}
+summary(linelist$wt_kg)
+```
+
+```{r, eval=TRUE, echo=FALSE}
+demo <- linelist_raw %>%
+  clean_names() %>%
+  rename(date_onset = onset_date)
+
+summary(demo$wt_kg)
+```
+
+If we look at the values of `linelist` in its current state, there are some weights in the column `wt_kg` that are negative - clearly some error in the data entry. **We want to convert negative weight values to `NA` (R's symbol for "missing").**  
+
+Here is a `mutate()` command that is modifying the existing column `wt_kg`. If the value in a row is negative, the value is changed to `NA`, otherwise it stays as the original value for that row.  
+
+```{r, echo=TRUE, eval=FALSE}
+mutate(wt_kg = ifelse(test = wt_kg < 0, yes = NA, no = wt_kg))
+```
+
+You can also write this command vertically, if it is easier for you to read:  
+
+```{r, echo=TRUE, eval=FALSE}
+mutate(wt_kg = ifelse(test = wt_kg < 0,
+                      yes = NA,
+                      no = wt_kg))
+```
+
+
+**Now add this `mutate()` command to the bottom of the pipe chain, so that it is properly recorded in our sequence of steps.**
+
+```{r mutate-wt, exercise=TRUE}
+linelist <- linelist_raw %>% 
+  clean_names() %>% 
+  rename(date_onset = onset_date,
+         date_report = date_of_report,
+         district_res = adm3_name_res,
+         district_det = adm3_name_det) %>% 
+  select(-row_num)
+```
+
+```{r mutate-wt-hint}
+Place a pipe operator after the close of select() and on a new line begin your mutate() command
+```
+
+```{r mutate-wt-hint-2}
+Within the mutate() write the name of the column to change, then the ifelse() function
+```
+
+
+```{r mutate-wt-hint-3}
+mutate(wt_kg = ifelse(test = wt_kg < 0, yes = NA, no = wt_kg))
+```
+
+```{r mutate-wt-solution, eval=FALSE}
+linelist <- linelist_raw %>%
+            clean_names() %>% 
+            rename(date_onset = onset_date,
+                   date_report = date_of_report,
+                   district_res = adm3_name_res,
+                   district_det = adm3_name_det) %>% 
+            select(-row_num) %>% 
+            mutate(wt_kg = ifelse(test = wt_kg < 0, yes = NA, no = wt_kg))
+```
+
+```{r mutate-wt-check}
+  grade_this({
+    # Automatically pass if .result equal to .solution
+    pass_if_equal(message =  "Excellent, you have cleaned column wt_kg as expected.")
+    # Default to failing grade with feedback
+    fail()
+  })
+```
+
+Now we can look at that `summary()` command again, and see that the minimum value is a positive number, and there are now a few `NA` values.  
+
+```{r, eval=TRUE, echo=TRUE}
+summary(linelist$wt_kg)
+```
+
+```{r, echo=FALSE, eval=TRUE}
+# update the current "demo" data frame
+demo <- linelist_raw %>%
+            clean_names() %>% 
+            rename(date_onset = onset_date,
+                   date_report = date_of_report,
+                   district_res = adm3_name_res,
+                   district_det = adm3_name_det) %>% 
+            select(-row_num) %>% 
+            mutate(wt_kg = ifelse(test = wt_kg < 0, yes = NA, no = wt_kg))
+```
+
+
+
+### Changing column class    
+
+Each column in a data frame has a "class". In fact, each object in R has a "class" (e.g. a "data frame" is a class as well). But most often we are concerned with the class of columns, so that their values are handled by R appropriately.  
+
+As a reminder, common classes of columns include:  
+
+* "Character" - these are words, with the values written within quotation marks  
+* "Numeric" - Numbers that can include decimal places  
+* "Integer" - Numbers that can only be whole numbers (no decimals)  
+* "Date" - Recognized by R as a date  
+* "Logical" - The values are either `TRUE` or `FALSE`  
+
+One very common task is to convert the "class" of a column from "character" to "Date", so that its date values are properly recognized by R, enabling the creation of epidemic curves, date calculations, etc.  
+
+The column `date_onset` is currently recognized as "character" by R, meaning that R is thinking about "10/20/2014" as simply a "word" - not as meaning any particular date.    
+
+```{r, eval=FALSE, echo=TRUE}
+class(linelist$date_onset)
+```
+
+```{r, eval=TRUE, echo=FALSE}
+class(demo$date_onset)
+```
+
+Dates in R are a significant topic and are covered in depth in this Epi R Handbook [chapter](https://epirhandbook.com/en/working-with-dates.html), but we will give an overview here.  
+
+First, we need to understand **how the date is *currently written* in the data before we make the change**.  
+
+```{r, eval=FALSE, echo=TRUE}
+linelist
+```
+
+```{r, eval=TRUE, echo=FALSE}
+demo
+```
+
+```{r quiz-date-format-raw}
+quiz(caption = "Quiz - raw date format",
+  question("Which format is date_onset??",
+    allow_retry = T,
+    answer("YYYY-MM-DD"),
+    answer("DD/MM/YYYY"),
+    answer("MM/DD/YYYY", correct = T)
+  )
+)
+```
+
+Then, within a `mutate()` command, we use one of the 3 {lubridate} functions below to transform the column to class "Date".  
+
+* `ymd()` - if the *current* format is Year Month Day
+* `mdy()` - if the *current* format is Month Day Year  
+* `dmy()` - if the *current* format is Day Month Year  
+
+
+**The reason for this is simple**: if we try to tell R to convert "02/03/2014" to a date, *it will not know whether the date is 3rd of February, or 2nd of March*. We have to tell R the *current* (old) format.  
+
+These {lubridate} functions are very forgiving: it does not matter the separator between the date parts, e.g. - / or space, it also does not matter if month is written as 01, Jan, or January:  
+
+The `ymd()` function converts character values to date class that are written as: year, month, day.  
+
+```{r, echo=TRUE}
+ymd("2020-10-11") 
+ymd("20201011")
+```
+
+
+The `mdy()` does the same but for values written as month, day, year.  
+
+```{r, echo=TRUE}
+mdy("Oct 11 2020")
+mdy("10/11/2020") 
+```
+
+and `dmy()` for values written as day, month, year  
+
+```{r, echo=TRUE}
+dmy("11 October 2020") 
+dmy("11/10/2020")
+```
+
+
+Once R converts the column to dates, it will display it in the data in the "standard" date format YYYY-MM-DD. **In ALL of the above commands, the *outcome* is values in date class that display as YYYY-MM-DD.**  
+
+```{r quiz-date-format}
+quiz(caption = "Quiz - date format",
+  question("Which function should be used to convert the column date_onset?",
+    allow_retry = T,
+    answer("ymd()"),
+    answer("dmy()"),
+    answer("mdy()", correct = T)
+  )
+)
+```
+
+Thus, the command to add to our pipe chain to modify the column `date_onset` to be converted to class "date" would look like this:  
+
+```{r, eval = F, echo = T}
+mutate(date_onset = mdy(date_onset))
+```
+
+
+Above, the code is in effect saying: "change (mutate) the values in the `date_onset` column, such that they become the current `date_onset` column as interpreted by the function `mdy()`."  
+
+**Now add two `mutate()` commands to the pipe chain, that convert `date_onset` and `date_report` to class "date".**  
+
+```{r mutate-date, exercise=TRUE}
+linelist <- linelist_raw %>% 
+  clean_names() %>% 
+  rename(date_onset = onset_date,
+         date_report = date_of_report,
+         district_res = adm3_name_res,
+         district_det = adm3_name_det) %>% 
+  select(-row_num) %>% 
+  mutate(wt_kg = ifelse(test = wt_kg < 0, yes = NA, no = wt_kg))
+```
+
+```{r mutate-date-hint}
+Add a pipe operator and begin with a new mutate() command on a new line
+```
+
+```{r mutate-date-hint-2}
+Within the mutate() write the name of the column to change, then the date conversion function, wrapped around the column name
+```
+
+```{r mutate-date-hint-3}
+mutate(date_onset = mdy(date_onset)) %>% 
+mutate(date_report = mdy(date_report))
+```
+
+```{r mutate-date-solution, eval=FALSE}
+linelist <- linelist_raw %>% 
+  clean_names() %>% 
+  rename(date_onset = onset_date,
+         date_report = date_of_report,
+         district_res = adm3_name_res,
+         district_det = adm3_name_det) %>% 
+  select(-row_num) %>% 
+  mutate(wt_kg = ifelse(test = wt_kg < 0, yes = NA, no = wt_kg)) %>% 
+  mutate(date_onset = mdy(date_onset)) %>% 
+  mutate(date_report = mdy(date_report))
+```
+
+```{r mutate-date-check}
+  grade_this({
+    # Automatically pass if .result equal to .solution
+    pass_if_equal(message =  "Excellent, you have cleaned the dataset as expected!")
+    # Default to failing grade with feedback
+    fail()
+  })
+```
+
+
+
+Now we can inspect the date column, and use it in plotting functions like a continuous variable. Previously, as class character, a plot like the one created below would not have been possible.  
+
+We give you this code below not to learn plotting, but simply to see the outcome. You will learn how to make plots with {ggplot2} later in the course.  
+
+```{r, echo=TRUE, eval=TRUE, warning=F, message=F}
+# plot a histogram of dates using the cleaned dataset and date column
+ggplot(data = linelist, mapping = aes(x = date_onset))+
+  geom_histogram()
+
+```
+
+
+```{r quiz-dates}
+quiz(caption = "Quiz - Date",
+  question("In the most recent weeks, what is the apparent trend in the number of reported cases?",
+    allow_retry = T,
+    answer("Increasing"),
+    answer("Decreasing", correct = T)
+  )
+)
+```
+
+
+You can use the function `as.character()` to convert to class "character", `as.numeric()` to convert to class "numeric", and there is also a function `as.Date()` although we recommend the approach above to convert to "date" if you are just now learning R.  
+
+
+
+
+
+
+
+
+### Coding style  
+
+It is worth pointing out that you can combine multiple mutate statements into one `mutate()` command. Simply separate the statements by commas.  
+
+Our cleaning pipe chain currently has 3 mutate commands at the end, separated by pipe operators.  
+
+```{r, eval=FALSE}
+linelist <- linelist_raw %>% 
+  clean_names() %>% 
+  rename(date_onset = onset_date,
+         date_report = date_of_report,
+         district_res = adm3_name_res,
+         district_det = adm3_name_det) %>% 
+  select(-row_num) %>% 
+  mutate(wt_kg = ifelse(test = wt_kg < 0, yes = NA, no = wt_kg)) %>% 
+  mutate(date_onset = mdy(date_onset)) %>% 
+  mutate(date_report = mdy(date_report))
+```
+
+This can also be written as:  
+
+```{r, eval=FALSE}
+linelist <- linelist_raw %>% 
+  clean_names() %>% 
+  rename(date_onset = onset_date,
+         date_report = date_of_report,
+         district_res = adm3_name_res,
+         district_det = adm3_name_det) %>% 
+  select(-row_num) %>% 
+  mutate(wt_kg = ifelse(test = wt_kg < 0, yes = NA, no = wt_kg), 
+         date_onset = mdy(date_onset),
+         date_report = mdy(date_report))
+```
+
+If you are just learning R, you may choose to write distinct `mutate()` commands for each step, to avoid accidentally making a mistake (e.g. forgetting a comma). Both approaches will work. Do remember though the order of events - it may be to your advantage to have a few `mutate()` commands in your chain, if you need to do other steps in between.  
+
+
+
+#### Be nice to your future readers  
+
+While we are on the topic of style for pipe chains, remember that if writing a proper R script it is best to thoroughly comment your code for future readers (including yourself!):  
+
+
+```{r, eval=FALSE}
+linelist <- linelist_raw %>% 
+  
+  # standardize column syntax
+  clean_names() %>% 
+  
+  # manually rename columns
+  rename(
+    date_onset = onset_date,            # list date first
+    date_report = date_of_report,       # standardize
+    district_res = adm3_name_res,       # simplify
+    district_det = adm3_name_det) %>%   # simplify
+  
+  # remove unnecessary column
+  select(-row_num) %>% 
+  
+  # clean existing columns
+  mutate(
+    
+    # clean weight
+    wt_kg = ifelse(
+      test = wt_kg < 0,    # if weight is negative
+      yes = NA,            # convert to missing
+      no = wt_kg),         # else keep original value
+    
+    # clean date of onset
+    date_onset = mdy(date_onset),   # convert to date
+    
+    # clean date of report
+    date_report = mdy(date_report)) # convert to date
+```
+
+
+Vertical space is your ally! It makes it much easier to read and understand code.  
+
+
+
+
+## Deduplication  
+
+
+The function `distinct()` from the package {dplyr} is useful for quick de-duplication of records.  
+
+If any rows are 100% identical (all columns), then `distinct()` will keep only one of them.  
+
+`distinct()` can also be used in more nuanced ways, such as to only consider certain columns when evaluating duplicates (e.g. rows that have the same age, gender, and first name). You can read in its [documentation](https://dplyr.tidyverse.org/reference/distinct.html), and in the [Epi R Handbook cleaning chapter](https://epirhandbook.com/en/cleaning-data-and-core-functions.html#deduplication). In fact, there is an entire chapter of the Epi R Handbook dedicated to [de-duplication](https://epirhandbook.com/en/de-duplication.html) that we encourage you to read if you do a lot of record de-duplication.   
+
+
+Below, we add a simple, empty `distinct()` command to our cleaning pipe chain, to deduplicate rows that are 100% identical:  
+
+
+```{r, echo = T, eval = T}
+linelist <- linelist_raw %>% 
+  clean_names() %>% 
+  rename(date_onset = onset_date,
+         date_report = date_of_report,
+         district_res = adm3_name_res,
+         district_det = adm3_name_det) %>% 
+  select(-row_num) %>% 
+  mutate(wt_kg = ifelse(test = wt_kg < 0, yes = NA, no = wt_kg)) %>% 
+  mutate(date_onset = mdy(date_onset)) %>% 
+  mutate(date_report = mdy(date_report)) %>% 
+  distinct()
+```
+
+```{r, echo = FALSE, eval = TRUE}
+demo <- linelist_raw %>% 
+  clean_names() %>% 
+  rename(date_onset = onset_date,
+         date_report = date_of_report,
+         district_res = adm3_name_res,
+         district_det = adm3_name_det) %>% 
+  select(-row_num) %>% 
+  mutate(wt_kg = ifelse(test = wt_kg < 0, yes = NA, no = wt_kg)) %>% 
+  mutate(date_onset = mdy(date_onset)) %>% 
+  mutate(date_report = mdy(date_report)) %>% 
+  distinct()
+```
+
+```{r, eval = FALSE, echo=TRUE}
+nrow(linelist)
+```
+
+```{r, eval = TRUE, echo=FALSE}
+nrow(demo)
+```
+
+As you can see, there are `r nrow(linelist_raw) - nrow(demo)` rows that were dropped from the original `r nrow(linelist_raw)`.  
+
+
+
+
+
+
+
+
+## Prioritizing values  
+
+
+The `coalesce()` function from {dplyr} allows us to "fill in" missing values with the first available value in an order you specify. In this way, you can say "use X if it is present, otherwise use Y". This can be very helpful in public health datasets.  
+ 
+Here is a mini-example using a data frame called `case_locations`:  
+
+```{r, echo=TRUE, eval=TRUE}
+# create the demo dataset
+case_locations <- data.frame(
+  detection = c("Ankara", "Gaziantep", NA,  "Ankara"),
+  residence = c("Istanbul", "Gaziantep", "Istanbul", NA))
+
+# print the demo dataset
+case_locations
+```
+
+Let's say that we want to make a GIS map of the cases by city - for the mapping we would prefer to use the city of detection, but some are missing. In those cases we want to use city of residence. If we were to modify the data frame with `mutate()` to add a column called `map_location`, it might look as below.  
+
+We create the column `map_location`, and use `coalesce()` such that the city of detection (if it exists) is prioritized over the city of residence:  
+
+```{r, echo=TRUE, eval=TRUE}
+# re-define case_locations data frame with extra column
+case_locations <- case_locations %>% 
+  mutate(map_location = coalesce(detection, residence))
+
+# print data frame
+case_locations
+```
+
+
+In our `linelist` data frame, we have data on the geographic district the case was detected in (`district_det`), and also on the district of the case's residence (`district_res`). Add a command to our pipe chain using `coalesce()` to create a new column `district` that prioritizes district of detection over district of residence:
+
+
+```{r coalesce, exercise=TRUE}
+linelist <- linelist_raw %>% 
+  clean_names() %>% 
+  rename(date_onset = onset_date,
+         date_report = date_of_report,
+         district_res = adm3_name_res,
+         district_det = adm3_name_det) %>% 
+  select(-row_num) %>% 
+  mutate(wt_kg = ifelse(test = wt_kg < 0, yes = NA, no = wt_kg)) %>% 
+  mutate(date_onset = mdy(date_onset)) %>% 
+  mutate(date_report = mdy(date_report)) %>% 
+  distinct()
+```
+
+```{r coalesce-hint}
+Add a pipe operator and begin with a new mutate() command on a new line
+```
+
+```{r coalesce-hint-2}
+Within the mutate() write the name of the new column, an equals, then the coalesce function
+```
+
+```{r coalesce-hint-3}
+mutate(district = coalesce(district_det, district_res))
+```
+
+```{r coalesce-solution, eval=FALSE}
+linelist <- linelist_raw %>% 
+  clean_names() %>% 
+  rename(date_onset = onset_date,
+         date_report = date_of_report,
+         district_res = adm3_name_res,
+         district_det = adm3_name_det) %>% 
+  select(-row_num) %>% 
+  mutate(wt_kg = ifelse(test = wt_kg < 0, yes = NA, no = wt_kg)) %>% 
+  mutate(date_onset = mdy(date_onset)) %>% 
+  mutate(date_report = mdy(date_report)) %>% 
+  distinct() %>% 
+  mutate(district = coalesce(district_det, district_res))
+
+```
+
+```{r coalesce-check}
+  grade_this({
+    # Automatically pass if .result equal to .solution
+    pass_if_equal(message =  "Excellent, you have cleaned the dataset as expected!")
+    # Default to failing grade with feedback
+    fail()
+  })
+```
 
 
 

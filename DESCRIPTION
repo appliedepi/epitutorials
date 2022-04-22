@@ -13,6 +13,7 @@ Imports:
     dplyr,
     tidyr,
     forcats,
+    lubridate,
     emo (>= 0.0.0.9000),
     flair,
     fontawesome,
