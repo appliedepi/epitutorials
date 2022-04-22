@@ -1261,7 +1261,7 @@ facet_wrap(
 
 Within the `facet_wrap()` function, you can also control the number of columns or rows of plots produced with `ncol = ` and `nrow = `.  
 
-Try editing the below code, which facets the histogram by the column `hospital`:
+Try editing the below code, which facets the histogram by the column `hospital_clean`:
 
 1. Add a "free_y" free y axis
 2. Have only 2 columns of plots
@@ -1273,7 +1273,7 @@ ggplot(
   mapping = aes(x = date_onset)) +
 geom_histogram() +
 facet_wrap(
-  ~hospital,
+  ~hospital_clean,
   ncol = 4)
 ```
 
@@ -1293,7 +1293,7 @@ ggplot(
   mapping = aes(x = date_onset)) +
 geom_histogram(mapping = aes(fill = source)) +
 facet_wrap(
-  ~hospital,
+  ~hospital_clean,
   scales = "free_y",
   ncol = 2)
 ```
@@ -1311,7 +1311,7 @@ ggplot(
   data = linelist,
   mapping = aes(x = date_onset)) +
 geom_histogram(mapping = aes(fill = source)) +
-facet_wrap(hospital ~ gender)
+facet_wrap(hospital_clean ~ gender)
 ```
 
 To improve on this layout you can instead use the `facet_grid()` command:  
@@ -1321,7 +1321,7 @@ ggplot(
   data = linelist,
   mapping = aes(x = date_onset)) +
 geom_histogram(mapping = aes(fill = source)) +
-facet_grid(hospital ~ gender)
+facet_grid(hospital_clean ~ gender)
 ```
 
 ### Drop levels from facets
@@ -1333,14 +1333,14 @@ For ease we can pipe this amended data straight into `ggplot()` rather than savi
 ```{r dropping, echo=T, warning=F, message=F, fig.height=10}
 # begin with the linelist
 linelist %>% 
-   drop_na(gender, hospital) %>%        # drop rows that are missing (NA) gender and hospital 
-   filter(hospital != "Missing") %>%    # drop rows where hospital is "Missing" 
+   drop_na(gender, hospital_clean) %>%  # drop rows that are missing (NA) gender and hospital 
+   filter(hospital_clean != "Missing") %>%    # drop rows where hospital is "Missing" 
 
 # pipe filtered linelist into the ggplot() command
 # note: no data= argument needed
 ggplot(mapping = aes(x = date_onset, fill = source)) +
 geom_histogram() +
-facet_grid(hospital ~ gender)
+facet_grid(hospital_clean ~ gender)
 ```
 
 
@@ -1353,9 +1353,9 @@ ggplot(
   data = linelist,
   mapping = aes(
     x = date_onset,
-    fill = hospital)) +
+    fill = hospital_clean)) +
 geom_histogram() +
-facet_wrap(~hospital) +
+facet_wrap(~hospital_clean) +
 gghighlight()
 
 ```
@@ -2017,7 +2017,7 @@ quiz(
 )
 ```
 
-## Challenge 1
+## Practice  
 
 Now that you have seen all of the basic building blocks of a `ggplot()` we would like you to attempt to build your own visualisation from scratch using the information in the previous sections. Feel free to use any of the aesthetics, geoms, facets and scales in the previous sections and go back to these sections to refresh as you work on this, your code should remain in the window.
 
@@ -2044,9 +2044,8 @@ scale_fill_brewer(palette = "Set2",        # pick a preset color palette
                   na.value = "grey",
                   labels = c("Female", "Male")) +   # Adjust labels to make them clearer  
 scale_x_date(date_breaks = "3 months",     # fix overlapping date labels
-             expand = c(0,0)) +            # no whit space around the plotted area
-scale_y_continuous(expand = c(0,0),           
-                   limits = c(0,200)) +    # set limits for the y-axis scale
+             expand = c(0,0)) +            # no white space around the plotted area
+scale_y_continuous(expand = c(0,0)) +      # no white space around the plotted area
 facet_wrap(~source,                        # wrap by source as we have already used color for gender
            ncol = 1) +                     # one column as we are dealing with wide rather than tall plots
 labs(
@@ -2085,6 +2084,12 @@ quiz(
 )
 
 ```
+
+
+
+
+
+
 ```{r your_plot-plot, eval= T, echo = F, fig.height = 8}
 ggplot(
   data = linelist,
@@ -2096,8 +2101,7 @@ scale_fill_brewer(palette = "Set2",        # pick a preset color palette
                   labels = c("Female", "Male")) +   # Adjust labels to make them clearer  
 scale_x_date(date_breaks = "3 months",     # fix overlapping date labels
              expand = c(0,0)) +            # no whit space around the plotted area
-scale_y_continuous(expand = c(0,0),           
-                   limits = c(0,200)) +    # set limits for the y-axis scale
+scale_y_continuous(expand = c(0,0)) +      # set limits for the y-axis scale
 facet_wrap(~source,                        # wrap by source as we have already used color for gender
            ncol = 1) +                     # one column as we are dealing with wide rather than tall plots
 labs(
@@ -2117,11 +2121,24 @@ theme(legend.position = "bottom",          # move legend to bottom so there is m
 )
 ```
 
-## Part 2
+## End  
 
-To learn more about plotting in **R**, focusing on more complex plotting techniques and common epidemiological plots, check out part 2 of this tutorial. 
 
-For refreshers on what we have covered in this tutorial and more detailed information on **ggplot2** look at the [ggplot basics](https://epirhandbook.com/en/ggplot-basics.html) and [ggplot tips](https://epirhandbook.com/en/ggplot-tips.html) sections of the epiRhandbook. 
+Congratulation on finishing this tutorial!  If you have extra time, consider completing the extra exercises below. Otherwise, we welcome you to advance to the next tutorial in the series. Please also see the tutorial that focuses on more complex plotting techniques and common epidemiological plots.  
 
-Further **ggplot2** resources are plentiful with all of the documentation for individual functions available directly from the [Tidyverse website](https://ggplot2.tidyverse.org/), including a nice [cheat sheet](https://github.com/rstudio/cheatsheets/blob/main/data-visualization-2.1.pdf) which you can print as a simple refresher and reference guide.
+Please consider making a donation to us. We are a nonprofit organization and rely on your contributions to continue supporting frontline epidemiologists around the world.
+
+
+<form target="_blank" action="https://www.paypal.com/donate" method="post" target="_top">
+<input type="hidden" name="hosted_button_id" value="YTEZELC8VBXV6" />
+<input type="image" src="https://github.com/appliedepi/epiRhandbook_eng/raw/master/images/donate_button_long.png" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
+<img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" />
+</form>
+
+
+For refreshers on what we have covered in this tutorial and more detailed information on **ggplot2** look at the [ggplot basics](https://epirhandbook.com/en/ggplot-basics.html) and [ggplot tips](https://epirhandbook.com/en/ggplot-tips.html) sections of the Epi R Handbook.  
+
+Further {ggplot2} resources are plentiful with all of the documentation for individual functions available directly from the [Tidyverse website](https://ggplot2.tidyverse.org/), including a nice [cheat sheet](https://github.com/rstudio/cheatsheets/blob/main/data-visualization-2.1.pdf) which you can print as a simple refresher and reference guide.  
+
+
 
