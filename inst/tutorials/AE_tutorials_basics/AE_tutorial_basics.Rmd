@@ -310,7 +310,7 @@ After completing this tutorial, we recommend you complete our tutorial on "Tidy 
 
 Because this tutorial is self-contained within this window, we will often ask you to look at the first few rows of practice datasets in the format below.  
 
-Below, the dataset `linelist` is displayed. It contains `r nrow(linelist)` rows, but we are only showing the **first 25 rows** now.  
+Below, the dataset `linelist` is displayed. It contains `r nrow(linelist)` rows, but we are only showing the **first 25 rows** now. A "linelist" is a term used in applied epidemiology to refer to a table that contains key information about each case or suspect case in an outbreak. Each row represents one case, and the columns contain variables such as age, sex, date of symptom onset, outcomes, etc.  
 
 * Scroll to the right to see all the columns  
 * Use the numbers buttons in the lower-right to page through the additional available rows (25 rows in this case)  

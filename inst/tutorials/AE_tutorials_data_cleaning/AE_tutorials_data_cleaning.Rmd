@@ -331,7 +331,7 @@ After completing this tutorial, we recommend you complete our tutorial on "Clean
 
 Because this tutorial is self-contained within this window, we will often ask you to look at the first few rows of practice datasets in the format below.  
 
-Below, the dataset `linelist` is displayed. It contains `r nrow(linelist)` rows, but we are only showing the **first 25 rows** now.  
+Below, the dataset `linelist` is displayed. It contains `r nrow(linelist)` rows, but we are only showing the **first 25 rows** now. A "linelist" is a term used in applied epidemiology to refer to a table that contains key information about each case or suspect case in an outbreak. Each row represents one case, and the columns contain variables such as age, sex, date of symptom onset, outcomes, etc.  
 
 * Scroll to the right to see all the columns  
 * Use the numbers buttons in the lower-right to page through the additional available rows (25 rows in this case)  
@@ -1400,7 +1400,7 @@ quiz(
 
 
 
-### Changing existing columns  
+### Using functions to modify columns  
 
 
 `mutate()` can also be used on existing columns. This is often to modify them in some way, which can also be thought of as "re-defining" the values in the column.  
@@ -1411,13 +1411,20 @@ The right side of the `mutate()` equals sign is often a *function*. The function
 
 
 ```{r, results = "asis", echo = FALSE}
-"mutate(column name = a function)" %>%
+"mutate(column name = a function used to create/modify the column's values)" %>%
   flair("column name", color = "deeppink") %>%
   flair("a function", color = "cornflowerblue") %>%
   flair_all(before = "<h4>", after = "</h4>") %>%
   cat()
 ```
 
+The function `ifelse()` is a simple, flexible tool that evaluates a logical statement for each row in the data frame, and provides either one value or another. It has the following arguments:  
+
+1) `test = ` Provide a logical statement that evaluates to either `TRUE` or `FALSE` for each row  
+2) `yes = `  Provide what should be written in the column for this row, if the statement evaluates to `TRUE`  
+3) `no = `   Provide what should be written in the column for this row, if the statement evaluates to `FALSE`  
+
+The `ifelse()` function can be used *within* a `mutate()` command as shown below:  
 
 ```{r mutate, include = F}
 demo %>% 
@@ -1427,19 +1434,15 @@ demo %>%
 ```{r mutate_flair, echo=F}
 decorate("mutate") %>%
   flair("adult", color = "deeppink") %>%
-  flair("ifelse(age >= 18, TRUE, FALSE)", color = "cornflowerblue") %>% 
+  flair("ifelse", color = "cornflowerblue") %>% 
   knit_print.with_flair()
 ```
 
-
-The function `ifelse()` is a simple, flexible tool that evaluates a logical statement for each row in the data frame, and provides either one value or another. It has the following arguments:  
-
-1) `test = ` Provide a logical statement that evaluates to either `TRUE` or `FALSE` for each row  
-2) `yes = `  Provide what should be written in the column for this row, if the statement evaluates to `TRUE`  
-3) `no = `   Provide what should be written in the column for this row, if the statement evaluates to `FALSE`  
+Click to see the new right-most column `adult` that was created by this command. 
 
 
-#### Cleaning negative weights  
+
+### Cleaning negative weights  
 
 ```{r, eval=FALSE, echo=TRUE}
 summary(linelist$wt_kg)
@@ -1532,6 +1535,12 @@ demo <- linelist_raw %>%
             select(-row_num) %>% 
             mutate(wt_kg = ifelse(test = wt_kg < 0, yes = NA, no = wt_kg))
 ```
+
+
+
+
+
+
 
 
 
@@ -2380,7 +2389,88 @@ linelist %>%
 
 
 
-Congratulations! When these commands are added to our cleaning pipe chain, it now looks like this:  
+### Create categories from numeric columns
+
+
+Now that we have cleaned the ages, and have a column `age_years', we want to create age groups. 
+
+There are numerous reasons why you may want to creating groupings of numeric values such ages, lab values, etc. R offers several ways of doing this.
+
+* `age_categories()`, from the {epikit} package  
+* `case_when()` as you have already learned  
+* alternatives such as `cut()` from {base}, or `quantile()` and `ntile()`  
+
+Here we will show what we believe is the easiest of these techniques: `age_categories()`.  
+
+
+### `age_categories()`
+
+The `age_categories()` function easily categorizes and label numeric columns. This function can be applied to non-age numeric variables too. As a bonus, the values in the output column automatically have an intrinsic order, which in R is called being of class "factor".  
+
+Here are the required inputs:
+
+* A numeric vector (a column)
+* A specification of how to create the groups, either:  
+  * The `breakers = ` argument, providing a numeric vector of break points for new groups, OR  
+  * The `lower = `, `upper = `, and `by = ` arguments  
+  
+Here is an example using the `breakers = ` argument. The column `age_cat` is being created, using the `age_categories()` function, from the `age_years` column.  
+
+```{r, echo = T, eval = T}
+linelist <- linelist %>% 
+  mutate(age_cat = age_categories(age_years,  
+      breakers = c(0, 5, 10, 15, 20, 30, 40, 50, 60, 70)))
+
+# Print a table
+linelist %>% tabyl(age_cat)
+```
+
+By default, the break values that you specify are the *lower* bounds, so that the left/lower side is "open" and "inclusive". You may also want to set an upper limit using `ceiling = TRUE`, which will categorize any value above the last breaker as `NA`.  
+
+```{r, echo = T, eval = T}
+linelist <- linelist %>% 
+  mutate(age_cat = age_categories(age_years,
+      breakers = c(0, 5, 10, 15, 20, 30, 40, 50, 60, 70),
+      ceiling = TRUE))
+
+# Print a table
+linelist %>% tabyl(age_cat)
+```
+
+Alternatively, instead of using `breakers = ` you can provide `lower = `, `upper = ` and `by = `. Here we also show how you can adjust how the labels are displayed with `separator = `, for which the default is "-".
+
+```{r, echo = T, eval = T}
+linelist <- linelist %>% 
+  mutate(age_cat = age_categories(age_years,
+      lower = 0,
+      upper = 70,
+      by = 5,
+      separator = " to "))
+
+# Print a table
+linelist %>% tabyl(age_cat)
+```
+
+There are many other variations to this tool, including combining months and years into appropriate categories. You can read more about it, and the other tools mentioned above, in the [age_categories() documentation](https://r4epi.github.io/epikit/) and in the [Data cleaning chapter](https://epirhandbook.com/en/cleaning-data-and-core-functions.html) of the Epi R Handbook. T  
+
+
+
+```{r quiz5}
+quiz(
+  question("Which of these age_categories() specifications would create breaks at 0, 25, 50 and 75?",
+    answer("age_categories(age_years, breakers = c(0, 25, 50, 75))", correct = TRUE),
+    answer("age_categories(age_years, lower = 0, upper = 75, by = 5)", correct = TRUE),
+    answer("age_categories(age_years, breakers = c(0, 25, 50, 75), ceiling = FALSE", correct = TRUE),
+    answer("age_categories(age_years, breakers = 25, lower = 0, upper  = 75)")
+  ))
+```
+
+
+
+
+### Add to pipe chain  
+
+When these last `mutate()` commands are added to our cleaning pipe chain, it looks like this:  
 
 ```{r, echo=TRUE, eval=TRUE}
 linelist <- linelist_raw %>% 
@@ -2416,7 +2506,7 @@ linelist <- linelist_raw %>%
   # de-duplicate, remove rows 100% similar
   distinct() %>% 
   
-  # further recoding and cleaning
+  # further recoding and cleaning of columns
   mutate(
     # prioritize detetion location over residence
     district = coalesce(district_det, district_res),
@@ -2445,14 +2535,20 @@ linelist <- linelist_raw %>%
     
     # create age in years
     age_years = case_when(
-      age_unit == "years"  ~ age,
-      age_unit == "months" ~ age/12,
-      is.na(age_unit)      ~ age),
+      age_unit == "years"  ~ age,    # leave as years
+      age_unit == "months" ~ age/12, # convert months to years
+      is.na(age_unit)      ~ age),   # if age unit missing, assume years
     
     # fix temperatures recorded in Farinheit
     temp = case_when(
       temp > 90 & temp < 120 ~ (temp - 32) * 5 / 9,
-      TRUE                   ~ temp))
+      TRUE                   ~ temp),
+    
+    # make age categories
+    age_cat = age_categories(age_years,
+      lower = 0,
+      upper = 70,
+      by = 5))
 ```
 
 This is long, but it a reproducible and well-documented record of all your cleaning steps. You could send this to a colleague and they could repeat and critique all of your steps. In the end, that makes for better science and more efficient insights!  
@@ -2494,7 +2590,11 @@ demo <- linelist_raw %>%
       is.na(age_unit)      ~ age),
     temp = case_when(
       temp > 90 & temp < 120 ~ (temp - 32) * 5 / 9,
-      TRUE                   ~ temp))
+      TRUE                   ~ temp),
+    age_cat = age_categories(age_years,
+      lower = 0,
+      upper = 70,
+      by = 5))
 ```
 
 

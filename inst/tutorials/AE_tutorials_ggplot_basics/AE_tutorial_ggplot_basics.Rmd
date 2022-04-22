@@ -115,19 +115,19 @@ gradethis::gradethis_setup(
 # }
 # 
 # options(tutorial.event_recorder = recorder_function)
-```
 
-```{r, include=FALSE}
+
 # hide non-exercise code chunks ------------------------------------------------
 knitr::opts_chunk$set(echo = FALSE, fig.align = "center", message = F, warning = F)
-```
 
-```{r, include=FALSE}
+
 # data prep --------------------------------------------------------------------
-linelist_raw <- rio::import(system.file("dat/linelist_raw.xlsx", package = "epitutorials"))
-linelist <- rio::import(system.file("dat/linelist_cleaned.rds", package = "epitutorials"))
+#linelist_raw <- rio::import(system.file("dat/linelist_raw.xlsx", package = "epitutorials"))
+linelist <- rio::import(system.file("dat/tutorial_linelist_cleaned.rds", package = "epitutorials"))
 malaria_counts <- rio::import(system.file("dat/malaria_facility_count_data.rds", package = "epitutorials"))
 ```
+
+
 
 
 
@@ -137,39 +137,38 @@ malaria_counts <- rio::import(system.file("dat/malaria_facility_count_data.rds",
 knitr::include_graphics("images/applied_epi_banner.png", error = F)
 ```
 
-Welcome to the self-paced interactive tutorial course "Introduction to R for applied epidemiologists" offered for free by **[Applied Epi](www.appliedepi.org)**, a nonprofit organization of 150 epidemiologists each with years of ground-level experience in local public health and outbreak response.  
+</br>
 
-This tutorial teaches **visualization of public health data with the ggplot2 R package**. We teach you how to write code to create figures such as epidemic curves, demographic pyramids, and many varieties of bar, line, and scatter plots.  
+#### Welcome to Applied Epi's free self-paced tutorial series
 
+This is the **third** tutorial in the series.  
 
+* **This tutorial teaches**: Introduction to visualization of data using {ggplot2} and public health examples  
+* **Target audience**: Public health practitioners, epidemiologists, clinicians, and researchers who cannot access our live courses  
+* **Format**: R coding is performed *within* this tutorial window  
+* **Offline access**: Follow [these instructions](www.training.appliedepi.org) to download and view offline in your RStudio  
 
+</br>
 
-#### Applied Epi  
-
-
-**[Applied Epi](www.appliedepi.org) is a nonprofit organization that supports frontline public health practitioners through open-source tools, training, and support.**  
-
-Our free [Epidemiologist R Handbook](www.epiRhandbook.com) has helped over **175,000 people** learn R and remains a vital resource for many practitioners.  
-We have built a comprehensive ecosystem of tools, training, and support around this foundation:  
-
+All of our courses welcome beginners who have never coded before, and use examples and solutions for common public health challenges. Here are the differences between these tutorials and our live courses:  
 
 :::: {style="display: flex;"}
 
 ::: {}
-```{r, out.width = "50%", fig.align = "center", echo=F}
-knitr::include_graphics("images/tools_icon.png")
-```
+**These tutorials:**
 
-* **[Epi R Handbook](www.epiRhandbook.com)**
-* **[R packages](https://appliedepi.org/tools/)**
-* **[Situation report templates](https://appliedepi.org/tools/)**
+ 
+* Help you get started with R  
+* R on your computer is **not** required  
+* Help is available at our public [Applied Epi Community](http://community.appliedepi.org) forum  
+
 :::
 
 
 
 
 
-::: {.col data-latex="{0.05\textwidth}"}
+::: {.col data-latex="{0.15\textwidth}"}
 \ 
 <!-- an empty Div (with a white space), serving as
 a column separator -->
@@ -180,7 +179,32 @@ a column separator -->
 
 
 ::: {}
-```{r, out.width = "50%", fig.align = "center", echo=F}
+**Live courses:**  
+
+* A comprehensive curriculum  
+* Use R on your computer (we help with set up)  
+* Immediate support and tips from live instructors with decades of frontline experience  
+
+
+:::
+
+::::
+
+See our [educational philosophy](https://applied-epi-training.netlify.app/educational-approach.html), [live course offerings](www.training.appliedepi.org), and [email us](mailto:contact@appliedepi.org) for tutorial coaching options.  
+
+</br>
+
+#### About Applied Epi^TM^
+
+**[Applied Epi](www.appliedepi.org) is a nonprofit organization that supports frontline public health practitioners through open-source tools, training, and support.** We are a team of 150 epidemiologists and public health practitioners with decades of ground-level experience in local public health and outbreak response.  
+
+Our free [Epidemiologist R Handbook](www.epiRhandbook.com) has helped over **175,000 people** learn R and remains a vital resource for many practitioners. We have built a comprehensive ecosystem of tools, training, and support:  
+
+
+:::: {style="display: flex;"}
+
+::: {}
+```{r, out.width = "65%", fig.align = "center", echo=F}
 knitr::include_graphics("images/teaching_icon.png")
 ```
 
@@ -192,6 +216,30 @@ knitr::include_graphics("images/teaching_icon.png")
 
 
 
+
+::: {.col data-latex="{0.05\textwidth}"}
+\ 
+<!-- an empty Div (with a white space), serving as
+a column separator -->
+:::
+
+
+
+
+
+::: {}
+```{r, out.width = "65%", fig.align = "center", echo=F}
+knitr::include_graphics("images/tools_icon.png")
+```
+
+* **[Epi R Handbook](www.epiRhandbook.com)**
+* **[R packages](https://appliedepi.org/tools/)**
+* **[Situation report templates](https://appliedepi.org/tools/)**
+:::
+
+
+
+
 ::: {.col data-latex="{0.05\textwidth}"}
 \ 
 <!-- an empty Div (with a white space), serving as
@@ -199,7 +247,7 @@ a column separator -->
 :::
 
 ::: {}
-```{r, out.width = "50%", fig.align = "center", echo=F}
+```{r, out.width = "65%", fig.align = "center", echo=F}
 knitr::include_graphics("images/QA_icon.png")
 ```
 
@@ -222,79 +270,209 @@ knitr::include_graphics("images/QA_icon.png")
 
 
 
+</br>
 
-
-
-
-#### Target Audience  
-
-Public health practitioners, applied epidemiologists, clinicians, and researchers seeking to learn R but who do not have access to our *live R courses*. R coding is taught *within* the tutorials, whereas in our live courses we have the flexibility to teaching *in RStudio*.    
-
-These tutorials:  
-
-* Are friendly to people who have never used a programming language before
-* Teach R emphasizing examples, datasets, and challenges commonly faced by applied epidemiologists
-* Are modular so that you can skip to sections most relevant to you
-
-
-
-
-#### Offline / Online
-
-You can access these tutorials offline by following [these instructions] to download our R package {epitutorials}. You will then be able to complete these exercises *within RStudio* offline.  
-
-
-#### Learning goals
-
-In this tutorial you will learn:  
-
-* The basics of data visualization in R with **ggplot2**  
-* The "grammar of graphics" approach to data visualization  
-* How to customize and edit plots to achieve the look you want  
-
-
-#### Accompanying resources
-
-This tutorial draws from chapters of our free [Epidemiologist R handbook](https://epirhandbook.com/en/) such as [ggplot basics](https://www.epirhandbook.com/en/ggplot-basics.html), [ggplot tips](https://www.epirhandbook.com/en/ggplot-tips.html), and [epidemic curves](https://www.epirhandbook.com/en/epidemic-curves.html). The Epi R Handbook has over 50 chapters, has helped over 170,000 people learn R, and is also available for offline use.  
-
-
-#### Acknowledgements  
+#### Acknowledgements and partners  
 
 Authors of this tutorial include:  
 
 * David Jorgensen  
 * Neale Batra  
 
+Funding for this tutorial was provided by Medicins sans frontieres (MSF) / Doctors without Borders and TEPHINET.  
+
+**Click "Next Topic" to move to the next section of the tutorial, or navigate using the Table of Contents on the left.**  
 
 
 
-## Data used  
 
-In this tutorial we will use the following "linelist" of cases from a simulated (fake) Ebola outbreak in Sierra Leone. Please take a few minutes to review the structure and content.  
+## About this tutorial
 
-Use the arrows on the right to scroll through hidden columns. Note that there are "raw" (messy) datasets that mimic problems commonly found in real-life epidemiological datasets availble. As we are focusing on visualization here we will use pre-cleaned data. The data cleaning tutorials cover the processing of raw data to get to this point and we recommend looking through these first
 
-A "linelist" is a term used in applied epidemiology to refer to a table that contains key information about each case or suspect case in an outbreak. Each row represents one case, and the columns contain variables such as age, sex, date of symptom onset, outcomes, etc.
+### Learning objectives
 
-This dataset contains `r nrow(linelist)` rows and `r ncol(linelist)` columns. Below are the first 6 rows:  
+In this tutorial you will learn and practice:  
 
-```{r}
-head(linelist) %>% 
-  knitr::kable()
+* The variety of data visualizations possible with R  
+* The "grammar of graphics" approach to data visualization  
+* The basics of building a data visualization in R with the {ggplot2} package  
+* How to customize and edit plots to achieve the look you want  
+
+
+#### Accompanying resources
+
+This tutorial draws from chapters of our free [Epidemiologist R handbook](https://epirhandbook.com/en/) such as [ggplot basics](https://www.epirhandbook.com/en/ggplot-basics.html), [ggplot tips](https://www.epirhandbook.com/en/ggplot-tips.html), and [epidemic curves](https://www.epirhandbook.com/en/epidemic-curves.html).  
+
+
+#### Next steps  
+
+After completing this tutorial, we recommend you complete our tutorial on "Descriptive tables".  
+
+
+
+
+### Review a dataset  
+
+Because this tutorial is self-contained within this window, we will often ask you to look at the first few rows of practice datasets in the format below.  
+
+Below, the dataset `linelist` is displayed. It contains `r nrow(linelist)` rows, but we are only showing the **first 25 rows** now. A "linelist" is a term used in applied epidemiology to refer to a table that contains key information about each case or suspect case in an outbreak. Each row represents one case, and the columns contain variables such as age, sex, date of symptom onset, outcomes, etc.  
+
+* Scroll to the right to see all the columns  
+* Use the numbers buttons in the lower-right to page through the additional available rows (25 rows in this case)  
+* Click a column name to sort the rows  
+* Filter rows by clicking/typing in the empty box above the column  
+
+```{r, echo=FALSE, eval=TRUE, message = FALSE, warning = FALSE}
+DT::datatable(head(linelist, 25), rownames = FALSE, filter="top", options = list(pageLength = 5, scrollX=T), class = 'white-space: nowrap' )
 ```
 
 
-### Accessing example data
-If you want to practice with this dataset, click to [download the **clean** dataset as an **.rds file**](https://github.com/appliedepi/epirhandbook_eng/raw/master/data/case_linelists/linelist_cleaned.rds). An *.rds file* is an R-specific file type that preserves column classes, which leaves only minimal cleaning to do after importing the data into R.  
+
+### Getting help  
+
+To get help while completing this tutorial:  
+
+1) Look for expandable green helper text  
+2) Look for "hints" and "solutions" above the coding boxes   
+3) Post a question in [Applied Epi Community](www.community.appliedepi.org) in the category for questions about Applied Epi Training  
+
+The the coming tutorial sections we will demonstrate how to use these resources.  
+
+### Helper text  
+
+Here is what the "helper text" will look like. Click on it to expand the text.
+
+<!--
+NOTE: Below is the hint (all within details tags collapsed)
+-->
+<details>
+
+<summary style='text-decoration: underline; color: darkgreen;'>`r fontawesome::fa("lightbulb", fill = "gold")` Click to read more</summary>
+</br>
+
+Here there will be some helpful tips or advice!
+
+
+</br>
+</details>
 
 
 
 
-### Tidy Data
+### Code boxes  
 
-We highly recommend doing our tutorial on [Tidy Data in Applied Epidemiology](www.training.appliedepi.org). Collecting, formatting, and preparing your dataset *before* importing it into R is a critical step!
+This tutorial does not assume that you have R or RStudio working on your computer. Therefore, you can complete coding exercises in these codeboxes within the tutorial. For example:  
 
-We recommend completing our self-paced R tutorials in order, to first learning data cleaning. 
+**Type the following R command in the codebox and press "Submit answer"**. This command will cross-tabulate observations from the dataset `linelist` (displayed above), placing gender in the output table's rows and case definition in the output table's columns.  
+
+```
+tbl_cross(data = linelist, row = gender, col = case_def)
+```
+
+* Press "Hints" to see hints or tips  
+* Press "Run code" to run the code to preview the result  
+* Press "Start over" to revert the box to its original state  
+* Press "Submit answer" to submit your code and compare it against the solution  
+
+
+<!-- ```{r ex-demo-setup, echo=FALSE, eval=FALSE} -->
+<!-- linelist <<- rio::import(system.file("dat/surveillance_linelist_20141201.csv", package = "epitutorials")) -->
+<!-- ``` -->
+
+
+```{r example-codebox, exercise = TRUE}
+Type the code here
+```
+
+```{r example-codebox-hint, eval = FALSE, exercise = FALSE}
+Type the code exactly as written, into the codebox. Then press Run
+```
+
+```{r example-codebox-hint2, eval = FALSE, exercise = FALSE}
+tbl_cross(data = linelist, row = gender, col = case_def)
+```
+
+```{r example-codebox-solution, exercise = FALSE}
+tbl_cross(data = linelist, row = gender, col = case_def)
+```
+
+```{r example-codebox-check, exercise = FALSE}
+grade_this_code("Correct, you should see a cross-tabulation of the linelist, in which gender is in the rows and case definition is in the columns.")
+```
+
+`r fontawesome::fa("exclamation", fill = "red")` If you get the error: `It looks like this might not be valid R code...` try typing the code instead of copy/pasting into the codebox.  
+
+
+
+### Quiz questions  
+
+Please complete the quiz questions that you encounter throughout the tutorial. **Answering will help you** to comprehend the material, and will also help us to improve the exercises for future students.  
+
+To practice, please answer the following questions:  
+
+```{r quiz-use-helper, echo=F}
+quiz(
+  question_radio("When should I view the red 'helper' code?",
+    answer("After trying to write the code myself", correct = TRUE),
+    answer("Before I try coding", correct = FALSE),
+    correct = "Reviewing best-practice code after trying to write yourself can help you improve",
+    incorrect = "Please attempt the exercise yourself, or use the hint, before viewing the answer."
+  )
+)
+```
+
+
+```{r quiz-anxious, echo = FALSE}
+question_numeric(
+ "How anxious are you about beginning this tutorial - on a scale from 1 (least anxious) to 10 (most anxious)?",
+ answer(10, message = "Try not to worry, we will help you succeed!", correct = T),
+ answer(9, message = "Try not to worry, we will help you succeed!", correct = T),
+ answer(8, message = "Try not to worry, we will help you succeed!", correct = T),
+ answer(7, message = "Try not to worry, we will help you succeed!", correct = T),
+ answer(6, message = "Ok, we will get there together", correct = T),
+ answer(5, message = "Ok, we will get there together", correct = T),
+ answer(4, message = "I like your confidence!", correct = T),
+ answer(3, message = "I like your confidence!", correct = T),
+ answer(2, message = "I like your confidence!", correct = T),
+ answer(1, message = "I like your confidence!", correct = T),
+ allow_retry = TRUE,
+ correct = "Thanks for sharing. ",
+ min = 1,
+ max = 10,
+ step = 1
+)
+```
+
+
+### Icons  
+
+You will see these icons throughout the exercises:
+
+Icon  |Meaning
+------|--------------------
+`r fontawesome::fa("eye", fill = "darkblue")`|Observe  
+`r fontawesome::fa("exclamation", fill = "red")`|Alert!  
+`r fontawesome::fa("pen", fill = "brown")`|An informative note  
+`r fontawesome::fa("terminal", fill = "black")`|Time for you to code!  
+`r fontawesome::fa("window-restore", fill = "darkgrey")`|Change to another window  
+`r fontawesome::fa("bookmark", fill = "orange")`|Remember this for later  
+
+
+
+### Getting help on Applied Epi Community  
+
+Our other site [Applied Epi Community](www.community.appliedepi.org) is a public Q&A and discussion forum. You can post a question in the category "Applied Epi Training" about the content in these tutorials. A member of the community may help you by voluntarily answering your question.  
+
+* Be sure to clearly reference which tutorial and which question you are stuck on  
+* Explain what you have already tried to do  
+* Thank anyone who replies for their time  
+
+
+
+
+
+
+
 
 
 
@@ -320,22 +498,22 @@ knitr::include_graphics("images/epicurve_top.png")
 
 [Source: Epi R Handbook](www.epiRhandbook.com)
 
-### Reporting completeness - heat plot  
-
-This heat plot shows the proportion of heath facilities reporting complete surveillance data to the district office, over time.  
-
-```{r, out.width = "75%", fig.align = "center", fig.show='hold', echo=F}
-knitr::include_graphics("images/heat_tile.png")
-```
-
-[Source: Epi R Handbook](www.epiRhandbook.com)
-
 ### Age pyramids  
 
 Age pyramids are very easy to make with R. This age pyramid actually plots *two* separate datasets over each other, to show the age/sex distribution of cases as compared to the underlying population.  
 
 ```{r, out.width = "100%", fig.align = "center", fig.show='hold', echo=F}
 knitr::include_graphics("images/pop_pyramid_baseline.png")
+```
+
+[Source: Epi R Handbook](www.epiRhandbook.com)
+
+### Reporting completeness - heat plot  
+
+This heat plot shows the proportion of heath facilities reporting complete surveillance data to the district office, over time.  
+
+```{r, out.width = "75%", fig.align = "center", fig.show='hold', echo=F}
+knitr::include_graphics("images/heat_tile.png")
 ```
 
 [Source: Epi R Handbook](www.epiRhandbook.com)
@@ -455,16 +633,25 @@ plot_grid(
 
 
 
-## R packages {#packages}
-
-We cover the intricacies of R package installation and loading in our tutorial on [R Basics](www.training.appliedepi.org). We have pre-loaded the below packages for use in this tutorial.  
-
-Recall that the {pacman} package and it's function `p_load()` will automatically install each R package *if not yet installed* and will load it for use in the current R session.  
-
-Installation and loading of these packages is described in detail in the Epi R Handbook chapter [_Suggested Packages_](https://epirhandbook.com/en/suggested-packages-1.html).  
+## Setup  
 
 
-```{r load-package-solution, echo=T, eval = FALSE}
+### Install and Load R packages {#packages}
+
+The first coding step of any cleaning process is to install and/or load all the R packages that will be used.  
+
+We've pre-loaded the packages for this tutorial, but if writing an R script it is best to do this at the very top of the script, so that any reviewer can quickly see which packages are used.
+
+If you are unfamiliar with this `pacman::p_load()` command, review the earlier tutorial on R basic syntax. In brief, this command will automatically install R packages if they are not already installed, *and* load them for use.  
+
+Installation and loading of packages is described in the Epi R Handbook content on [Packages](https://epirhandbook.com/en/r-basics.html#packages) and [Suggested packages for public health](https://epirhandbook.com/en/suggested-packages-1.html).  
+
+In this tutorial we use the following packages. Below they are written in a vertical style, with explanatory # comments to the right.  
+
+The {ggplot2} package is installed/loaded within the {tidyverse} family of packages.  
+
+
+```{r load-package-solution, echo=TRUE, eval = FALSE}
 # install/load packages for use in the tutorial
 pacman::p_load(
   rio,           # importing data  
@@ -482,17 +669,35 @@ pacman::p_load(
 
 
 
-## Import data {#import} 
+### Import data {#import}  
 
-In this tutorial we will work with the *cleaned* Ebola linelist shown above. If you are interested in the process of cleaning data have a look at the data cleaning tutorial.
+In this tutorial, we have pre-loaded the data. But if you were writing in an R script, your next command would be to import the "raw" or "unclean" data from where it is stored on your computer.  
 
-Below we show a command that imports the data into R and saves it as the object `linelist` in our R environment for later use. This command uses the `import()` function from the package {rio}.  
+As explained in the previous tutorial, we strongly recommend organizing your work within an [RStudio project](https://epirhandbook.com/en/r-projects.html). In this way, the "paths" to your data files will not break when used on different computers.  
 
-**Your import command may look different from this one**, depending upon how your files are organized within your RStudio project. See the [R Basics](www.training.appliedepi.org) tutorial to learn more about importing data into R with `import()`, RStudio projects, and the {here} R package.  
+Below is an command that imports the file "linelist.rds", which is located in the RStudio project's "data" folder.  
+
+* The `here()` function, from the {here} package, creates the file path which automatically adjusts to whichever computer it is run on  
+* The `import()` function, from the {rio} package, imports the data into R - no matter if it is .csv, .xlsx, .rds, etc.  
+* The `<-` assignment operator stores the imported dataset in R as the object `linelist_raw` for later reference  
 
 ```{r import-demo-subfolder, echo=T, eval=F}
-linelist <- import("linelist_cleaned.rds")   # import data and save as "linelist"
+linelist_raw <- import(here("data", "linelist.rds"))
 ```
+
+You can read more in our Basics tutorial and in the [Epi R Handbook](https://www.epirhandbook.com/en/import-and-export.html) about how RStudio projects, the {here} package, and the {rio} package can be efficiently used together to make the data import process very easy!
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -682,7 +887,7 @@ For example, by mapping the column `age` to the x-axis, every row in the data is
 Below, we set the axes X and Y to the age and height columns from the linelist data. You can see this represented on the axes scales, which now have titles and values. Note that no data is yet displayed.  
 
 ```{r aes, echo=T, eval=T}
-ggplot(data = linelist, mapping = aes(x = age, y = ht_cm))
+ggplot(data = linelist, mapping = aes(x = age_years, y = ht_cm))
 ```
 
 Below is an R exercise where you can edit, write, and run your own code. Try editing the code such that the y-axis reflects temperature rather than height. Clicking "Run code" will run what you have entered and produce an output. To check your answer against the solution click "Submit Answer". If you need help, click the "Hints" button above the code chunk to get a hint to the solution. You can also ask a question in our [Community Forum](www.community.appliedepi.org).  
@@ -695,7 +900,7 @@ head(linelist, 25)
  
 
 ```{r axes-plot, exercise = TRUE}
-ggplot(data = linelist, mapping = aes(x = age, y = ht_cm))
+ggplot(data = linelist, mapping = aes(x = age_years, y = ht_cm))
 ```
 
 ```{r axes-plot-check}
@@ -707,7 +912,7 @@ The temperature column is named temp
 ```
 
 ```{r axes-plot-solution, eval= FALSE}
-ggplot(data = linelist, mapping = aes(x = age, y = temp))
+ggplot(data = linelist, mapping = aes(x = age_years, y = temp))
 ```
 
 *Note: You may see `aes()` written in ggplot code without the `mapping = ` argument name. As with any R function the argument names do not need to be written as long as they are written in the order expected by the function. For clarity here we include `mapping = ` but if you see code elsewhere without this, it achieves the same result.*
@@ -722,7 +927,7 @@ Next we need to declare *how* we want our data to be visualized - that is, which
 To "add" geometry, we extend our `ggplot()` command with a `+` symbol and write one of the "geom" functions below, such as `geom_point()`. Adding the function `geom_point()` to the `ggplot()` command visualizes each row in the data as a point, using the defined X and Y aesthetic mappings. Note that the `+` appears after the close of the `ggplot()` parentheses.  
 
 ```{r simple_plot, echo=T, message = T, warning = T}
-ggplot(data = linelist, mapping = aes(x = age, y = wt_kg))+
+ggplot(data = linelist, mapping = aes(x = age_years, y = wt_kg))+
   geom_point()
 ```
 
@@ -783,7 +988,7 @@ This approach begins to introduce proper spacing, and some new lines:
 
 ```{r, echo = TRUE, eval = FALSE, tidy = FALSE}
 ggplot(data = surv,
-       mapping = aes(x = age, y = ht_cm)) +
+       mapping = aes(x = age_years, y = ht_cm)) +
 geom_point()
 ```
 
@@ -793,7 +998,7 @@ Finally, here is our recommended approach:
 ggplot(
   data = surv,        # use case linelist
   mapping = aes(      # make aesthetic mappings for all geoms
-    x = age,          # assign x-axis to age column
+    x = age_years,          # assign x-axis to age column
     y = ht_cm)) +     # assign y-axis to height
 geom_point()          # display data as points
 ```
@@ -838,7 +1043,7 @@ Below, the `color = ` aesthetic of the points is assigned the value `"orange"`, 
 ggplot(
   data = linelist,
   mapping = aes(
-    x = age,
+    x = age_years,
     y = ht_cm)) +
 geom_point(
   color = "orange")
@@ -860,7 +1065,7 @@ We have already made dynamic assignments for the x-axis (and y-axis), but this c
 ggplot(
   data = linelist,
   mapping = aes(
-    x = age,
+    x = age_years,
     y = ht_cm,
     color = gender)) +
 geom_point()
@@ -888,7 +1093,7 @@ Remember that you will need to also remove the static aesthetic assignment to "o
 ggplot(
   data = linelist,
   mapping = aes(
-    x = age,
+    x = age_years,
     fill = gender)) +
 geom_histogram()
 ```
@@ -905,7 +1110,7 @@ You may have both static and dynamic aesthetic in the same plot. Try changing th
 ggplot(
   data = linelist,
   mapping = aes(
-    x = age,
+    x = age_years,
     y = ht_cm)) +
 geom_point(color = "orange")
 ```
@@ -923,7 +1128,7 @@ geom_point(size = 3, alpha = 0.5)
 ggplot(
   data = linelist,
   mapping = aes(
-    x = age,
+    x = age_years,
     y = ht_cm,
     color = gender)) +
 geom_point(size = 3, alpha = 0.5)
@@ -959,7 +1164,7 @@ As with the other aesthetics, we have seen that `shape` can be dynamic. Below th
 ggplot(
   data = linelist,
   mapping = aes(
-    x = age,
+    x = age_years,
     y = wt_kg,
     shape = gender,      # shape by gender
     color = age_cat)) +  # color by age category
@@ -974,7 +1179,7 @@ Below the points are all assigned to shape 21 - the circle with both an exterior
 ggplot(
   data = linelist,
   mapping = aes(
-    x = age,
+    x = age_years,
     y = wt_kg,
     fill = age_cat)) +   # interior fill of points by age category
 geom_point(
@@ -1018,14 +1223,14 @@ quiz(
 
 While dynamic aesthetics are a good way of showing groups in your data, another way is by *faceting*. Also called "small-multiples", faceting produces individual plots for each unique value in a column passed to the function `facet_wrap()`. Place a tilde "~" before the column name in the command.  
 
-Below, we create facets the source of infection (the column `souce`). Note that we write a "~" before the column name we want to facet by, otherwise we will get an error message. This symbol can be interpreted as the word "by".  
+Below, we create facets the case definition (the column `case_def`). Note that we write a "~" before the column name we want to facet by, otherwise we will get an error message. This symbol can be interpreted as the word "by".  
 
 ```{r facet-wrap, echo=T, warning=F, message=F}
 ggplot(
   data = linelist,
   mapping = aes(x = date_onset)) +
 geom_histogram() +
-facet_wrap(~source)
+facet_wrap(~case_def)
 ```
 
 
@@ -1045,7 +1250,7 @@ ggplot(
   mapping = aes(x = date_onset)) +
 geom_histogram() +
 facet_wrap(
-  ~source,
+  ~case_def,
   scales = "free_y")
 ```
 
@@ -1060,7 +1265,7 @@ Try editing the below code, which facets the histogram by the column `hospital`:
 
 1. Add a "free_y" free y axis
 2. Have only 2 columns of plots
-3.Assign `fill` to the column `source` of infection (tip: review the aesthetic mapping section above)  
+3. Assign `fill` to the column `case_def` (tip: review the aesthetic mapping section above)  
 
 ```{r facet-test, exercise = TRUE, warning=F, message=F}
 ggplot(
@@ -1073,20 +1278,20 @@ facet_wrap(
 ```
 
 ```{r facet-test-check}
-grade_this_code("correct, we remove the scales argument, change ncol to 2 and add fill = source to the mapping = aes() of the histogram")
+grade_this_code("correct, we remove the scales argument, change ncol to 2 and add fill = case_def to the mapping = aes() of the histogram")
 ```
 
 ```{r facet-test-hint}
 1. Add the argument scales = "free_y" to facet_wrap()
 2. Adust ncol = 
-3. We want to specify fill = source inside the aes() mapping for the histogram
+3. We want to specify fill = case_def inside the aes() mapping for the histogram
 ```
 
 ```{r facet-test-solution, eval= FALSE}
 ggplot(
   data = linelist,
   mapping = aes(x = date_onset)) +
-geom_histogram(mapping = aes(fill = source)) +
+geom_histogram(mapping = aes(fill = case_def)) +
 facet_wrap(
   ~hospital,
   scales = "free_y",
@@ -1105,7 +1310,7 @@ If you do this within `facet_wrap()`, the levels of the two columns are combined
 ggplot(
   data = linelist,
   mapping = aes(x = date_onset)) +
-geom_histogram(mapping = aes(fill = source)) +
+geom_histogram(mapping = aes(fill = case_def)) +
 facet_wrap(hospital ~ gender)
 ```
 
@@ -1115,7 +1320,7 @@ To improve on this layout you can instead use the `facet_grid()` command:
 ggplot(
   data = linelist,
   mapping = aes(x = date_onset)) +
-geom_histogram(mapping = aes(fill = source)) +
+geom_histogram(mapping = aes(fill = case_def)) +
 facet_grid(hospital ~ gender)
 ```
 
@@ -1133,7 +1338,7 @@ linelist %>%
 
 # pipe filtered linelist into the ggplot() command
 # note: no data= argument needed
-ggplot(mapping = aes(x = date_onset, fill = source)) +
+ggplot(mapping = aes(x = date_onset, fill = case_def)) +
 geom_histogram() +
 facet_grid(hospital ~ gender)
 ```
@@ -1348,7 +1553,7 @@ Try applying what you have learned to add a continuous viridis palette to the fo
 ggplot(
   data = linelist,
   mapping = aes(
-    x = age,
+    x = age_years,
     y = wt_kg,
     color = temp)) +
 geom_point() 
@@ -1367,7 +1572,7 @@ grade_this_code("Correct! we need to specify we want a color scale, viridis pale
 ggplot(
   data = linelist,
   mapping = aes(
-    x = age,
+    x = age_years,
     y = wt_kg,
     color = temp)) +
 geom_point() +
@@ -1605,7 +1810,7 @@ linelist$hosp_time <- linelist$date_outcome - linelist$date_hospitalisation
 ggplot(data = linelist) +
 geom_point(
   mapping = aes(
-    x = age,
+    x = age_years,
     y = hosp_time,
     color = outcome),    
   alpha = 0.7) +
@@ -1674,7 +1879,7 @@ linelist$hosp_time <- linelist$date_outcome - linelist$date_hospitalisation
 ggplot(data = linelist) +
 geom_point(
   mapping = aes(
-    x = age,
+    x = age_years,
     y = hosp_time,
     color = outcome),    
   alpha = 0.7) +
@@ -1700,7 +1905,7 @@ linelist$hosp_time <- linelist$date_outcome - linelist$date_hospitalisation
 plt_base <- ggplot(data = linelist) +
 geom_point(
   mapping = aes(
-    x = age,
+    x = age_years,
     y = hosp_time,
     color = outcome),    
   alpha = 0.7) +
@@ -1734,7 +1939,7 @@ Micro-adjustments to the theme can be made with `theme()` as these are mostly sm
 ggplot(data = linelist) +
 geom_point(
   mapping = aes(
-    x = age,
+    x = age_years,
     y = hosp_time,
     color = outcome),    
   alpha = 0.7) +
@@ -1822,7 +2027,7 @@ We would like you to produce a plot with the same fictional Ebola linelist data 
 head(linelist,25)
 ```
 
-Can you think of a good way to represent the date of onset for infections by the source of infection and gender, be sure to try customizing your axis labels, title etc. to get a plot you are happy with. An example plot is provided as the answer with some comments but have a go at producing one for yourself. Once you have something you are happy with consider the questions below the exercise. If you want to know more about a certain `geom_*()` and how to use it, try using a question mark before the name of the geom to pull up the documentation for the function, e.g. `?geom_point`
+Can you think of a good way to represent the date of onset for infections by the case definition and gender, be sure to try customizing your axis labels, title etc. to get a plot you are happy with. An example plot is provided as the answer with some comments but have a go at producing one for yourself. Once you have something you are happy with consider the questions below the exercise. If you want to know more about a certain `geom_*()` and how to use it, try using a question mark before the name of the geom to pull up the documentation for the function, e.g. `?geom_point`
 
 ```{r your_plot, exercise = TRUE, warning=F, message=F, fig.height=8}
 
@@ -1842,10 +2047,10 @@ scale_x_date(date_breaks = "3 months",     # fix overlapping date labels
              expand = c(0,0)) +            # no whit space around the plotted area
 scale_y_continuous(expand = c(0,0),           
                    limits = c(0,200)) +    # set limits for the y-axis scale
-facet_wrap(~source,                        # wrap by source as we have already used color for gender
+facet_wrap(~case_def,                     # wrap by case_def as we have already used color for gender
            ncol = 1) +                     # one column as we are dealing with wide rather than tall plots
 labs(
-  title = "Cases by source of infection",
+  title = "Cases by case definition",
   subtitle = str_glue(
   "Weekly cases from {min(linelist$date_onset, na.rm = TRUE)}
   to {max(linelist$date_onset, na.rm = TRUE)}"),  # use str_glue to extract information ot add to the plot
@@ -1893,10 +2098,10 @@ scale_x_date(date_breaks = "3 months",     # fix overlapping date labels
              expand = c(0,0)) +            # no whit space around the plotted area
 scale_y_continuous(expand = c(0,0),           
                    limits = c(0,200)) +    # set limits for the y-axis scale
-facet_wrap(~source,                        # wrap by source as we have already used color for gender
+facet_wrap(~case_def,                     # wrap by case_def as we have already used color for gender
            ncol = 1) +                     # one column as we are dealing with wide rather than tall plots
 labs(
-  title = "Cases by source of infection",
+  title = "Cases by case definition",
   subtitle = str_glue(
   "Weekly cases from {min(linelist$date_onset, na.rm = TRUE)}
   to {max(linelist$date_onset, na.rm = TRUE)}"),  # use str_glue to extract information ot add to the plot
