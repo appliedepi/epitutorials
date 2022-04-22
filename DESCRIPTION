@@ -14,6 +14,7 @@ Imports:
     tidyr,
     forcats,
     lubridate,
+    stringr,
     emo (>= 0.0.0.9000),
     flair,
     fontawesome,

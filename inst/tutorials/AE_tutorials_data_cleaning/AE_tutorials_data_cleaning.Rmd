@@ -27,6 +27,7 @@ library(tidyr)           # data handling
 library(janitor)         # tables and clean_names()
 library(forcats)         # factors
 library(lubridate)       # dates
+library(stringr)         # string handling
 library(epikit)          # age categories
 library(flair)           # highlight code
 library(ggplot2)         # visualise data
@@ -106,8 +107,32 @@ gradethis::gradethis_setup(
 
 # data prep (must be in setup chunk) --------------------------------------------------------------------
 linelist_raw <- rio::import(system.file("dat/surveillance_linelist_20141201.csv", package = "epitutorials")) %>% 
-  select(-bmi) %>% 
-  mutate(age = as.numeric(age))
+  select(-bmi, -case_def) %>% 
+  mutate(age = as.numeric(age)) %>% 
+  mutate(hospital = na_if(hospital, ""))
+
+# create epilink column
+linelist_raw <- linelist_raw %>% 
+  mutate(epilink = sample(
+    c(rep("yes", .85 * nrow(linelist_raw)),
+      rep("no", .10 * nrow(linelist_raw)),
+      rep(NA, .05 * nrow(linelist_raw))),
+    size = nrow(linelist_raw), replace = TRUE)
+    ) %>% 
+  
+# create lab confirmed
+  mutate(lab_confirmed = sample(
+    c(rep(TRUE, .75 * nrow(linelist_raw)),
+      rep(FALSE, .15 * nrow(linelist_raw)),
+      rep(NA, .10 * nrow(linelist_raw))),
+    size = nrow(linelist_raw), replace = TRUE)
+    )
+
+# Randomly convert some temperatures to Fahrenheit instead of celcius for an exercise later
+set.seed(1)
+take_these <- sample(1:nrow(linelist_raw), 42)
+linelist_raw$temp[take_these] <- (linelist_raw$temp[take_these] * 9/5) + 32
+
 
 linelist <- rio::import(system.file("dat/surveillance_linelist_clean_20141201.rds", package = "epitutorials"))
 
@@ -769,13 +794,13 @@ In R syntax, a simplified "pipe chain" looks like below. The underscores would c
 ```{r, echo=T, eval=F}
 # create a "clean" linelist with a cleaning pipe chain
 ######################################################
-surv <- surv_raw %>%        # create new "clean" dataset, starting with the raw
-        clean_names() %>%   # clean the column names
-        rename(___) %>%     # manually edit column names
-        select(___) %>%     # select, remove, or re-order columns
-        distinct(___) %>%   # de-duplicate rows
-        mutate(___) %>%     # create or recode columns
-        filter(___)         # keep only certain rows 
+linelist <- linelist_raw %>%    # create "clean" dataset, starting with the raw
+            clean_names() %>%   # clean the column names
+            rename(___) %>%     # manually edit column names
+            select(___) %>%     # select, remove, or re-order columns
+            distinct(___) %>%   # de-duplicate rows
+            mutate(___) %>%     # create or recode columns
+            filter(___)         # keep only certain rows 
  
 ```
 
@@ -1384,6 +1409,29 @@ The right side of the `mutate()` equals sign is often a *function*. The function
 
 > mutate(**column name** = *a function* used to create/modify the column's values) 
 
+
+```{r, results = "asis", echo = FALSE}
+"mutate(column name = a function)" %>%
+  flair("column name", color = "deeppink") %>%
+  flair("a function", color = "cornflowerblue") %>%
+  flair_all(before = "<h4>", after = "</h4>") %>%
+  cat()
+```
+
+
+```{r mutate, include = F}
+demo %>% 
+  mutate(adult = ifelse(age >= 18, TRUE, FALSE)) # creates new T/F column
+```
+
+```{r mutate_flair, echo=F}
+decorate("mutate") %>%
+  flair("adult", color = "deeppink") %>%
+  flair("ifelse(age >= 18, TRUE, FALSE)", color = "cornflowerblue") %>% 
+  knit_print.with_flair()
+```
+
+
 The function `ifelse()` is a simple, flexible tool that evaluates a logical statement for each row in the data frame, and provides either one value or another. It has the following arguments:  
 
 1) `test = ` Provide a logical statement that evaluates to either `TRUE` or `FALSE` for each row  
@@ -1842,7 +1890,9 @@ case_locations
 ```
 
 
-In our `linelist` data frame, we have data on the geographic district the case was detected in (`district_det`), and also on the district of the case's residence (`district_res`). Add a command to our pipe chain using `coalesce()` to create a new column `district` that prioritizes district of detection over district of residence:
+In our `linelist` data frame, we have data on the geographic district the case was detected in (`district_det`), and also on the district of the case's residence (`district_res`).  
+
+Add a command to our pipe chain using `coalesce()` to create a new column `district` that prioritizes district of detection over district of residence:
 
 
 ```{r coalesce, exercise=TRUE}
@@ -1901,5 +1951,749 @@ linelist <- linelist_raw %>%
 
 
 
+### Missing values  
+
+As identified earlier, in the column `gender` in the original `linelist_raw` data frame there is the character value "Unknown".  
+
+```{r, echo=T}
+linelist_raw %>% 
+  tabyl(gender)
+```
+
+There are some analyses in our future for which we want "missing" values in this column to be properly coded as `NA`, not as the character "Unknown". For example, making age/sex pyramids are easier with missing values coded this way.  
+
+You already know one tool that can fix this problem - `ifelse()`.
+
+What would your `mutate()` command look like if you used `ifelse()` to convert "Unknown" to `NA`?  
+
+```{r ifelse-gender, exercise = TRUE}
+linelist %>% 
+  mutate(___)
+```
 
 
+
+```{r ifelse-gender-hint}
+Within the mutate() the name of the column to modify, then equals, then the ifelse function
+```
+
+```{r ifelse-gender-hint-2}
+The ifelse function has three arguments: the test, the yes value, and the no value
+```
+
+```{r ifelse-gender-hint-3}
+mutate(gender = ifelse(gender == "Unknown", NA, gender))
+```
+
+```{r ifelse-gender-solution, eval=FALSE}
+linelist %>% 
+  mutate(gender = ifelse(gender == "Unknown", NA, gender))
+```
+
+```{r ifelse-gender-check}
+gradethis::grade_this_code("Yes, good memory!")
+```
+
+Note how in the solution, the arguments of `ifelse()` did not have their names (test, yes, and no). As long as the arguments are written in the expected order, you do not need to specify their names.  
+
+#### {dplyr} helper functions  
+
+{dplyr} and {tidyr} offer two other helpful functions to know: `na_if()` and `replace_na()`. These are simple functions - they simply switch a single character value with `NA`.  
+
+Thus, in the above scenario, you could write instead:  
+
+```{r, echo=TRUE, eval=FALSE}
+mutate(gender = na_if(gender, "Unknown"))
+```
+
+You can read more about [na_if()](https://dplyr.tidyverse.org/reference/na_if.html) and [replace_na()](https://tidyr.tidyverse.org/reference/replace_na.html).
+
+
+Our pipe chain now looks like this:  
+
+```{r, eval=FALSE, echo=TRUE}
+linelist <- linelist_raw %>% 
+  clean_names() %>% 
+  rename(date_onset = onset_date,
+         date_report = date_of_report,
+         district_res = adm3_name_res,
+         district_det = adm3_name_det) %>% 
+  select(-row_num) %>% 
+  mutate(wt_kg = ifelse(test = wt_kg < 0, yes = NA, no = wt_kg)) %>% 
+  mutate(date_onset = mdy(date_onset)) %>% 
+  mutate(date_report = mdy(date_report)) %>% 
+  distinct() %>% 
+  mutate(district = coalesce(district_det, district_res)) %>% 
+  mutate(gender = na_if(gender, "Unknown"))
+```
+
+```{r, eval=TRUE, echo=FALSE}
+#Update demo at this point in time
+demo <- linelist_raw %>% 
+  clean_names() %>% 
+  rename(date_onset = onset_date,
+         date_report = date_of_report,
+         district_res = adm3_name_res,
+         district_det = adm3_name_det) %>% 
+  select(-row_num) %>% 
+  mutate(wt_kg = ifelse(test = wt_kg < 0, yes = NA, no = wt_kg)) %>% 
+  mutate(date_onset = mdy(date_onset)) %>% 
+  mutate(date_report = mdy(date_report)) %>% 
+  distinct() %>% 
+  mutate(district = coalesce(district_det, district_res)) %>% 
+  mutate(gender = na_if(gender, "Unknown"))
+```
+
+
+
+
+
+
+
+
+
+
+
+## Simple recoding  
+
+Values are often entered in data inconsistently, and must be "cleaned". In other scenarios, you simply want to re-code values to make them more concise. Either way, if the switches are simple you can use the `recode()` function within a `mutate()` command to do the job.  
+
+For instance, to fix a date that has been incorrectly written we can use the following (note that the old value in this case is an impossible date):
+
+```{r, echo = TRUE, eval = FALSE}
+linelist %>%                             #Old value     #New value
+  mutate(date_onset = recode(date_onset, "15/14/2014" = "15/04/2014"))
+```
+
+Why make this change in code? Why not just go back to the Excel file and make the change there?  
+
+**This way, you have a record** - your work is now transparent and reproducible by others. You can discuss your script with your team and decide if they agree with you. And moreover, you do not have to do it all over again when you receive an updated linelist with new cases!  
+
+
+
+### Re-coding hospital names  
+
+Now we turn to the column `hospital`. Again, the `tabyl()` function can be used to create a simple tabulation of all the values in this column:  
+
+```{r, echo=T, eval=F}
+linelist %>% 
+  tabyl(hospital)
+```
+
+```{r, echo=FALSE, eval=TRUE}
+demo %>% 
+  tabyl(hospital)
+```
+
+It seems there is some cleaning to be done! Note the different spellings of "hospital" and "hopital", of "Military" and "Mitilary", and of "Port" and "Port Hospital". These need to be synchronized.  
+
+An easy option is `recode()`. The syntax is relatively simple when we want to simply exchange one value for another:  
+
+```{r, echo=T, eval=F}
+linelist %>% 
+  mutate(hospital = recode(hospital,
+    "OLD value" = "NEW value",
+    "OLD value" = "NEW value",
+    "OLD value" = "NEW value"))
+```
+
+The above code can be read as: "Re-define `hospital` as `hospital` with these recodings applied".  
+
+**Note that unlike `rename()`, `recode()` is used within a `mutate()` function**. It also uses the *opposite* syntax (old = new, instead of new = old).  
+
+**Now, add a command to the pipe chain that aligns all the hospital names to the following:**  
+
+* Military Hospital  
+* Port Hospital  
+* Central Hospital
+* SMMH
+* Other  
+
+**To preserve the original values, save the result in a new column `hospital_clean`.**  
+
+
+```{r recode, exercise=TRUE}
+linelist <- linelist_raw %>% 
+  clean_names() %>% 
+  rename(date_onset = onset_date,
+         date_report = date_of_report,
+         district_res = adm3_name_res,
+         district_det = adm3_name_det) %>% 
+  select(-row_num) %>% 
+  mutate(wt_kg = ifelse(test = wt_kg < 0, yes = NA, no = wt_kg)) %>% 
+  mutate(date_onset = mdy(date_onset)) %>% 
+  mutate(date_report = mdy(date_report)) %>% 
+  distinct() %>% 
+  mutate(district = coalesce(district_det, district_res)) %>% 
+  mutate(gender = na_if(gender, "Unknown"))
+```
+
+```{r recode-hint}
+Within the mutate() write the name of the new column, an equals, then the recode() function
+```
+
+```{r recode-hint-2}
+mutate(hospital_clean = recode(hospital,
+  OLD = NEW,
+  OLD = NEW))
+```
+
+```{r recode-hint-3}
+linelist <- linelist_raw %>% 
+  clean_names() %>% 
+  rename(date_onset = onset_date,
+         date_report = date_of_report,
+         district_res = adm3_name_res,
+         district_det = adm3_name_det) %>% 
+  select(-row_num) %>% 
+  mutate(wt_kg = ifelse(test = wt_kg < 0, yes = NA, no = wt_kg)) %>% 
+  mutate(date_onset = mdy(date_onset)) %>% 
+  mutate(date_report = mdy(date_report)) %>% 
+  distinct() %>% 
+  mutate(district = coalesce(district_det, district_res)) %>% 
+  mutate(gender = na_if(gender, "Unknown")) %>% 
+  mutate(hospital_clean = recode(hospital,
+    "Mitilary Hospital"  = "Military Hospital",
+    "Port"               = "Port Hospital",
+    "Port Hopital"       = "Port Hospital",
+    "St. Mark's Maternity Hospital (SMMH)" = "SMMH"))
+```
+
+```{r recode-solution, eval=FALSE}
+
+linelist <- linelist_raw %>% 
+  clean_names() %>% 
+  rename(date_onset = onset_date,
+         date_report = date_of_report,
+         district_res = adm3_name_res,
+         district_det = adm3_name_det) %>% 
+  select(-row_num) %>% 
+  mutate(wt_kg = ifelse(test = wt_kg < 0, yes = NA, no = wt_kg)) %>% 
+  mutate(date_onset = mdy(date_onset)) %>% 
+  mutate(date_report = mdy(date_report)) %>% 
+  distinct() %>% 
+  mutate(district = coalesce(district_det, district_res)) %>% 
+  mutate(gender = na_if(gender, "Unknown")) %>% 
+  mutate(hospital_clean = recode(hospital,
+    "Mitilary Hospital"  = "Military Hospital",
+    "Port"               = "Port Hospital",
+    "Port Hopital"       = "Port Hospital",
+    "St. Mark's Maternity Hospital (SMMH)" = "SMMH"))
+```
+
+```{r recode-check}
+  grade_this({
+    # Automatically pass if .result equal to .solution
+    pass_if_equal(message =  "Excellent, you have cleaned the dataset as expected!")
+    # Default to failing grade with feedback
+    fail()
+  })
+```
+
+```{r, eval=TRUE, echo=FALSE}
+#Update demo at this point in time
+demo <- linelist_raw %>% 
+  clean_names() %>% 
+  rename(date_onset = onset_date,
+         date_report = date_of_report,
+         district_res = adm3_name_res,
+         district_det = adm3_name_det) %>% 
+  select(-row_num) %>% 
+  mutate(wt_kg = ifelse(test = wt_kg < 0, yes = NA, no = wt_kg)) %>% 
+  mutate(date_onset = mdy(date_onset)) %>% 
+  mutate(date_report = mdy(date_report)) %>% 
+  distinct() %>% 
+  mutate(district = coalesce(district_det, district_res)) %>% 
+  mutate(gender = na_if(gender, "Unknown")) %>% 
+  mutate(hospital_clean = recode(hospital,
+    "Mitilary Hospital"  = "Military Hospital",
+    "Port"               = "Port Hospital",
+    "Port Hopital"       = "Port Hospital",
+    "St. Mark's Maternity Hospital (SMMH)" = "SMMH"))
+```
+
+
+
+Now we can re-run the `tabyl()` command to see if the values were changed as we expected:  
+
+```{r, echo=T, eval=F}
+linelist %>% 
+  tabyl(hospital_clean)
+```
+
+```{r, echo=FALSE, eval=TRUE}
+demo %>% 
+  tabyl(hospital_clean)
+```
+
+You can even cross-tabulate with `tabyl()` to see how the old values (in the rows) compare to the new values (in the columns). We will teach you more advanced tabling techniquies with `tabyl()` in a different tutorial.  
+
+```{r, eval=FALSE, echo=TRUE}
+linelist %>% 
+  tabyl(hospital, hospital_clean)
+```
+
+
+
+
+## Complex recoding  
+
+Simple logical re-coding you have already learned - you can use `ifelse()` for most things. Here are two others you can read about later:  
+
+* [`if_else()`](https://dplyr.tidyverse.org/reference/if_else.html) is particularly useful if re-coding dates  
+* [`replace()`](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/replace) can be a shortcut for `ifelse()` logical recoding  
+But for more complex re-coding, you will likely switch to using [`case_when()`](https://dplyr.tidyverse.org/reference/case_when.html) from {dplyr}.  
+
+This function allows you to run the equivalent of multiple `ifelse()` statements in a series - it is R's equivalent to the SQL `CASE WHEN` statement.  
+
+It is just a coincidence that the `case_when()` function has a name that sounds like it was made for building case definitions! It is a general function - it is not specific to public health. Still, here is a demonstration of a `case_when()` command, used within `mutate()`, to create a case definition column:  
+
+```{r, echo=TRUE, eval = TRUE}
+linelist <- linelist %>% 
+  mutate(case_def = case_when(
+    lab_confirmed == TRUE             ~ "Confirmed case",
+    epilink == "yes" & fever == "yes" ~ "Suspect case",
+    TRUE                              ~ "To investigate"))
+```
+
+Within the `case_when()` function, you can write multiple two-sided formulas, one on each line for clarity.  
+
+* Each formula has a *left* side, and a *right* side, separated by a tilde ~  
+* The *left* side is a logical statement that can evaluate to `TRUE` or `FALSE` for a given row in the data  
+  * You can reference other columns in these logical statements  
+* The *right* side is the value that is used if the *left* side is `TRUE` for a given row  
+  * **Importantly**, all values on the *right* side must be of the same class (e.g. either character, numeric, integer, etc.)  
+  
+Every row in the data frame is evaluated for each of these formulae, starting from the top and working to the last one. The first one that evaluates to `TRUE` for that row is used. **Therefore, it is very important to write the formulae in an intentional order - typically from very specific (at the top) to very broad (at the bottom)**.   
+
+If none of the statements apply to a row in the data, that row is assigned `NA` by default, unless a `TRUE` statement is written as the last statement, as shown above. If last *left* side is `TRUE`, this catches any other situation that has not triggered one of the above logical statements.  
+
+In the case definition example above, if a case is lab confirmed they are immediately categorized as a "Confirmed case". If lab confirmation is `FALSE` or missing, then if they have an epidemiologic link and a fever they are categorized as a "Suspect case". Finally, any row that has not met either of those criteria is marked as "To investigate".  
+
+Now we can tabulate the new column `case_def` and see the results :
+
+```{r, echo=TRUE, eval = TRUE}
+linelist %>% 
+  tabyl(case_def)
+```
+
+It is also wise to go look at the dataset to confirm that the logic was applied the way that you intended!  
+
+
+### Make age in years  
+
+Use what you learned about `case_when()`, and write a command that creates a column `age_years`, and which converts the value in `age` correctly, depending on whether the value in `age_unit` is "years" or "months".  
+
+
+```{r casewhen1, exercise=TRUE}
+linelist <- linelist %>% 
+  mutate(age_years = case_when(
+    # write logic             # make age_years   # tip
+    if age_unit is months   ~ calculation here,  # divide age by 12 
+    if age_unit is years    ~ calculation here,  # age 
+    if age_unit is missing  ~ age,               # assume years
+```
+
+```{r casewhen1-hint}
+replace the left sides with logic statements such as age_unit == "years"
+```
+
+```{r casewhen1-hint-2}
+replace the right sides with calculations such as age/12
+```
+
+```{r casewhen1-hint-3}
+linelist <- linelist %>%
+  mutate(age_years = case_when(
+    age_unit == "years"  ~ age,
+    age_unit == "months" ~ age/12,
+    is.na(age_unit)      ~ age))
+```
+
+```{r casewhen1-solution, eval=FALSE}
+linelist <- linelist %>%
+  mutate(age_years = case_when(
+    age_unit == "years"  ~ age,
+    age_unit == "months" ~ age/12,
+    is.na(age_unit)      ~ age))
+```
+
+```{r casewhen1-check}
+  grade_this({
+    # Automatically pass if .result equal to .solution
+    pass_if_equal(message =  "Excellent, you have cleaned the dataset as expected!")
+    # Default to failing grade with feedback
+    fail()
+  })
+```
+
+
+
+### Correct temperatures
+
+Let us look at the temperatures of the case that are recorded in the `linelist` data frame. 
+
+Thanks to this visualization, we can see that there is some discordance in the dataset.  
+
+```{r, echo = TRUE, eval = TRUE, error = FALSE, warning=FALSE}
+ggplot(data = linelist_raw) +
+    geom_histogram(aes(x = temp), binwidth = 1) +
+    scale_x_continuous(
+      limits = c(30, 110),
+      breaks = seq(from = 30, to = 110, by = 10)) +
+    labs(
+      x = "Temperature",
+      y = "Count")
+```
+
+Most of the values are located between 35 and 41, as expected if we were recording temperatures in °C, however some values are around 100, and so we can deduce that these have been incorrectly recorded in °F. Using the formula, `°C = (°F − 32) * 5/9`, can you use complex logic to convert values that are above 90 and below 120 to Celcius? If the temperature is correctly recorded in °C, make sure it is not converted to `NA`!
+
+```{r temp_convert_logic, exercise = TRUE}
+linelist <- linelist %>%
+  mutate(___)
+```
+
+```{r temp_convert_logic-hint}
+You will need to use case_when() and greater than (temp >) and less than (temp <) combined with the and (&)
+```
+
+```{r temp_convert_logic-hint-2}
+Your last line will need to be TRUE ~ temp so that all other values are not set to NA
+```
+
+```{r temp_convert_logic-check}
+  grade_this({
+    # Automatically pass if .result equal to .solution
+    pass_if_equal(message = "You've successfully used complex logic, great work.")
+    # Default to failing grade with feedback
+    fail()
+  })
+```
+
+```{r temp_convert_logic-solution}
+linelist %>%
+    mutate(temp = case_when(
+      temp > 90 & temp < 120 ~ (temp - 32) * 5/9,
+      TRUE                   ~ temp))
+  
+```
+
+
+
+Congratulations! When these commands are added to our cleaning pipe chain, it now looks like this:  
+
+```{r, echo=TRUE, eval=TRUE}
+linelist <- linelist_raw %>% 
+  
+  # standardize column syntax
+  clean_names() %>% 
+  
+  # manually rename columns
+  rename(
+    date_onset = onset_date,            # list date first
+    date_report = date_of_report,       # standardize
+    district_res = adm3_name_res,       # simplify
+    district_det = adm3_name_det) %>%   # simplify
+  
+  # remove unnecessary column
+  select(-row_num) %>% 
+  
+  # clean existing columns
+  mutate(
+    
+    # clean weight
+    wt_kg = ifelse(
+      test = wt_kg < 0,    # if weight is negative
+      yes = NA,            # convert to missing
+      no = wt_kg),         # else keep original value
+    
+    # clean date of onset
+    date_onset = mdy(date_onset),        # convert to date
+    
+    # clean date of report
+    date_report = mdy(date_report)) %>%  # convert to date
+  
+  # de-duplicate, remove rows 100% similar
+  distinct() %>% 
+  
+  # further recoding and cleaning
+  mutate(
+    # prioritize detetion location over residence
+    district = coalesce(district_det, district_res),
+    
+    # convert to NA
+    gender = na_if(gender, "Unknown"), 
+    
+    # clean hospital spellings
+    hospital_clean = recode(hospital,
+      "Mitilary Hospital"  = "Military Hospital",
+      "Port"               = "Port Hospital",
+      "Port Hopital"       = "Port Hospital",
+      "St. Mark's Maternity Hospital (SMMH)" = "SMMH"), 
+    
+    # create case definition
+    case_def = case_when(
+      
+      # if lab confirmed
+      lab_confirmed == TRUE             ~ "Confirmed case",
+      
+      # else if epilink and fever
+      epilink == "yes" & fever == "yes" ~ "Suspect case",
+      
+      # all others
+      TRUE                              ~ "To investigate"),
+    
+    # create age in years
+    age_years = case_when(
+      age_unit == "years"  ~ age,
+      age_unit == "months" ~ age/12,
+      is.na(age_unit)      ~ age),
+    
+    # fix temperatures recorded in Farinheit
+    temp = case_when(
+      temp > 90 & temp < 120 ~ (temp - 32) * 5 / 9,
+      TRUE                   ~ temp))
+```
+
+This is long, but it a reproducible and well-documented record of all your cleaning steps. You could send this to a colleague and they could repeat and critique all of your steps. In the end, that makes for better science and more efficient insights!  
+
+
+```{r, echo=FALSE, eval=TRUE}
+# save current state of demo
+demo <- linelist_raw %>% 
+  clean_names() %>% 
+  rename(
+    date_onset = onset_date,            # list date first
+    date_report = date_of_report,       # standardize
+    district_res = adm3_name_res,       # simplify
+    district_det = adm3_name_det) %>%   # simplify
+  select(-row_num) %>% 
+  mutate(
+    wt_kg = ifelse(
+      test = wt_kg < 0,    # if weight is negative
+      yes = NA,            # convert to missing
+      no = wt_kg),         # else keep original value
+    date_onset = mdy(date_onset),        # convert to date
+    date_report = mdy(date_report)) %>%  # convert to date
+  distinct() %>% 
+  mutate(
+    district = coalesce(district_det, district_res),
+    gender = na_if(gender, "Unknown"), 
+    hospital_clean = recode(hospital,
+      "Mitilary Hospital"  = "Military Hospital",
+      "Port"               = "Port Hospital",
+      "Port Hopital"       = "Port Hospital",
+      "St. Mark's Maternity Hospital (SMMH)" = "SMMH"), 
+    case_def = case_when(
+      lab_confirmed == TRUE             ~ "Confirmed case",
+      epilink == "yes" & fever == "yes" ~ "Suspect case",
+      TRUE                              ~ "To investigate"),
+    age_years = case_when(
+      age_unit == "years"  ~ age,
+      age_unit == "months" ~ age/12,
+      is.na(age_unit)      ~ age),
+    temp = case_when(
+      temp > 90 & temp < 120 ~ (temp - 32) * 5 / 9,
+      TRUE                   ~ temp))
+```
+
+
+
+## Filtering
+
+Sub-setting rows is done with the function `filter()`. Inside the parentheses you write logical criteria (using "==", "!=", ">", "<", etc) that are applied to each row. Rows that meet the criteria are kept. 
+
+See the previous tutorial, or the [Basics chapter of the Epi R Handbook](https://epirhandbook.com/en/r-basics.html#relational-and-logical-operators) to review the logical operators.  
+
+Here are some examples:  
+
+A simple filter is applied that keeps only rows in which `age_years` is greater than 10.  
+
+```{r eval=FALSE, echo=TRUE}
+linelist %>% 
+  filter(age_years > 10)
+```
+
+Additional required ("AND") criteria can be added with a comma, or with &.  
+
+```{r eval=FALSE, echo=TRUE}
+linelist %>% 
+  filter(age_years > 10, gender == "m")
+```
+
+Logic can get quite complex using `&` (AND), `|` (OR), and parentheses:  
+
+```{r eval=FALSE, echo=TRUE}
+linelist %>% 
+  filter(age_years > 10 & (gender == "m" | case_def == "To investigate"))
+```
+
+The above command keeps rows that have age above 10 and EITHER male gender OR are still under investigation.  
+
+
+## End  
+
+Congratulation on finishing this tutorial!  If you have extra time, consider completing the extra exercises below. Otherwise, we welcome you to advance to the next tutorial in the series.  
+
+Please consider making a donation to us. We are a nonprofit organization and rely on your contributions to continue supporting frontline epidemiologists around the world.
+
+
+<form target="_blank" action="https://www.paypal.com/donate" method="post" target="_top">
+<input type="hidden" name="hosted_button_id" value="YTEZELC8VBXV6" />
+<input type="image" src="https://github.com/appliedepi/epiRhandbook_eng/raw/master/images/donate_button_long.png" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
+<img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" />
+</form>
+
+
+
+
+
+## Extra exercises  
+
+
+### GIS dataset  
+
+
+Your GIS team needs a data frame to put into their routine maps for this outbreak. They use R, so they expect a .rds file (exported R data frame) containing the `case_id`, the columns `district`, `district_res`, `district_det`, `lat`, and `lon`).  
+
+**Can you make this file for them?**  
+
+```{r gis, exercise=TRUE}
+gis_data <- linelist %>% 
+```
+
+```{r gis-hint}
+Use a select() command
+```
+
+```{r gis-hint-2}
+# create data frame with only gis information
+gis_data <- linelist %>% 
+  select(case_id, district, district_res, district_det, lat, lon)
+```
+
+```{r gis-solution, eval=FALSE}
+# create data frame with only gis information
+gis_data <- linelist %>% 
+  select(case_id, district, district_res, district_det, lat, lon)
+```
+
+```{r gis-check}
+  grade_this({
+    # Automatically pass if .result equal to .solution
+    pass_if_equal(message =  "Excellent, you have cleaned the dataset as expected!")
+    # Default to failing grade with feedback
+    fail()
+  })
+```
+
+
+### Spotlight on children  
+
+**Create a separate data frame for analysis of children.**  
+
+* Start from the clean data frame `linelist` and assign this new data frame with the name `children`  
+* Reduce the data frame to only contain cases with `age_years` less than 18 years  
+* Create a new column `infant` that says "Infant" if the case is less than 1 year old, and says "Non-infant" otherwise  
+* Reduce the data frame to only show the columns `case_id`, `age_years`, `infant`, `gender`, `district`, and `date_report`  
+
+```{r children, exercise=TRUE}
+children <- linelist %>% 
+```
+
+```{r children-hint}
+Use a filter(), then a mutate() with ifelse(), then select()
+```
+
+```{r children-hint-2}
+# create data frame with only child cases
+children <- linelist %>% 
+  filter(age_years < 18) %>% 
+  mutate(infant = ifelse(age_years < 1, "Infant", "Non-infant")) %>% 
+  select(case_id, age_years, infant, gender, district, date_report)
+```
+
+```{r children-solution, eval=FALSE}
+# create data frame with only child cases
+children <- linelist %>% 
+  filter(age_years < 18) %>% 
+  mutate(infant = ifelse(age_years < 1, "Infant", "Non-infant")) %>% 
+  select(case_id, age_years, infant, gender, district, date_report)
+```
+
+```{r children-check}
+  grade_this({
+    # Automatically pass if .result equal to .solution
+    pass_if_equal(message =  "Excellent, you have cleaned the dataset as expected!")
+    # Default to failing grade with feedback
+    fail()
+  })
+```
+
+
+
+
+
+### String detection  
+
+The R package {stringr} is part of the {tidyverse} and contains many different functions to handle words and character "strings". If you ever want to split, unite, or search within a character value, you should look in the [Characters and strings chapter of the Epi R Handbook](https://epirhandbook.com/en/characters-and-strings.html).  
+
+For example the function `str_detect()` returns `TRUE` or `FALSE` depending on whether particular characters are found within a specified value. The true arguments are:  
+
+1) `string = ` this is the column or text to search in  
+2) `pattern = ` this the character pattern to search for  
+
+For example:  
+
+* `str_detect(string = name, pattern = "Isha")` will return `TRUE` if the characters "Isha" are found in a particular row of the colunm `name`  
+* `str_detect(string = occupation, pattern = "nurse")` will return `TRUE` if the characters "nurse" are found in a particular row of the colunm `occupation`  
+
+Be aware that this function is *case sensitive* by default. You can adjust this using the tip found [here](https://epirhandbook.com/en/characters-and-strings.html#detect-a-pattern) in the Epi R Handbook.
+
+**Now, starting with the clean data frame `linelist`, create a new data frame that contains only the cases reported from district whose names contains "West".**  
+
+```{r west, exercise=TRUE}
+western_cases <- linelist %>% 
+```
+
+```{r west-hint}
+Use a select() command
+```
+
+```{r west-hint-2}
+# create data frame with only cases from the "West" districts
+western_cases <- linelist %>% 
+  filter(str_detect(string = district, pattern = "West"))
+```
+
+```{r west-solution, eval=FALSE}
+# create data frame with only cases from the "West" districts
+western_cases <- linelist %>% 
+  filter(str_detect(string = district, pattern = "West"))
+```
+
+```{r west-check}
+  grade_this({
+    # Automatically pass if .result equal to .solution
+    pass_if_equal(message =  "Excellent, you have cleaned the dataset as expected!")
+    # Default to failing grade with feedback
+    fail()
+  })
+```
+
+```{r, eval=TRUE, echo=FALSE}
+western_cases_n <- linelist %>% 
+  filter(str_detect(string = district, pattern = "West")) %>% 
+  nrow()
+```
+
+```{r quiz-western, echo = FALSE}
+quiz(caption = "Quiz - Western districts",
+  question("How many cases were there in western districts?",
+    allow_retry = TRUE,
+    answer("170"),
+    answer("258", correct = TRUE),
+    answer("418")
+  )
+)
+```
