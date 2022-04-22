@@ -123,7 +123,7 @@ knitr::opts_chunk$set(echo = FALSE, fig.align = "center", message = F, warning =
 
 # data prep --------------------------------------------------------------------
 #linelist_raw <- rio::import(system.file("dat/linelist_raw.xlsx", package = "epitutorials"))
-linelist <- rio::import(system.file("dat/tutorial_linelist_cleaned.rds", package = "epitutorials"))
+linelist <- rio::import(system.file("dat/tutorial_linelist_clean.rds", package = "epitutorials"))
 malaria_counts <- rio::import(system.file("dat/malaria_facility_count_data.rds", package = "epitutorials"))
 ```
 
@@ -1223,14 +1223,14 @@ quiz(
 
 While dynamic aesthetics are a good way of showing groups in your data, another way is by *faceting*. Also called "small-multiples", faceting produces individual plots for each unique value in a column passed to the function `facet_wrap()`. Place a tilde "~" before the column name in the command.  
 
-Below, we create facets the case definition (the column `case_def`). Note that we write a "~" before the column name we want to facet by, otherwise we will get an error message. This symbol can be interpreted as the word "by".  
+Below, we create facets the source of infection (the column `souce`). Note that we write a "~" before the column name we want to facet by, otherwise we will get an error message. This symbol can be interpreted as the word "by".  
 
 ```{r facet-wrap, echo=T, warning=F, message=F}
 ggplot(
   data = linelist,
   mapping = aes(x = date_onset)) +
 geom_histogram() +
-facet_wrap(~case_def)
+facet_wrap(~source)
 ```
 
 
@@ -1250,7 +1250,7 @@ ggplot(
   mapping = aes(x = date_onset)) +
 geom_histogram() +
 facet_wrap(
-  ~case_def,
+  ~source,
   scales = "free_y")
 ```
 
@@ -1265,7 +1265,7 @@ Try editing the below code, which facets the histogram by the column `hospital`:
 
 1. Add a "free_y" free y axis
 2. Have only 2 columns of plots
-3. Assign `fill` to the column `case_def` (tip: review the aesthetic mapping section above)  
+3.Assign `fill` to the column `source` of infection (tip: review the aesthetic mapping section above)  
 
 ```{r facet-test, exercise = TRUE, warning=F, message=F}
 ggplot(
@@ -1278,20 +1278,20 @@ facet_wrap(
 ```
 
 ```{r facet-test-check}
-grade_this_code("correct, we remove the scales argument, change ncol to 2 and add fill = case_def to the mapping = aes() of the histogram")
+grade_this_code("correct, we remove the scales argument, change ncol to 2 and add fill = source to the mapping = aes() of the histogram")
 ```
 
 ```{r facet-test-hint}
 1. Add the argument scales = "free_y" to facet_wrap()
 2. Adust ncol = 
-3. We want to specify fill = case_def inside the aes() mapping for the histogram
+3. We want to specify fill = source inside the aes() mapping for the histogram
 ```
 
 ```{r facet-test-solution, eval= FALSE}
 ggplot(
   data = linelist,
   mapping = aes(x = date_onset)) +
-geom_histogram(mapping = aes(fill = case_def)) +
+geom_histogram(mapping = aes(fill = source)) +
 facet_wrap(
   ~hospital,
   scales = "free_y",
@@ -1310,7 +1310,7 @@ If you do this within `facet_wrap()`, the levels of the two columns are combined
 ggplot(
   data = linelist,
   mapping = aes(x = date_onset)) +
-geom_histogram(mapping = aes(fill = case_def)) +
+geom_histogram(mapping = aes(fill = source)) +
 facet_wrap(hospital ~ gender)
 ```
 
@@ -1320,7 +1320,7 @@ To improve on this layout you can instead use the `facet_grid()` command:
 ggplot(
   data = linelist,
   mapping = aes(x = date_onset)) +
-geom_histogram(mapping = aes(fill = case_def)) +
+geom_histogram(mapping = aes(fill = source)) +
 facet_grid(hospital ~ gender)
 ```
 
@@ -1338,7 +1338,7 @@ linelist %>%
 
 # pipe filtered linelist into the ggplot() command
 # note: no data= argument needed
-ggplot(mapping = aes(x = date_onset, fill = case_def)) +
+ggplot(mapping = aes(x = date_onset, fill = source)) +
 geom_histogram() +
 facet_grid(hospital ~ gender)
 ```
@@ -2027,7 +2027,7 @@ We would like you to produce a plot with the same fictional Ebola linelist data 
 head(linelist,25)
 ```
 
-Can you think of a good way to represent the date of onset for infections by the case definition and gender, be sure to try customizing your axis labels, title etc. to get a plot you are happy with. An example plot is provided as the answer with some comments but have a go at producing one for yourself. Once you have something you are happy with consider the questions below the exercise. If you want to know more about a certain `geom_*()` and how to use it, try using a question mark before the name of the geom to pull up the documentation for the function, e.g. `?geom_point`
+Can you think of a good way to represent the date of onset for infections by the source of infection and gender, be sure to try customizing your axis labels, title etc. to get a plot you are happy with. An example plot is provided as the answer with some comments but have a go at producing one for yourself. Once you have something you are happy with consider the questions below the exercise. If you want to know more about a certain `geom_*()` and how to use it, try using a question mark before the name of the geom to pull up the documentation for the function, e.g. `?geom_point`
 
 ```{r your_plot, exercise = TRUE, warning=F, message=F, fig.height=8}
 
@@ -2047,10 +2047,10 @@ scale_x_date(date_breaks = "3 months",     # fix overlapping date labels
              expand = c(0,0)) +            # no whit space around the plotted area
 scale_y_continuous(expand = c(0,0),           
                    limits = c(0,200)) +    # set limits for the y-axis scale
-facet_wrap(~case_def,                     # wrap by case_def as we have already used color for gender
+facet_wrap(~source,                        # wrap by source as we have already used color for gender
            ncol = 1) +                     # one column as we are dealing with wide rather than tall plots
 labs(
-  title = "Cases by case definition",
+  title = "Cases by source of infection",
   subtitle = str_glue(
   "Weekly cases from {min(linelist$date_onset, na.rm = TRUE)}
   to {max(linelist$date_onset, na.rm = TRUE)}"),  # use str_glue to extract information ot add to the plot
@@ -2098,10 +2098,10 @@ scale_x_date(date_breaks = "3 months",     # fix overlapping date labels
              expand = c(0,0)) +            # no whit space around the plotted area
 scale_y_continuous(expand = c(0,0),           
                    limits = c(0,200)) +    # set limits for the y-axis scale
-facet_wrap(~case_def,                     # wrap by case_def as we have already used color for gender
+facet_wrap(~source,                        # wrap by source as we have already used color for gender
            ncol = 1) +                     # one column as we are dealing with wide rather than tall plots
 labs(
-  title = "Cases by case definition",
+  title = "Cases by source of infection",
   subtitle = str_glue(
   "Weekly cases from {min(linelist$date_onset, na.rm = TRUE)}
   to {max(linelist$date_onset, na.rm = TRUE)}"),  # use str_glue to extract information ot add to the plot

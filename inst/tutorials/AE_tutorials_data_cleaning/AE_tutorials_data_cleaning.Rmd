@@ -504,7 +504,7 @@ The first coding step of any cleaning process is to install and/or load all the 
 
 We've pre-loaded the packages for this tutorial, but if writing an R script it is best to do this at the very top of the script, so that any reviewer can quickly see which packages are used.
 
-You can practice loading them in the codebox below. If you are unfamiliar with this `pacman::p_load()` command, review the earlier tutorial on R basic syntax. In brief, this command will automatically install R packages if they are not already installed, *and* load them for use.  
+If you are unfamiliar with this `pacman::p_load()` command, review the earlier tutorial on R basic syntax. In brief, this command will automatically install R packages if they are not already installed, *and* load them for use.  
 
 Installation and loading of packages is described in the Epi R Handbook content on [Packages](https://epirhandbook.com/en/r-basics.html#packages) and [Suggested packages for public health](https://epirhandbook.com/en/suggested-packages-1.html).  
 
@@ -2335,6 +2335,20 @@ linelist <- linelist %>%
     fail()
   })
 ```
+
+
+```{r, eval=TRUE, echo=FALSE}
+# register the change in the dataset
+linelist <- linelist %>%
+  mutate(age_years = case_when(
+    age_unit == "years"  ~ age,
+    age_unit == "months" ~ age/12,
+    is.na(age_unit)      ~ age))
+```
+
+
+
+
 
 
 
