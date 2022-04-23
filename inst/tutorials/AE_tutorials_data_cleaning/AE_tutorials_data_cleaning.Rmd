@@ -1,5 +1,5 @@
 ---
-title: "Applied Epi Tutorials - Data cleaning"
+title: "Applied Epi Tutorials: Data cleaning"
 tutorial:
   id: "AE_tutorial_data_cleaning"
 output: 
@@ -169,14 +169,13 @@ All of our training materials focus on challenges and solutions for frontline pr
 
 :::: {style="display: flex;"}
 
-::: {}
-**These self-paced tutorials:**
+::: {.tutorial}
+**Self-paced tutorials:**
 
  
 * Introduce you to the basics of R coding  
 * R on your computer is **not** required  
-* Help is available at our public  
-[Applied Epi Community](http://community.appliedepi.org) forum  
+* Help is available at our public [Applied Epi Community](http://community.appliedepi.org) forum  
 
 :::
 
@@ -188,7 +187,7 @@ a column separator -->
 :::
 
 
-::: {}
+::: {.tutorial}
 **Live courses:**  
 
 * A more comprehensive curriculum  
@@ -217,8 +216,9 @@ See our [live course offerings](www.training.appliedepi.org), [educational philo
 
 We are a global team of 150 applied epidemiologists and public health practitioners with extensive ground-level experience.  
 
-We offer a comprehensive ecosystem of R training, tools, and support, including our free [Epidemiologist R Handbook](www.epiRhandbook.com) which has helped over **175,000 people** learn R and remains a vital resource for many practitioners.  
+Our free [Epidemiologist R Handbook](www.epiRhandbook.com) is a vital resource for over **175,000 people**.  
 
+We offer a comprehensive ecosystem of training, tools, and support:  
 
 
 
@@ -228,33 +228,33 @@ We offer a comprehensive ecosystem of R training, tools, and support, including 
 ```{r, out.width = "55%", fig.align = "left", echo=F}
 knitr::include_graphics("images/teaching_icon.png")
 ```
-**Training:**  
 
-* **[Live R courses](www.appliedepi.org)**  
-* **[Self-paced interactive tutorials](https://training.appliedepi.org)**  
-* **[Case studies](www.training.appliedepi.org)**  
+**Training:**  
+**[Live courses](www.appliedepi.org)**  
+**[Tutorials](https://training.appliedepi.org)**  
+**[Case studies](www.training.appliedepi.org)**  
 :::
 
 ::: {}
 ```{r, out.width = "55%", fig.align = "left", echo=F}
 knitr::include_graphics("images/tools_icon.png")
 ```
-**Tools:**  
 
-* **[Epi R Handbook](www.epiRhandbook.com)**  
-* **[R packages](https://appliedepi.org/tools/)**  
-* **[Sitrep templates](https://appliedepi.org/tools/)**  
+**Tools:**  
+**[Epi R Handbook](www.epiRhandbook.com)**  
+**[R packages](https://appliedepi.org/tools/)**  
+**[Sitrep templates](https://appliedepi.org/tools/)**  
 :::
 
 ::: {}
 ```{r, out.width = "55%", fig.align = "left", echo=F}
 knitr::include_graphics("images/QA_icon.png")
 ```
-**Support:**  
 
-* **[Community forum](www.community.appliedepi.org)**  
-* **[R Help Desk](https://appliedepi.org/helpdesk/)**  
-* **[Mentorship](https://appliedepi.org/join/)**  
+**Support:**  
+**[Community forum](www.community.appliedepi.org)**  
+**[R Help Desk](https://appliedepi.org/helpdesk/)**  
+**[Mentorship](https://appliedepi.org/join/)**  
 :::
 
 
@@ -285,9 +285,9 @@ a column separator -->
 
 ::: {}
 ```{r, out.width = "100%", fig.align = "center", echo=F}
-knitr::include_graphics("images/logo.png")
+knitr::include_graphics("images/support-help-moz.jpg")
 ```
-
+[*Image: Neale Batra*]{style="float:right"}
 :::
 
 ::::
@@ -311,6 +311,33 @@ Authors of this tutorial include:
 * Neale Batra  
 
 Funding for this tutorial was provided by Médecins Sans Frontières (MSF) / Doctors without Borders and TEPHINET.  
+
+
+:::: {style="display: flex;"}
+
+::: {}
+```{r, out.width = "85%", fig.align = "center", echo=F}
+knitr::include_graphics("images/msf-logo.jpg")
+```
+:::
+
+
+::: {.col data-latex="{0.05\textwidth}"}
+\ 
+<!-- an empty Div (with a white space), serving as
+a column separator -->
+:::
+
+
+::: {}
+```{r, out.width = "85%", fig.align = "center", echo=F}
+knitr::include_graphics("images/tephinet-logo.png")
+```
+
+:::
+
+::::
+
 
 **Click "Next Topic" to move to the next section of the tutorial, or navigate using the Table of Contents on the left.**  
 
@@ -370,7 +397,6 @@ To get help while completing this tutorial:
 2) Look for "hints" and "solutions" above the coding boxes   
 3) Post a question in [Applied Epi Community](www.community.appliedepi.org) in the category for questions about Applied Epi Training  
 
-The the coming tutorial sections we will demonstrate how to use these resources.  
 
 ### Helper text  
 

@@ -1,5 +1,5 @@
 ---
-title: "Applied Epi Tutorials - Tidy data"
+title: "Applied Epi Tutorials: Tidy data"
 tutorial:
   id: "AE_tutorial_tidy_data"
 output: 
@@ -114,7 +114,8 @@ knitr::opts_chunk$set(echo = FALSE)
 
 
 
-## Introduction to R for Applied Epidemiology and Public Health
+
+## Welcome to Applied Epi's free self-paced R tutorial series
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "100%"}
 knitr::include_graphics("images/applied_epi_banner.png", error = F)
@@ -122,28 +123,120 @@ knitr::include_graphics("images/applied_epi_banner.png", error = F)
 
 </br>
 
-#### Welcome to Applied Epi's free self-paced tutorial series
+#### Tutorial 0: Tidy data  
 
-This is the **second** tutorial in the series.  
+This is the **first** tutorial in the series.  
 
-* **This tutorial teaches**: Tidy data best practices in public health  
+* **This tutorial teaches**: Best practices for data entry, format, documentation, and preparation for analysis using R  
 * **Target audience**: Public health practitioners, epidemiologists, clinicians, and researchers who cannot access our live courses  
 * **Format**: R coding is performed *within* this tutorial window  
 * **Offline access**: Follow [these instructions](www.training.appliedepi.org) to download and view offline in your RStudio  
 
 </br>
 
-All of our courses welcome beginners who have never coded before, and use examples and solutions for common public health challenges. Here are the differences between these tutorials and our live courses:  
+#### Our introductory R training materials  
+
+All of our training materials focus on challenges and solutions for frontline practitioners, and are accessible to beginner audiences. Read more about our educational approach [here](training.appliedepi.org/educational-approach) 
+
+:::: {style="display: flex;"}
+
+::: {.tutorial}
+**Self-paced tutorials:**
+
+ 
+* Introduce you to the basics of R coding  
+* R on your computer is **not** required  
+* Help is available at our public [Applied Epi Community](http://community.appliedepi.org) forum  
+
+:::
+
+
+::: {.col data-latex="{0.05\textwidth}"}
+\ 
+<!-- an empty Div (with a white space), serving as
+a column separator -->
+:::
+
+
+::: {.tutorial}
+**Live courses:**  
+
+* A more comprehensive curriculum  
+* We help you navigate and use R on your computer  
+* Personal support and tips from live instructors who have  
+extensive frontline public health experience  
+
+
+:::
+
+::::
+
+See our [live course offerings](www.training.appliedepi.org), [educational philosophy](https://applied-epi-training.netlify.app/educational-approach.html), and [email us](mailto:contact@appliedepi.org) for tutorial personal coaching options.  
+
+</br>
+
+#### About Applied Epi
+
 
 :::: {style="display: flex;"}
 
 ::: {}
-**These tutorials:**
 
- 
-* Help you get started with R  
-* R on your computer is **not** required  
-* Help is available at our public [Applied Epi Community](http://community.appliedepi.org) forum  
+
+**[Applied Epi](www.appliedepi.org) is a nonprofit organization that supports frontline public health practitioners through accessible tools, training, and support.**  
+
+We are a global team of 150 applied epidemiologists and public health practitioners with extensive ground-level experience.  
+
+Our free [Epidemiologist R Handbook](www.epiRhandbook.com) is a vital resource for over **175,000 people**.  
+
+We offer a comprehensive ecosystem of training, tools, and support:  
+
+
+
+:::: {style="display: flex;"}
+
+::: {}
+```{r, out.width = "55%", fig.align = "left", echo=F}
+knitr::include_graphics("images/teaching_icon.png")
+```
+
+**Training:**  
+**[Live courses](www.appliedepi.org)**  
+**[Tutorials](https://training.appliedepi.org)**  
+**[Case studies](www.training.appliedepi.org)**  
+:::
+
+::: {}
+```{r, out.width = "55%", fig.align = "left", echo=F}
+knitr::include_graphics("images/tools_icon.png")
+```
+
+**Tools:**  
+**[Epi R Handbook](www.epiRhandbook.com)**  
+**[R packages](https://appliedepi.org/tools/)**  
+**[Sitrep templates](https://appliedepi.org/tools/)**  
+:::
+
+::: {}
+```{r, out.width = "55%", fig.align = "left", echo=F}
+knitr::include_graphics("images/QA_icon.png")
+```
+
+**Support:**  
+**[Community forum](www.community.appliedepi.org)**  
+**[R Help Desk](https://appliedepi.org/helpdesk/)**  
+**[Mentorship](https://appliedepi.org/join/)**  
+:::
+
+
+::::
+
+<form target="_blank" action="https://www.paypal.com/donate" method="post" target="_top">
+<input type="hidden" name="hosted_button_id" value="YTEZELC8VBXV6" />
+<input type="image" src="https://github.com/appliedepi/epiRhandbook_eng/raw/master/images/donate_button_long.png" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
+<img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" />
+</form>
+
 
 :::
 
@@ -162,95 +255,20 @@ a column separator -->
 
 
 ::: {}
-**Live courses:**  
-
-* A comprehensive curriculum  
-* Use R on your computer (we help with set up)  
-* Immediate support and tips from live instructors with decades of frontline experience  
-
-
-:::
-
-::::
-
-See our [educational philosophy](https://applied-epi-training.netlify.app/educational-approach.html), [live course offerings](www.training.appliedepi.org), and [email us](mailto:contact@appliedepi.org) for tutorial coaching options.  
-
-</br>
-
-#### About Applied Epi^TM^
-
-**[Applied Epi](www.appliedepi.org) is a nonprofit organization that supports frontline public health practitioners through open-source tools, training, and support.** We are a team of 150 epidemiologists and public health practitioners with decades of ground-level experience in local public health and outbreak response.  
-
-Our free [Epidemiologist R Handbook](www.epiRhandbook.com) has helped over **175,000 people** learn R and remains a vital resource for many practitioners.  
-We have built a comprehensive ecosystem of tools, training, and support:  
-
-
-:::: {style="display: flex;"}
-
-::: {}
-```{r, out.width = "65%", fig.align = "center", echo=F}
-knitr::include_graphics("images/teaching_icon.png")
+```{r, out.width = "100%", fig.align = "center", echo=F}
+knitr::include_graphics("images/support-help-moz.jpg")
 ```
-
-* **[Live R training courses](www.training.appliedepi.org)**
-* **[Self-paced R tutorials](https://training.appliedepi.org)**
-* **[Case studies](www.training.appliedepi.org)**
+[*Image: Neale Batra*]{style="float:right"}
 :::
-
-
-
-
-
-::: {.col data-latex="{0.05\textwidth}"}
-\ 
-<!-- an empty Div (with a white space), serving as
-a column separator -->
-:::
-
-
-
-
-
-::: {}
-```{r, out.width = "65%", fig.align = "center", echo=F}
-knitr::include_graphics("images/tools_icon.png")
-```
-
-* **[Epi R Handbook](www.epiRhandbook.com)**
-* **[R packages](https://appliedepi.org/tools/)**
-* **[Situation report templates](https://appliedepi.org/tools/)**
-:::
-
-
-
-
-::: {.col data-latex="{0.05\textwidth}"}
-\ 
-<!-- an empty Div (with a white space), serving as
-a column separator -->
-:::
-
-::: {}
-```{r, out.width = "65%", fig.align = "center", echo=F}
-knitr::include_graphics("images/QA_icon.png")
-```
-
-* **[Q&A discussion forum](www.community.appliedepi.org)**
-* **[R Help Desk](https://appliedepi.org/helpdesk/)**
-* **Mentorship program**  
-:::
-
-
 
 ::::
 
 
 
-<form target="_blank" action="https://www.paypal.com/donate" method="post" target="_top">
-<input type="hidden" name="hosted_button_id" value="YTEZELC8VBXV6" />
-<input type="image" src="https://github.com/appliedepi/epiRhandbook_eng/raw/master/images/donate_button_long.png" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
-<img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" />
-</form>
+
+
+
+
 
 
 
@@ -263,10 +281,38 @@ Authors of this tutorial include:
 * Mara Kont  
 * Neale Batra  
 
-Funding for this tutorial was provided by Medicins sans frontieres (MSF) / Doctors without Borders and TEPHINET.  
+Funding for this tutorial was provided by Médecins Sans Frontières (MSF) / Doctors without Borders and TEPHINET.  
+
+
+:::: {style="display: flex;"}
+
+::: {}
+```{r, out.width = "85%", fig.align = "center", echo=F}
+knitr::include_graphics("images/msf-logo.jpg")
+```
+:::
+
+
+::: {.col data-latex="{0.05\textwidth}"}
+\ 
+<!-- an empty Div (with a white space), serving as
+a column separator -->
+:::
+
+
+::: {}
+```{r, out.width = "85%", fig.align = "center", echo=F}
+knitr::include_graphics("images/tephinet-logo.png")
+```
+
+:::
+
+::::
+
+
+
 
 **Click "Next Topic" to move to the next section of the tutorial, or navigate using the Table of Contents on the left.**  
-
 
 
 
@@ -303,7 +349,7 @@ After completing this tutorial, we recommend you complete our tutorial on "Clean
 
 Because this tutorial is self-contained within this window, we will often ask you to look at the first few rows of practice datasets in the format below.  
 
-Below, the dataset `linelist` is displayed. It contains `r nrow(linelist)` rows, but we are only showing the **first 25 rows** now.  
+Below, the dataset `linelist` is displayed. It contains `r nrow(linelist)` rows, but we are only showing the **first 25 rows** now. A "linelist" is a term used in applied epidemiology to refer to a table that contains key information about each case or suspect case in an outbreak. Each row represents one case, and the columns contain variables such as age, sex, date of symptom onset, outcomes, etc.    
 
 * Scroll to the right to see all the columns  
 * Use the numbers buttons in the lower-right to page through the additional available rows (25 rows in this case)  
@@ -324,7 +370,6 @@ To get help while completing this tutorial:
 2) Look for "hints" and "solutions" above the coding boxes   
 3) Post a question in [Applied Epi Community](www.community.appliedepi.org) in the category for questions about Applied Epi Training  
 
-The the coming tutorial sections we will demonstrate how to use these resources.  
 
 ### Helper text  
 
@@ -388,6 +433,7 @@ tbl_cross(data = linelist, row = gender, col = case_def)
 grade_this_code("Correct, you should see a cross-tabulation of the linelist, in which gender is in the rows and case definition is in the columns.")
 ```
 
+</br>
 `r fontawesome::fa("exclamation", fill = "red")` If you get the error: `It looks like this might not be valid R code...` try typing the code instead of copy/pasting into the codebox.  
 
 
@@ -400,7 +446,7 @@ To practice, please answer the following questions:
 
 ```{r quiz-use-helper, echo=F}
 quiz(
-  question_radio("When should I view the red 'helper' code?",
+  question_radio("When should I view the code hints and solutions?",
     answer("After trying to write the code myself", correct = TRUE),
     answer("Before I try coding", correct = FALSE),
     correct = "Reviewing best-practice code after trying to write yourself can help you improve",
@@ -498,30 +544,38 @@ head(malaria_counts,5)
 Click to [download the **clean** malaria counts dataset as an **.rds file**](https://github.com/appliedepi/epirhandbook_eng/raw/master/data/malaria_facility_count_data.rds) for your own practice. A *.rds file* is an R-specific file type that preserves column classes. This ensures you will have only minimal cleaning to do after importing the data into R.
 
 
-### **Hand-collected data in Excel**
-Here we provide 2 Excel datasets which were hand-collected.
+### **Hand-entered Excel spreadsheets**  
 
-The first dataset contains information on hospital capacity at various sites:
+Here we provide two Excel datasets which were hand-entered.
 
-![" "](images/tidy_data/messydata.PNG){width=100%}
+The first dataset contains information on clinics and their patient capacities:
+
+```{r, out.width = "85%", fig.align = "center", echo=F}
+knitr::include_graphics("images/messydata.PNG")
+```
 
 
-The second dataset contains the planning of a study data collection:
 
-![" "](images/tidy_data/messydata2.PNG){width=100%}
+The second dataset contains the information on which organizations are responding to an emergency in particular provinces and districts:
+
+```{r, out.width = "85%", fig.align = "center", echo=F}
+knitr::include_graphics("images/messydata2.PNG")
+```
+
 
 
 ## What is tidy data?
 
 Tidying data refers to the process of structuring your datasets for analysis. Most datasets will require some level of cleaning, a process which can make up the majority of the time you spend on your analysis depending on how "messy" your dataset is.
 
-```{r open_text_qu}
+```{r rhetorical1, echo = FALSE}
 question_text(
-  "How long does it typically take you to clean your dataset for analysis?",
-  answer("lemons", correct = TRUE),
-  incorrect="Thank you for your feedback!",
-  correct="Thank you for your feedback!",
-  allow_retry = TRUE
+  "What are some features of your data that make it particularly difficult to clean prior to analysis?",
+  answer_fn(function(value) {
+    if (grepl(paste(letters, collapse = "|"), value)) {
+      correct("")
+    }
+  }, )
 )
 ```
 
@@ -749,7 +803,10 @@ It is true that some of the more aesthetic Excel formatting can get lost in tran
 To help you see the difference, below are some fictional examples of **non-tidy data** that prioritize *human*-readability over *machine*-readability.
 Here is our hospital capacity dataset in Excel:
 
-![" "](images/tidy_data/messydata.PNG){width=100%}
+```{r, out.width = "55%", fig.align = "left", echo=F}
+knitr::include_graphics("images/messydata.PNG")
+```
+
 
 ```{r quiz_messydata}
 quiz(
@@ -775,8 +832,9 @@ These different options have already given you quite a few things to think about
 
 ### **Merged cells**
 
-
-![" "](images/tidy_data/messydata2_nocolours.PNG){width=100%}
+```{r, out.width = "55%", fig.align = "left", echo=F}
+knitr::include_graphics("images/messydata2_nocolours.PNG")
+```
 
 *Problems*: In the spreadsheet above, there are **merged cells** which are not easily digested by R. Which row should be considered the “header” is not clear.
 
@@ -830,7 +888,10 @@ When collecting data for analysis, it is best to avoid the use of merged cells. 
 
 ### **Empty cells**
 
-![" "](images/tidy_data/messydata.PNG){width=100%}
+```{r, out.width = "55%", fig.align = "left", echo=F}
+knitr::include_graphics("images/messydata.PNG")
+```
+
 
 *Problems*: In the spreadsheet above, there are numerous extra empty rows and columns within the dataset - this will cause cleaning headaches in R.
 
@@ -856,7 +917,9 @@ On the other hand, the values in the column `Patients` are actually missing. In 
 
 ### **Colour dictionaries**
 
-![" "](images/tidy_data/messydata2.PNG){width=100%}
+```{r, out.width = "55%", fig.align = "left", echo=F}
+knitr::include_graphics("images/messydata2.PNG")
+```
 
 *Problems:* A color-based dictionary is to the right side of the dataset shown above and cell values are represented by colors - which is also not easily interpreted by R (nor by humans with color-blindness!). Furthermore, different pieces of information are combined into one cell (multiple partner organizations working in one area, or the status “TBC” in the same cell as “Partner D”).
 
@@ -1196,7 +1259,9 @@ Whilst not incorrect, it is generally better to avoid spelling out the gender as
 
 Look at the `GPS` column in the dataset below:
 
-![" "](images/tidy_data/messydata.PNG){width=100%}
+```{r, out.width = "55%", fig.align = "left", echo=F}
+knitr::include_graphics("images/messydata.PNG")
+```
 
 ```{r quiz_gps}
 question("What is the issue with it?",
