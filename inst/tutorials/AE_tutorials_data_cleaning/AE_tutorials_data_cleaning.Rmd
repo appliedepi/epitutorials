@@ -1,12 +1,11 @@
 ---
 title: "Applied Epi Tutorials: Data cleaning"
 tutorial:
-  id: "AE_tutorial_data_cleaning"
+  id: "AE_tutorials_data_cleaning"
 output: 
   learnr::tutorial:
     progressive: true
     allow_skip: true
-    theme: "paper"
 runtime: shiny_prerendered
 description: >
   Learn how to get started with R, and how to import a dataset
@@ -367,7 +366,7 @@ This tutorial draws from chapters of our free [Epidemiologist R handbook](https:
 
 #### Next steps  
 
-After completing this tutorial, we recommend you complete our tutorial on "Cleaning data".  
+After completing this tutorial, we recommend you complete our tutorial on "Data visualization basics".  
 
 
 
@@ -602,17 +601,6 @@ DT::datatable(head(linelist_raw, 25), rownames = FALSE, filter="top", options = 
 ```
 
 
-If you want, you can view this dataset in a pop-out window the `View()` command in the codebox below, with the name of the dataset in the parentheses. Try typing `View()` and writing `linelist_raw` in the parentheses (note the capital "V"), and click "Run code".  
-
-```{r viewdata, exercise = TRUE}
-
-```
-
-
-```{r viewdata-solution, eval=FALSE}
-View(linelist_raw)
-```
-
 
 
 
@@ -715,10 +703,10 @@ skim(linelist_raw)
 
 ```{r quiz-skim}
 quiz(caption = "Quiz - reviewing the data",
-  question("How many columns are there in the data frame?)",
+  question("How many columns are there in the data frame?",
     allow_retry = T,
-    answer("665", message = "No, this is the number of rows/observations"),
-    answer("23", correct = TRUE, message = "Yes this is correct!"),
+    answer(nrow(linelist_raw), message = "No, this is the number of rows/observations"),
+    answer(ncol(linelist_raw), correct = TRUE, message = "Yes this is correct!"),
     answer("19", message = "This is not correct, try again."),
     answer("25", message = "No, this is the number of rows shown in the initial display")
   ),
@@ -730,12 +718,12 @@ quiz(caption = "Quiz - reviewing the data",
     answer("1", message = "No, this is the number of columns that are POSIXct - a type of date format")
   ),
 
-  question("Review the information on character columns. What is the number of unique values in the hospital column?",
+  question("Review the information on character columns. What is the number of missing values in the hospital column?",
     allow_retry = T,
-    answer("9", correct = TRUE),
+    answer(sum(is.na(linelist_raw$hospital)), correct = TRUE),
     answer("Port Hospital"),
-    answer("3"),
-    answer("8")
+    answer("100"),
+    answer("75")
   ),
 
   question("Review the information on numeric columns. What is the MEDIAN age?",
@@ -759,6 +747,10 @@ Try running the command below. It is instructing R to create a simple table of c
 ```{r tabyl1, exercise = TRUE}
 tabyl(linelist_raw, gender)
 ```
+
+You will learn more about the `tabyl()` function and its utilities in a later tutorial - it is quite useful and versatile!  
+
+(*and yes, we know that it says "percent" by default in the headings when it really shows a decimal proportion - this discordance is fixed when you use the funtion further*)  
 
 Now try editing the above command to run using the column `hospital`.  
 
@@ -872,7 +864,7 @@ The order of functions in the pipeline is important, because they are occur sequ
 Below, we describe a series of R commands that clean a dataset in preparation for analysis. Can you put them in the correct sequence?  
 
 ```{r sortable_question, echo = FALSE}
-function_order <- c( "Begin with the raw dataset", "Clean the synatax of the column names", "Recode values in column 'temperature' column to ensure they are in celsius", "Create column 'fever' as binary Yes/No based on numeric column 'temperature'", "Create a new column 'case_definition' by referencing the columns 'fever', 'epilink' and 'lab_result'", "Filter to remove rows with suspect cases")
+function_order <- c( "Begin with the raw dataset", "Clean the syntax of the column names", "Recode values in column 'temperature' column to ensure they are in celsius", "Create column 'fever' as binary Yes/No based on numeric column 'temperature'", "Create a new column 'case_definition' by referencing the columns 'fever', 'epilink' and 'lab_confirmation'", "Filter to remove rows with suspect cases")
 
 # Initialize the question
 question_rank(
@@ -965,7 +957,7 @@ Manually cleaning column names in the CSV or Excel file would be time consuming,
 
 ### Automatic name cleaning  
 
-The first function in our pipe chain is the `clean_names()` function from the {janitor} package. This function does much of the hard work of cleaning column names for us!  
+The first function in our pipe chain is typically the `clean_names()` function from the {janitor} package. This function does much of the hard work of cleaning column names for us!  
 
 It does the following:  
 
@@ -984,7 +976,7 @@ Do you remember the column names in the "raw" data frame `linelist_raw`?
 names(linelist_raw)
 ```
 
-**In the codebox below, begin your pipe chain by piping the `linelist_raw` data frame to the `clean_names()` function, storing the result as `linelist`.**  
+**In the codebox below, begin your pipe chain by piping the `linelist_raw` data frame to the `clean_names()` function, storing the result as `linelist`.** Don't forget that you can use Ctrl + Shift + m as a shortcut to write the pipe operator.  
 
 
 ```{r start, exercise=TRUE}
@@ -1013,7 +1005,7 @@ linelist <- linelist_raw %>%
   clean_names()
 ```
 
-Do not expect any output, but you can now inspect the column names of the **cleaned** `linelist` using `names()` 
+**Do not expect any output** because you ran an *assignment* command. But now that you created the cleaned `linelist` you can inspect its column names using `names()` 
 
 ```{r cleannames, exercise=TRUE}
 
@@ -1034,7 +1026,7 @@ names(linelist)
 
 Of note: this `names()` command is not part of your pipe chain, you are simply running an independent check to see what your `clean_names()` function did.  
 
-You can see that this has done a lot of the work for us, replacing spaces with "_", and ensuring there are no unusual characters (see the onset date, weight, and height columns).
+Compare these names to the previous ones above. You can see that this has done a lot of the work for us, replacing spaces with "_", and ensuring there are no unusual characters (see the onset date, weight, and height columns).
 
 `r fontawesome::fa("pen", fill = "brown")` Removing spaces from R is important because if a column name has spaces in it, you must refer to it within backticks \`  . Backticks are different from single quotation marks '. Doing this is rather annoying, so it is better to quickly replace all spaces with underscores via `clean_names()`.  
 
@@ -1081,13 +1073,6 @@ quiz(
     answer("date_hosp", correct = TRUE, message = "Yes, short and concise with no spaces or special characters."),
     allow_retry = TRUE
   ),
-  question("Which of these functions can be used to rename columns?",
-           answer("rename()", correct = TRUE),
-           answer("clean_names()", correct = TRUE),
-           answer("head()"),
-           answer("select()", correct = TRUE),
-    allow_retry = TRUE
-           ),
   question("Why is it useful to follow a similar style nomenclature (all date columns starting *date_*) for column names?",
     answer("It looks good when you output tables and figures"),
     answer("It helps us find relevant columns and makes omissions/errors less likely", correct = TRUE),
@@ -1150,7 +1135,13 @@ linelist <- linelist_raw %>%
   })
 ```
 
+</br>
+
+`r fontawesome::fa("exclamation", fill = "red")` If you get the error: `It looks like this might not be valid R code...` try typing the code instead of copy/pasting into the codebox.  
+
 Let's again use the `names()` function to see the new column names in the cleaned data frame `linelist`:  
+
+
 
 ```{r, eval=TRUE, echo=TRUE}
 names(linelist)
@@ -1201,7 +1192,7 @@ names(linelist)
 # print the result
 # note: linelist dataset is NOT permanently changed
 linelist %>% 
-  select(case_id, age, gender, case_def) %>% 
+  select(case_id, age, gender, lat, lon) %>% 
   filter(age > 65)
 ```
 
@@ -1234,7 +1225,7 @@ Any column name that is not included in the parentheses will be dropped. The com
 
 ```{r, echo=T, eval=TRUE}
 linelist %>% 
-  select(case_def, age, gender)
+  select(case_id, age, gender)
 ```
 
 What did you notice about the new order of the columns? *`select()` also re-orders columns*.  
@@ -1242,21 +1233,21 @@ What did you notice about the new order of the columns? *`select()` also re-orde
 
 ### Drop columns by name  
 
-Use a minus symbol ( - ) to drop a column by name - all other columns are retained.  
+Use a minus symbol ( - ) to drop a column by name, and all other columns are retained.  
 
 ```{r, echo=T, eval=F}
 # remove a column by name
-select(-case_def)
+select(-epilink)
 ```
 
-Try dropping multiple columns by wrapping all their names in a vector with `c()` - this applies the negative sign to all of them. We learned about the {base} function `c()` in the previous tutorial, which stands for "concatenate". Here it is used to create a vector of column names and the - minus sign is applied to all of them.  
+You can drop multiple columns by wrapping all their names in a vector with `c()` - this applies the negative sign to all of them. We learned about the {base} function `c()` in the previous tutorial, which stands for "concatenate". Here it is used to create a vector of column names and the - minus sign is applied to all of them.  
 
 ```{r, echo=T, eval=F}
 # removes these three columns
-select(-c(case_def, district_det, age))
+select(-c(epilink, district_det, temp))
 
 # an equivalent command to above
-select(-case_def, -district_det, -age)
+select(-epilink, -district_det, -temp)
 ```
 
 
@@ -1453,9 +1444,6 @@ quiz(
 
 The right side of the `mutate()` equals sign is often a *function*. The function will look at values in each row, and return some output to the existing/new column based on those other values.  
 
-> mutate(**column name** = *a function* used to create/modify the column's values) 
-
-
 ```{r, results = "asis", echo = FALSE}
 "mutate(column name = a function used to create/modify the column's values)" %>%
   flair("column name", color = "deeppink") %>%
@@ -1637,7 +1625,7 @@ quiz(caption = "Quiz - raw date format",
 )
 ```
 
-Then, within a `mutate()` command, we use one of the 3 {lubridate} functions below to transform the column to class "Date".  
+Then, within a `mutate()` command, we suggest that you use one of the 3 {lubridate} functions below to transform the column to class "Date".  
 
 * `ymd()` - if the *current* format is Year Month Day
 * `mdy()` - if the *current* format is Month Day Year  
@@ -1781,7 +1769,7 @@ It is worth pointing out that you can combine multiple mutate statements into on
 
 Our cleaning pipe chain currently has 3 mutate commands at the end, separated by pipe operators.  
 
-```{r, eval=FALSE}
+```{r, eval=FALSE, echo=TRUE}
 linelist <- linelist_raw %>% 
   clean_names() %>% 
   rename(date_onset = onset_date,
@@ -1796,7 +1784,7 @@ linelist <- linelist_raw %>%
 
 This can also be written as:  
 
-```{r, eval=FALSE}
+```{r, eval=FALSE, echo=TRUE}
 linelist <- linelist_raw %>% 
   clean_names() %>% 
   rename(date_onset = onset_date,
@@ -1818,7 +1806,7 @@ If you are just learning R, you may choose to write distinct `mutate()` commands
 While we are on the topic of style for pipe chains, remember that if writing a proper R script it is best to thoroughly comment your code for future readers (including yourself!):  
 
 
-```{r, eval=FALSE}
+```{r, eval=FALSE, echo=TRUE}
 linelist <- linelist_raw %>% 
   
   # standardize column syntax
@@ -1905,7 +1893,7 @@ nrow(linelist)
 nrow(demo)
 ```
 
-As you can see, there are `r nrow(linelist_raw) - nrow(demo)` rows that were dropped from the original `r nrow(linelist_raw)`.  
+As you can see, `r nrow(linelist_raw) - nrow(demo)` rows were dropped from the original `r nrow(linelist_raw)`.  
 
 
 
@@ -2521,7 +2509,8 @@ quiz(
     answer("age_categories(age_years, breakers = c(0, 25, 50, 75))", correct = TRUE),
     answer("age_categories(age_years, lower = 0, upper = 75, by = 5)", correct = TRUE),
     answer("age_categories(age_years, breakers = c(0, 25, 50, 75), ceiling = FALSE", correct = TRUE),
-    answer("age_categories(age_years, breakers = 25, lower = 0, upper  = 75)")
+    answer("age_categories(age_years, breakers = 25, lower = 0, upper  = 75)"),
+    allow_retry = TRUE
   ))
 ```
 
@@ -2690,10 +2679,33 @@ linelist %>%
 
 The above command keeps rows that have age above 10 and EITHER male gender OR are still under investigation.  
 
+`r fontawesome::fa("exclamation", fill = "red")` Please note that missing values (`NA`) are removed by default unless you specify that they should be kept!  
+
+For example, the command below will only keep rows with a `date_onset` prior to 15 April 2020, and any row with a missing date of onset will also be dropped.  
+
+```{r eval=FALSE, echo=TRUE}
+linelist %>% 
+  filter(date_onset < ymd("2020-04-15"))
+```
+
+To keep the missing values, you would need to add an "OR" statement like this:  
+
+```{r eval=FALSE, echo=TRUE}
+linelist %>% 
+  filter(date_onset < ymd("2020-04-15") | is.na(date_onset))
+```
+
+The same principle applies for numeric filters, character filters, etc. Remember that in the filter you are specifying which rows to *keep*.  
+
+
+
+
 
 ## End  
 
-Congratulation on finishing this tutorial!  If you have extra time, consider completing the extra exercises below. Otherwise, we welcome you to advance to the next tutorial in the series.  
+Congratulation on finishing this tutorial!  
+
+If you have extra time, consider completing the extra exercises below. Otherwise, we welcome you to advance to the next tutorial in the series.  
 
 Please consider making a donation to us. We are a nonprofit organization and rely on your contributions to continue supporting frontline epidemiologists around the world.
 
@@ -2852,7 +2864,7 @@ quiz(caption = "Quiz - Western districts",
   question("How many cases were there in western districts?",
     allow_retry = TRUE,
     answer("170"),
-    answer("258", correct = TRUE),
+    answer(western_cases_n, correct = TRUE),
     answer("418")
   )
 )

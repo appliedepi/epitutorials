@@ -12,6 +12,7 @@ LazyData: true
 Imports: 
     dplyr,
     tidyr,
+    magrittr,
     forcats,
     lubridate,
     stringr,
@@ -28,7 +29,15 @@ Imports:
     skimr,
     sortable,
     rio,
-    DT
+    DT,
+    datasets,
+    Hmisc,
+    cowplot,
+    RColorBrewer,
+    gghighlight,
+    ggpubr,
+    ggExtra,
+    ggrepel
 Remotes: 
     rstudio/learnr,
     rstudio/gradethis,

@@ -1,7 +1,7 @@
 ---
 title: "Applied Epi Tutorials: Data preparation"
 tutorial:
-  id: "AE_tutorial_tidy_data"
+  id: "AE_tutorials_tidy_data"
 output: 
   learnr::tutorial:
     progressive: true

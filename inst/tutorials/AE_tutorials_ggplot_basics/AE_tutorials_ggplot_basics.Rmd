@@ -1,12 +1,11 @@
 ---
 title: "Applied Epi Tutorials: ggplot basics"
 tutorial:
-  id: "AE_tutorial_ggplot_basics"
+  id: "AE_tutorials_ggplot_basics"
 output: 
   learnr::tutorial:
     progressive: true
     allow_skip: true
-    theme: "paper"
 runtime: shiny_prerendered
 description: >
   Basics of public health data visualisation with R
@@ -29,6 +28,7 @@ library(lubridate)
 library(ggrepel)
 library(ggExtra)
 library(scales)
+library(gtsummary)
 library(ggpubr)
 library(flair)
 library(gghighlight)
@@ -218,8 +218,8 @@ knitr::include_graphics("images/teaching_icon.png")
 
 **Training:**  
 **[Live courses](www.appliedepi.org)**  
-**[Tutorials](https://training.appliedepi.org)**  
-**[Case studies](www.training.appliedepi.org)**  
+**[Tutorials](www.appliedepi.org)**  
+**[Case studies](www.appliedepi.org)**  
 :::
 
 ::: {}
@@ -720,14 +720,14 @@ In this tutorial, we have pre-loaded the data. But if you were writing in an R s
 
 As explained in the previous tutorial, we strongly recommend organizing your work within an [RStudio project](https://epirhandbook.com/en/r-projects.html). In this way, the "paths" to your data files will not break when used on different computers.  
 
-Below is an command that imports the file "linelist.rds", which is located in the RStudio project's "data" folder.  
+Below is an command that imports the file "linelist.rds", which is located in the RStudio project's "data" folder. The .rds file is R's file type that stores column classes - so we know this is a dataset that has been previous cleaned in R.  
 
 * The `here()` function, from the {here} package, creates the file path which automatically adjusts to whichever computer it is run on  
 * The `import()` function, from the {rio} package, imports the data into R - no matter if it is .csv, .xlsx, .rds, etc.  
 * The `<-` assignment operator stores the imported dataset in R as the object `linelist_raw` for later reference  
 
 ```{r import-demo-subfolder, echo=T, eval=F}
-linelist_raw <- import(here("data", "linelist.rds"))
+linelist <- import(here("data", "linelist.rds"))
 ```
 
 You can read more in our Basics tutorial and in the [Epi R Handbook](https://www.epirhandbook.com/en/import-and-export.html) about how RStudio projects, the {here} package, and the {rio} package can be efficiently used together to make the data import process very easy!
@@ -840,13 +840,15 @@ quiz(
     answer("Statistics"),
     answer("Scale"),
     answer("Data", correct = TRUE),
-    answer("Visualisation type")
+    answer("Visualisation type"),
+    allow_retry = TRUE
   ),
   question("Sub-components of ggplot2 commands are linked together by what symbol?",
     answer("`%>%`", message = "You have selected the 'pipe' operator, which is used in data management generally, but not within ggplot commands."),
     answer("`*`"),
     answer("`$`", message = "You can selected an indexing operator used to select a column from a data frame, which is generally not used within ggplot commands."),
-    answer("`+`", correct = TRUE, message = "Yes, the plus symbol is used to link sub-commands within a ggplot command.")
+    answer("`+`", correct = TRUE, message = "Yes, the plus symbol is used to link sub-commands within a ggplot command."),
+    allow_retry = TRUE
   )
 )
 ```
@@ -884,14 +886,14 @@ ggplot(data = linelist)
 ```
 
 
-If you are familiar with the pipe operator (`%>%`) from our [Data cleaning tutorial](www.training.appliedepi.org), data can also be *piped into* a ggplot command using a pipe:  
+If you are familiar with the pipe operator (`%>%`) from our data cleaning tutorial, data can also be *piped into* a ggplot command using a pipe:  
 
 ```{r pipe, eval=F, echo=T}
 linelist %>%
   ggplot()
 ```
 
-Neither of these approaches to specifying the data will change the blank canvas:  
+At this stage, neither of these approaches to specifying the data will change the blank canvas:  
 
 ```{r blank-plot2, exercise = TRUE}
 ggplot(data = linelist)
@@ -935,12 +937,12 @@ Below, we set the axes X and Y to the age and height columns from the linelist d
 ggplot(data = linelist, mapping = aes(x = age_years, y = ht_cm))
 ```
 
-Below is an R exercise where you can edit, write, and run your own code. Try editing the code such that the y-axis reflects temperature rather than height. Clicking "Run code" will run what you have entered and produce an output. To check your answer against the solution click "Submit Answer". If you need help, click the "Hints" button above the code chunk to get a hint to the solution. You can also ask a question in our [Community Forum](www.community.appliedepi.org).  
+In the codebox below, edit the code such that the y-axis reflects *temperature* rather than height. Clicking "Run code" will run what you have entered and produce an output. To check your answer against the solution click "Submit Answer". If you need help, click the "Hints" button above the code chunk to get a hint to the solution. You can also ask a question in our [Community Forum](www.community.appliedepi.org).  
 
-The first 25 rows of the linelist data are reproduced below. You can use the arrows to scroll left and right through this table and find the correct column.  
+The columns names of the `linelist` data are printed below so that you can find the correct column name to use.  
 
-```{r linelist-data}
-head(linelist, 25)
+```{r echo=TRUE, eval=TRUE}
+names(linelist)
 ```
  
 
@@ -960,7 +962,7 @@ The temperature column is named temp
 ggplot(data = linelist, mapping = aes(x = age_years, y = temp))
 ```
 
-*Note: You may see `aes()` written in ggplot code without the `mapping = ` argument name. As with any R function the argument names do not need to be written as long as they are written in the order expected by the function. For clarity here we include `mapping = ` but if you see code elsewhere without this, it achieves the same result.*
+`r fontawesome::fa("pen", fill = "brown")` *Note: You may see `aes()` written in ggplot code without the `mapping = ` argument name. As with any R function the argument names do not need to be written as long as they are written in the order expected by the function. For clarity here we include `mapping = ` but if you see code elsewhere without this, it achieves the same result.*
 
 
 
@@ -1090,8 +1092,7 @@ ggplot(
   mapping = aes(
     x = age_years,
     y = ht_cm)) +
-geom_point(
-  color = "orange")
+geom_point(color = "orange")
 ```
 
 *NOTE: when we assign a character value such as the fixed color orange, we need to use quotation marks (`"orange"`) whereas when we are mapping an aesthetic to a column name we do not use quotation marks*
@@ -1104,7 +1105,9 @@ Alternatively, we can provide a *column name* for the aesthetic assignment, resu
 1. The assignment is made to a **column name**, without quotes  
 2. The assignment is written **within the `mapping = aes()` argument** of the `ggplot()`  
 
-We have already made dynamic assignments for the x-axis (and y-axis), but this can also be done for aesthetics like `color`. In the plot below, `color = ` is written in the `mapping = aes()` argument, as is assigned to the column `gender`. Now the `color` of each point depends on the value for `gender` in that specific row of data. In effect, this "groups" the data by gender and also produces a legend on the right side of the plot.  
+We have already made dynamic assignments for the x-axis (and y-axis), but this can also be done for aesthetics like `color`. In the plot below, `color = ` is written within the `aes()` and is assigned to the column `gender`.  
+
+Now the `color` of each point depends on the value for `gender` in that specific row of data. In effect, this "groups" the data by gender and also produces a legend on the right side of the plot.  
   
 ```{r dynamic-aes, warning=F, message=F, echo=T}
 ggplot(
@@ -1142,6 +1145,12 @@ ggplot(
     fill = gender)) +
 geom_histogram()
 ```
+
+</br>
+
+`r fontawesome::fa("exclamation", fill = "red")` If you get the error: `It looks like this might not be valid R code...` try typing the code instead of copy/pasting into the codebox.  
+
+
 
 ### Both static and dynamic aesthetics  
 
@@ -1203,7 +1212,7 @@ ggpubr::show_point_shapes()
 
 ```
 
-As with the other aesthetics, we have seen that `shape` can be dynamic. Below the point `shape` is assigned to the column `gender`, and the color to `age_cat`. Note the two legends that appear on the right.  
+As with the other aesthetics, we have seen that `shape` can be dynamic. Below the point `shape` is assigned to the column `gender`, and the color to `case_def`. Note the two legends that appear on the right.  
 
 ```{r dynamic-shape, warning=F, message=F, echo=T}
 ggplot(
@@ -1212,13 +1221,13 @@ ggplot(
     x = age_years,
     y = wt_kg,
     shape = gender,      # shape by gender
-    color = age_cat)) +  # color by age category
+    color = case_def)) +  # color by case definition
 geom_point(
   size = 3,              # all points are size 3
   alpha = 0.3)           # all points are mostly transparent
 ```
 
-Below the points are all assigned to shape 21 - the circle with both an exterior `color` and an interior `fill`. Below we assign the color as "black" and the fill to the column `age_cat`.  
+Below, the points are all assigned to shape 21 - the circle with both an exterior `color` and an interior `fill`. Below we assign the color as "black" and the fill to the column `case_def`.  
 
 ```{r static-shape, warning=F, message=F, echo=T}
 ggplot(
@@ -1226,7 +1235,7 @@ ggplot(
   mapping = aes(
     x = age_years,
     y = wt_kg,
-    fill = age_cat)) +   # interior fill of points by age category
+    fill = case_def)) +  # interior fill of points by case definition
 geom_point(
   shape = 21,            # all points are circles that can be filled
   color = "black",       # all points have black outline
@@ -1241,7 +1250,7 @@ Below are some rules about how aesthetic assignments are inherited (or not) by l
 
 1. Dynamic mappings in the initial `ggplot()` call will apply to subsequent geoms, *unless otherwise overwritten*  
 2. Static aesthetics (e.g. color = "blue") are not inherited by subsequent geoms  
-3. Mappings written within one geom apply only to that geom
+3. Aesthetic mappings written within one geom apply only to that geom
 
 Point 3 above alludes to a variation in ggplot coding that we have not yet shown you - the fact that the `mapping = aes()` can be placed in multiple geoms. For simplicity, in the above examples we have written the `mapping = aes()` only in the top part of the `ggplot()` command. In truth, this argument can be written in any of the geoms, but typically this is only done in complex ggplot commands involving multiple data frames.  
 

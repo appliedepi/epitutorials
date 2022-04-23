@@ -1,12 +1,11 @@
 ---
 title: "Applied Epi Tutorials: R basics"
 tutorial:
-  id: "AE_tutorial_basics"
+  id: "AE_tutorials_basics"
 output: 
   learnr::tutorial:
     progressive: true
     allow_skip: true
-    theme: "paper"
 runtime: shiny_prerendered
 description: >
   Learn how to get started with R, and how to import a dataset
@@ -102,6 +101,9 @@ gradethis::gradethis_setup(
 
 # data prep (must be in setup chunk) --------------------------------------------------------------------
 linelist <- rio::import(system.file("dat/surveillance_linelist_20141201.csv", package = "epitutorials"))
+
+linelist_clean <- rio::import(system.file("dat/tutorial_linelist_clean.rds", package = "epitutorials"))
+
 
 # hide non-exercise code chunks ------------------------------------------------
 knitr::opts_chunk$set(echo = FALSE)
@@ -277,6 +279,8 @@ Authors of this tutorial include:
 * Neale Batra  
 * Brianna Bradley  
 
+Graphics supported by Calder Fong. Images are either from Applied Epi team members or via our Canva account.  
+
 Funding for this tutorial was provided by Médecins Sans Frontières (MSF) / Doctors without Borders and TEPHINET.  
 
 
@@ -348,7 +352,7 @@ This tutorial draws from chapters of our free [Epidemiologist R handbook](https:
 
 
 #### Next steps  
-After completing this tutorial, we recommend you complete our tutorial on "Tidy Data" - collecting, formatting, and preparing your dataset *before* importing it into R is a critical step!  
+After completing this tutorial, we recommend you complete our tutorial on "Data preparation" - collecting, formatting, and preparing your dataset *before* importing it into R is a critical step!  
 
 
 
@@ -365,7 +369,7 @@ Below, the dataset `linelist` is displayed. It contains `r nrow(linelist)` rows,
 * Filter rows by clicking/typing in the empty box above the column  
 
 ```{r, echo=FALSE, eval=TRUE, message = FALSE, warning = FALSE}
-DT::datatable(head(linelist, 25), rownames = FALSE, filter="top", options = list(pageLength = 5, scrollX=T), class = 'white-space: nowrap' )
+DT::datatable(head(linelist_clean, 25), rownames = FALSE, filter="top", options = list(pageLength = 5, scrollX=T), class = 'white-space: nowrap' )
 ```
 
 
@@ -579,7 +583,7 @@ knitr::include_graphics("images/r_popularity.png", error = FALSE)
 
 R is known for its brilliant data visualizations. It is capable of producing deeply customized tables, maps, and epidemic curves. With a bit more advanced knowledge you can visualize contact tracing patterns, phylogenetic trees, and publication-ready plots.  
 
-```{r viz, fig.margin = TRUE, echo = FALSE, out.width = "75%", out.height="100%", fig.cap = ""}
+```{r viz, fig.margin = TRUE, echo = FALSE, out.width = "100%", out.height="100%", fig.cap = ""}
 knitr::include_graphics("images/visualization.png", error = FALSE)
 ```
 
@@ -592,7 +596,7 @@ The dashboards that you can make with R are also extremely sharp and versatile, 
 :::: {style="display: flex;"}
 
 ::: {}
-```{r dashboards, fig.margin = TRUE, echo = FALSE, out.width = "45%", out.height="100%", fig.cap = "", fig.show='hold'}
+```{r dashboards, fig.margin = TRUE, echo = FALSE, out.width = "100%", out.height="100%", fig.cap = "", fig.show='hold'}
 knitr::include_graphics("images/automated_reports.png", error = FALSE)
 ```
 
@@ -609,7 +613,7 @@ a column separator -->
 
 
 ::: {}
-```{r shiny, fig.margin = TRUE, echo = FALSE, out.width = "45%", out.height="100%", fig.cap = "", fig.show='hold'}
+```{r shiny, fig.margin = TRUE, echo = FALSE, out.width = "100%", out.height="100%", fig.cap = "", fig.show='hold'}
 knitr::include_graphics("images/automated_dashboard.png", error = FALSE)
 ```
 
@@ -664,73 +668,55 @@ knitr::include_graphics("images/user_community.png", error = FALSE)
 
 ### What is your reason for learning R?
 
-Tell us in one or two sentences why you are trying to learn R. **Write your answer within "quotation marks" and press 'Submit answer'.**
+  
 
-```{r excited-r, exercise=TRUE, exercise.lines = 2}
-"I want to..."
-
-```
-
-```{r excited-r-check}
-grade_this({
-  # custom checking code appears here
-  if (is.character(.result)) {
-    pass("Thank you for sharing your story with us!")
-  }
-  fail("Thanks for sharing!")
-})
-```
-
-Which analytical software do you use the most? **Write your answer within "quotation marks" and press 'Submit answer'.**
-
-```{r software-use, exercise=TRUE, exercise.lines = 2}
-"e.g. SAS, Stata, Excel, R, EpiInfo, EpiData, Tableau, Python..."
-
-```
-
-```{r software-use-check}
-grade_this({
-  # custom checking code appears here
-  if (is.character(.result)) {
-    pass("Thank you for sharing this detail with us!")
-  }
-  fail("Thanks for sharing!")
-})
+```{r rhetorical1, echo = FALSE}
+question_text(
+  "Tell us in one or two sentences why you are trying to learn R.",
+  answer_fn(function(value) {
+    if (grepl(paste(letters, collapse = "|"), value)) {
+      correct("Thank you for sharing your motivations")
+    }
+  }, )
+)
 ```
 
 
-What is your current level of experience with R? **Write your answer within "quotation marks" and press 'Submit answer'.**
-
-```{r r-experience, exercise=TRUE, exercise.lines = 2}
-"Write either: None, Some training, Run other people's scripts, Regular user, or Advanced."
-
+```{r rhetorical2, echo = FALSE}
+question_text(
+  "Which analytical software do you use the most? (e.g. SAS, Stata, Excel, R, EpiInfo, EpiData, Tableau, Python...)",
+  answer_fn(function(value) {
+    if (grepl(paste(c(letters,toupper(letters)), collapse = "|"), value)) {
+      correct("Thank you for sharing")
+    }
+  }, )
+)
 ```
 
-```{r r-experience-check}
-grade_this({
-  # custom checking code appears here
-  if (is.character(.result)) {
-    pass("Thank you for sharing this with us!")
-  }
-  fail("Thanks for sharing!")
-})
+
+
+
+```{r rhetorical3, echo = FALSE}
+question_text(
+  "What is your current level of experience with R? (Write either: None, Some training, Run other people's scripts, Regular user, or Advanced)",
+  answer_fn(function(value) {
+    if (grepl(paste(letters, collapse = "|"), value)) {
+      correct("Thank you for sharing")
+    }
+  }, )
+)
 ```
 
-What is your primary professional relationship with public health? **Write your answer within "quotation marks" and press 'Submit answer'.**
 
-```{r health-experience, exercise=TRUE, exercise.lines = 2}
-"Write either: None, Student/trainee, Academic research, Public health practitioner, Applied epidemiologist, or Clinician."
-
-```
-
-```{r health-experience-check}
-grade_this({
-  # custom checking code appears here
-  if (is.character(.result)) {
-    pass("Thank you for sharing this with us!")
-  }
-  fail("Thanks for sharing!")
-})
+```{r rhetorical4, echo = FALSE}
+question_text(
+  "What is your primary professional relationship with public health? (e.g. None, Student/trainee, Academic research, Public health practitioner, Applied epidemiologist, or Clinician)",
+  answer_fn(function(value) {
+    if (grepl(paste(letters, collapse = "|"), value)) {
+      correct("Thank you for sharing")
+    }
+  }, )
+)
 ```
 
 
@@ -782,14 +768,16 @@ quiz(caption = "Quiz - R and RStudio",
            correct = TRUE,
            message = "The RStudio IDE is a software offered for free by the RStudio corporation. There are other, less common, IDEs to use R, such as Tinn-R and Emacs."),
     answer("No",
-           message = "RStudio IDE is free and open-source.")
+           message = "RStudio IDE is free and open-source."),
+    allow_retry = TRUE
   ),
   
   question("Do you need to install both R and RStudio?",
     answer("Yes.",
            correct = TRUE, message = "While it is possible to work in R without an interface like RStudio, this is not recommended for beginners."),
     answer("No.",
-           message = "You need to install both programs separately.")
+           message = "You need to install both programs separately."),
+    allow_retry = TRUE
   ),
   
   question("Once both programs are installed, which one should you open to begin working?",
@@ -797,7 +785,8 @@ quiz(caption = "Quiz - R and RStudio",
            correct = TRUE,
            message = "Opening RStudio will automatically start R."),
     answer("R",
-           message = "For beginners, it is best to work in R *through* RStudio. Open RStudio."))
+           message = "For beginners, it is best to work in R *through* RStudio. Open RStudio."),
+    allow_retry = TRUE)
 )
 ```
 
@@ -924,7 +913,7 @@ If you are working in an RStudio project, you will see the name of the project i
 
 ### An example RStudio project  
 
-For example, if you had an RStudio project on your desktop in a folder called "intro_course", the contents might look like this:  
+For example, if you you were to create an RStudio project on your desktop called "intro_course", and then continue building subfolders, the contents might look like this:  
 
 ```{r, eval = TRUE, echo = FALSE, out.width = "75%"}
 knitr::include_graphics("images/new_r_project_explorer.png", error = F)
@@ -1352,6 +1341,7 @@ commands <- c(
 # Initialize the question
 question_rank(
   "Click and move the commands into their correct order:",
+  random_answer_order = TRUE,
   answer(commands, correct = TRUE, message = "Yes, you must assign the values of `confirmed_cases` and `suspect_cases`, then finally assign the value of `total_cases` using the two previously-assigned values."),
   answer(c(commands[2], commands[1], commands[3]), correct = TRUE, message = "Yes, you must assign the values of `confirmed_cases` and `suspect_cases`, then finally assign the value of `total_cases` using the two previously-assigned values."),
   answer(rev(commands), correct = FALSE, message = "Other direction!"),
@@ -1983,7 +1973,7 @@ gradethis::grade_this({
 
 Note: Even though the vector contains character values, when typing the *name of the vector*, you do not use quotes. It is an R object just like `confirmed_cases`, and so should be written plainly in code.  
 
-What can we do with a *character* vector We cannot multiply it by 2 because it is not numeric... for fun, **put this vector into another function**: `toupper()`, which changes all of the characters to upper case. We have set this code box to remember what you wrote in the previous codebox, so you can reference the `jurisdictions` object that you created.  
+What can we do with a *character* vector? We cannot multiply it by 2 because it is not numeric... for fun, please **write a command that puts your vector into another function**: `toupper()`, which changes all of the characters to upper case. We have set this code box to remember what you wrote in the previous codebox, so you can reference the `jurisdictions` object that you created.  
 
 ```{r use-toupper-button}
 actionButton("use-toupper", "Use your jurisdictions code")
@@ -2102,23 +2092,15 @@ knitr::include_graphics("images/excel_arguments.png", error = F)
 
 Let's take a hypothetical example - pretend that there is an R function called `oven_bake()` that will bake something in an oven. 
 
-What are some possible arguments for this function? **Write your answer within "quotation marks" and press 'Submit answer'.** This question will not be graded, it is simply to make you think.
-
-```{r oven-bake-free-text, exercise=TRUE, exercise.lines = 5}
-"Write some free text here in the quotation marks.
-What (object) needs to go into the oven?
-What oven settings must be adjusted?
-What other instructions must be followed?"
-```
-
-```{r oven-bake-free-text-check}
-grade_this({
-  # custom checking code appears here
-  if (is.character(.result)) {
-    pass("Thank you for trying this mind exercise.")
-  }
-  fail("Put your answer within quotation marks.")
-})
+```{r rhetorical5, echo = FALSE}
+question_text(
+  "What are some possible arguments for this function? (e.g. think of the object to go in the oven, settings to be adjusted, or other instructions to be followed)",
+  answer_fn(function(value) {
+    if (grepl(paste(letters, collapse = "|"), value)) {
+      correct("Thank you for your answer!")
+    }
+  }, )
+)
 ```
 
 
@@ -2211,7 +2193,7 @@ flair::decorate("arguments") %>%
 ```{r quiz-comma-add}
 quiz(
   question("How would you modify the command to add a space after each comma (note that single quotes are equivalent to double quotes)?",
-    answer("paste(jurisdictions, space = YES, collapse = ','", correct = FALSE, "No, space is not an argument of the paste() function"),
+    answer("paste(jurisdictions, space = YES, collapse = ',')", correct = FALSE, "No, space is not an argument of the paste() function"),
     answer("paste(jurisdictions, collapse = ',_')", correct = FALSE, message = "No, an underscore is its own character, and will not insert a space."),
     answer("paste(jurisdictions, collapse = ', ')", correct = TRUE, message = "That is correct. Placing a single space after the comma will make the space appear between words as well."),
     answer("paste(jurisdictions, collapse = ',')", correct = TRUE, message = "No, this is the original."),
@@ -2220,7 +2202,7 @@ quiz(
   )
 ```
 
-Now use the codebox below to try the `paste()` function and its `collapse=` argument on your object `jurisdictions` (press the button to bring in your old command).  
+Now use the codebox below to try the `paste()` function and its `collapse=` argument on your object `jurisdictions` (press the button to bring in your old command, then add a new command below it).  
 
 See how `paste()` knows to not place the comma after the last value in `jurisdictions` - this is a special feature of using `collapse = `.  
 
@@ -2327,11 +2309,6 @@ The documentation details will look something like this (we can help you interpr
 knitr::include_graphics("images/r-help.png", error = F)
 ```
 
-In this tutorial, you can run a command with the question mark from any codebox to launch the function documentation in a new window, for example: `?max`. Try it below:  
-
-```{r help-doc, exercise = TRUE, exercise.lines = 2}
-
-```
 
 Here are some final quiz questions to check your comprehension:  
 
@@ -2383,12 +2360,15 @@ calc_tests <- function(site1, site2, site3, extra){   # list the arguments, and 
 
 ```
 
-Once the above code is run, the function is defined (it will appear in the R environment pane just like the other objects).  
-
-Now that the function has been defined, we can use it to run the equation given values for the arguments, like this:  
+Once the above code is run, the function `calc_tests()` is created - it did not exist prior! Now you can use the function `calc_tests()` to determine how many tests you need to order. Simply write it as below, and provide the numeric values to its arguments as shown - the equation will be run in the background.  
 
 ```{r, echo=T}
 calc_tests(site1 = 200, site2 = 550, site3 = (925*2), extra = 420)
+```
+
+
+```{r, echo=T}
+calc_tests(site1 = 400, site2 = 800, site3 = 150, extra = 5)
 ```
 
 See how we've wrapped up all the code into a function! Very cool. Think of the possibilities...
@@ -2959,53 +2939,44 @@ quiz(caption = "Quiz - file names",
 
 Below are some file names of case linelists that are arriving from several hospitals.  
 
-Revise the file names to align with naming best-practices. **Leave the names in quotation marks**:  
-
-```{r rename-central, exercise=TRUE, exercise.lines = 2}
-"Central Hospital 12012014.csv"
-```
-
-```{r rename-central-check}
-grade_this({
-  # custom checking code appears here
-  if (is.character(.result)) {
-    pass("Thanks for your answer. We suggest: 20141201_hosp_central.csv")
-  }
-  fail("Ensure your answer is within quote marks to be correctly submitted")
-})
-```
+Revise the file names below to align with naming best-practices. **Leave the names in quotation marks**:  
 
 
-```{r rename-military, exercise=TRUE, exercise.lines = 2}
-"Dec 1 2014 Military Hospital.csv"
-```
-
-```{r rename-military-check}
-grade_this({
-  # custom checking code appears here
-  if (is.character(.result)) {
-    pass("Thanks for your answer. We suggest: 20141201_hosp_central.csv")
-  }
-  fail("Ensure your answer is within quote marks to be correctly submitted")
-})
+```{r rhetorical6, echo = FALSE}
+question_text(
+  "Central Hospital 12012014.csv",
+  answer_fn(function(value) {
+    if (grepl(paste(letters, collapse = "|"), value)) {
+      correct("Thanks for your answer. We suggest: 20141201_hosp_central.csv")
+    }
+  }, )
+)
 ```
 
 
-```{r rename-port, exercise=TRUE, exercise.lines = 2}
-"Ebola Port Hospital December 1st 2014.csv"
+
+```{r rhetorical7, echo = FALSE}
+question_text(
+  "Dec 1 2014 Military Hospital.csv",
+  answer_fn(function(value) {
+    if (grepl(paste(letters, collapse = "|"), value)) {
+      correct("Thanks for your answer. We suggest: 20141201_hosp_military.csv")
+    }
+  }, )
+)
 ```
 
-```{r rename-port-check}
-grade_this({
-  # custom checking code appears here
-  if (is.character(.result)) {
-    pass("Thanks for your answer. We suggest: 20141201_hosp_port.csv")
-  }
-  fail("Ensure your answer is within quote marks to be correctly submitted")
-})
+
+```{r rhetorical8, echo = FALSE}
+question_text(
+  "Ebola Port Hospital December 1st 2014.csv",
+  answer_fn(function(value) {
+    if (grepl(paste(letters, collapse = "|"), value)) {
+      correct("Thanks for your answer. We suggest: 20141201_hosp_port.csv")
+    }
+  }, )
+)
 ```
-
-
 
 
 
@@ -3362,8 +3333,8 @@ quiz(caption = "Quiz - data review",
 You can return a good summary of the data frame using the R package {skimr} and its function `skim()` (note the difference in spelling!).  
 
 
-Place the name of the linelist in `skim()` and run. What content appears in the R console?
-  
+Place the name of the linelist in `skim()` and run. What content appears? (this would be printed to the R console in RStudio)  
+
 ```{r skimr-ex, exercise = TRUE}
 skim(linelist)
 ```
@@ -3402,7 +3373,7 @@ quiz(caption = "Quiz - reviewing the data",
   question("Review the information on numeric columns. What is the median age?",
     allow_retry = T,
         answer("32.2"),
-        answer("13", correct = TRUE),
+        answer("13", correct = TRUE, message = "The 50th percentile of the column age is given."),
         answer("1250"),
         answer("99.0")
   )
