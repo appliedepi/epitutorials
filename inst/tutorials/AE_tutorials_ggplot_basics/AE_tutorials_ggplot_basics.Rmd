@@ -1660,7 +1660,7 @@ Axis scales can be edited in a similar way. In our bar plot, we have a continuou
 By adding `scale_y_continuous()` we can adjust the y-axis breaks using the {base} function `seq()` to define a numeric sequence. The function `seq()` accepts a `from = `, `to = `, and `by = ` values, and produces a vector of values that are used by the scale command. For example:  
 
 ```{r, echo=T, eval=T}
-seq(from = 0, to = 3000, by = 500)
+seq(from = 0, to = 400, by = 25)
 ```
 
 We can supply this vector to the argument `breaks = ` in the `scale_y_continuous` function to achieve exactly the breaks that we want.  
@@ -1674,8 +1674,8 @@ ggplot(
 geom_bar() +
 scale_fill_viridis_d(na.value = "grey") +
 scale_y_continuous(breaks = seq(from = 0,
-                                to = 3000,
-                                by = 500))
+                                to = 400,
+                                by = 25))
 ```
 
 
@@ -1696,8 +1696,8 @@ ggplot(
 geom_bar() +
 scale_fill_viridis_d(na.value = "grey") +
 scale_y_continuous(breaks = seq(from = 0,
-                                to = 3000,
-                                by = 500),
+                                to = 400,
+                                by = 25),
                    expand = c(0,0))
 ```
 
@@ -1712,8 +1712,8 @@ ggplot(
 geom_bar() +
 scale_fill_viridis_d(na.value = "grey") +
 scale_y_continuous(breaks = seq(from = 0,
-                                to = 3000,
-                                by = 500),
+                                to = 400,
+                                by = 25),
                    expand = c(0,0))
 ```
 
@@ -1730,8 +1730,8 @@ ggplot(
 geom_bar() +
 scale_fill_viridis_d(na.value = "grey") +
 scale_y_continuous(breaks = seq(from = 0,
-                                to = 3000,
-                                by = 500),
+                                to = 400,
+                                by = 25),
                    expand = c(0,0)) +
 scale_x_discrete(expand = c(0,0))
 ```
@@ -1757,7 +1757,7 @@ Adjustment of this date axis can be done with `scale_x_date()`. The first step i
 
 Note: these are the axis *label* breaks - they do not impact the bins of the histogram (bar widths). To adjust the histogram bins, see the [Epidemic curves](https://epirhandbook.com/en/epidemic-curves.html) chapter of the Epi R Handbook.  
 
-For practice, try setting the date axis breaks in this plot to appear every 2 months:
+For practice, try setting the date axis breaks in this plot to appear every 2 weeks:
 
 ```{r date-break, exercise = TRUE, warning=F, message=F}
 ggplot(
@@ -1775,7 +1775,7 @@ ggplot(
   data = linelist,
   mapping = aes(x = date_onset)) +
 geom_histogram() +
-scale_x_date(date_breaks = "2 months")
+scale_x_date(date_breaks = "2 weeks")
 ```
 
 You may notice that the labels now appear in a defauly format: YYYY-MM-DD. We will show you how to change this in the next section...  
@@ -1804,7 +1804,7 @@ ggplot(
   data = linelist,
   mapping = aes(x = date_onset)) +
 geom_histogram() +
-scale_x_date(date_breaks = "2 months",
+scale_x_date(date_breaks = "2 weeks",
              date_labels = "%d %b \n %Y" )
 ```
 
@@ -1822,7 +1822,7 @@ ggplot(
   data = linelist,
   mapping = aes(x = date_onset)) +
 geom_histogram() +
-scale_x_date(date_breaks = "2 months",
+scale_x_date(date_breaks = "2 weeks",
              labels = scales::label_date_short() )
 ```
 
@@ -1833,7 +1833,7 @@ The {scales} package also offers useful function to help us display percentages.
 To create an example, we summarise the linelist data to arrive at the monthly case fatality ratio:  
 
 
-```{r CFR, echo = F, eval = T}
+```{r CFR, echo = TRUE, eval = TRUE}
 # Create new data frame of monthly case fatality ratios
 CFR_data <- linelist %>% 
   
@@ -1847,13 +1847,15 @@ CFR_data <- linelist %>%
     CFR    = deaths / cases)
 ```
 
+The first 4 rows are shown below:  
+
 ```{r, echo = F, eval = T}
 CFR_data %>% 
   head(4) %>%
   knitr::kable()
 ```
 
-Conveniently, we can simply write `labels = percent`, and ggplot will know to use this function (assuming you have installed and loaded the {scales} package).  
+Conveniently, we can simply write `labels = percent`, and ggplot will know to use this function to convert the decimal proportions to percents (assuming you have installed and loaded the {scales} package).  
 
 ```{r , echo = TRUE, eval = T, warning = F, message = F}
 ggplot(
@@ -1917,7 +1919,8 @@ Here we extract the current date (`Sys.Date()`) in the time zone of our computer
 str_glue("{fmt_count(linelist, is.na(date_onset))} cases missing onset and not shown")
 ```
 
-Anything wrapped in curly brackets (`{__}`) will be run as **R** code allowing us to produce labels which will update with values from our data as the data is updated.
+Anything wrapped in curly brackets (`{__}`) will be run as **R** code allowing us to produce labels which will update with values from our data as the data is updated. The `fmt_count()` is a useful function from {epikit} that returns nicely formatted counts and the corresponding percents.  
+
 
 ## Theme elements
 
@@ -1940,7 +1943,10 @@ Themes are non-data design features (background, text size/color, etc).
 
 Try adding the default themes above to this plot to see the changes:
 
-```{r theme_trial, exercise = TRUE, warning=F, message=F}
+Try the argument `base_size = 16` inside the theme command to quickly increase all text sizes.  
+
+
+```{r theme_trial, exercise = TRUE, warning=F, message=F, exercise.lines = 24}
 linelist$hosp_time <- linelist$date_outcome - linelist$date_hospitalisation
 
 ggplot(data = linelist) +
@@ -1964,7 +1970,6 @@ labs(
 )
 ```
 
-Try the argument `base_size = 16` inside the theme to quickly increase text size.  
 
 ```{r themes, echo=F, eval=T, warning=F, message=F, fig.height = 6}
 linelist$hosp_time <- linelist$date_outcome - linelist$date_hospitalisation
@@ -2132,25 +2137,50 @@ theme(legend.position = "bottom",          # move legend to bottom so there is m
 )
 ```
 
-
-```{r your_plot_quiz}
-quiz(
-  question_text("Do you think your plot would be easily understandable at a quick glance?",
-    answer("Good graphics are usually interpretable within a few seconds for those familiar with standard plotting methods. This interpretation can be aided by including descriptive titles, axis labels, legends and captions as well as by not over-cluttering your plot. Do not be afraid to use facets if you feel that a plot is becoming too complex.", correct = T), incorrect  = "Good graphics are usually interpretable within a few seconds for those familiar with standard plotting methods. This interpretation can be aided by including descriptive titles, axis labels, legends and captions as well as by not over-cluttering your plot. Do not be afraid to use facets if you feel that a plot is becoming too complex."
-    ),
-    question_text("Do you think your visualization is showing something too complex to explain with words?",
-    answer("This is a good way to consider data visualization, if something can easily be explained with words it likely doesn't need to be plotted unless to support other information. If a plot is explaining something which you would struggle to explain succinctly with words this means that it is an effective and valuable visualization.", correct = T), incorrect  = "This is a good way to consider data visualization, if something can easily be explained with words it likely doesn't need to be plotted unless to support other information. If a plot is explaining something which you would struggle to explain succinctly with words this means that it is an effective and valuable visualization."
-    ),
-    question_text("What do you think about the contrast in your plot? is it highlighting what you want to show?",
-    answer("Don't be afraid to play with colors and the different background themes in ggplot to create an effective and visually appealing visualization. It is important that associations you are trying to highlight are easily visible and noticed without further prompting.", correct = T), incorrect  = "Don't be afraid to play with colors and the different background themes in ggplot to create an effective and visually appealing visualization. It is important that associations you are trying to highlight are easily visible and noticed without further prompting."
-    ),
-    question_text("How would you improve on the example plot in the answer (reproduced below)?",
-    answer("This is up to you to decide! One thing which jumps out is that it doesn't mention that we are using Ebola data anywhere on the plot. This would be ok if it was to form part of a report on a certain dataset or a presentation on the progress of an Ebola outbreak but may be an issue if it is a plot to be viewed by the public or wider level stakeholders and collaborators.", correct = T), incorrect  = "This is up to you to decide! One thing which jumps out is that it doesn't mention that we are using Ebola data anywhere on the plot. This would be ok if it was to form part of a report on a certain dataset or a presentation on the progress of an Ebola outbreak but may be an issue if it is a plot to be viewed by the public or wider level stakeholders and collaborators."
-    )
-
+```{r rhetorical3, echo = FALSE}
+question_text(
+  "Do you think your plot would be easily understandable at a quick glance?",
+  answer_fn(function(value) {
+    if (grepl(paste(letters, collapse = "|"), value)) {
+      correct("Good graphics are usually interpretable within a few seconds for those familiar with standard plotting methods. This interpretation can be aided by including descriptive titles, axis labels, legends and captions as well as by not over-cluttering your plot. Do not be afraid to use facets if you feel that a plot is becoming too complex.")
+    }
+  }, )
 )
-
 ```
+
+```{r rhetorical4, echo = FALSE}
+question_text(
+  "Do you think your visualization is showing something too complex to explain with words?",
+  answer_fn(function(value) {
+    if (grepl(paste(letters, collapse = "|"), value)) {
+      correct("This is a good way to consider data visualization, if something can easily be explained with words it likely doesn't need to be plotted unless to support other information. If a plot is explaining something which you would struggle to explain succinctly with words this means that it is an effective and valuable visualization.")
+    }
+  }, )
+)
+```
+
+```{r rhetorical5, echo = FALSE}
+question_text(
+  "What do you think about the contrast in your plot? is it highlighting what you want to show?",
+  answer_fn(function(value) {
+    if (grepl(paste(letters, collapse = "|"), value)) {
+      correct("Don't be afraid to play with colors and the different background themes in ggplot to create an effective and visually appealing visualization. It is important that associations you are trying to highlight are easily visible and noticed without further prompting.")
+    }
+  }, )
+)
+```
+
+```{r rhetorical6, echo = FALSE}
+question_text(
+  "How would you improve on the example plot in the answer (reproduced below)?",
+  answer_fn(function(value) {
+    if (grepl(paste(letters, collapse = "|"), value)) {
+      correct("This is up to you to decide! One thing which jumps out is that it doesn't mention that we are using Ebola data anywhere on the plot. This would be ok if it was to form part of a report on a certain dataset or a presentation on the progress of an Ebola outbreak but may be an issue if it is a plot to be viewed by the public or wider level stakeholders and collaborators.")
+    }
+  }, )
+)
+```
+
 
 
 
@@ -2191,7 +2221,9 @@ theme(legend.position = "bottom",          # move legend to bottom so there is m
 ## End  
 
 
-Congratulation on finishing this tutorial!  If you have extra time, consider completing the extra exercises below. Otherwise, we welcome you to advance to the next tutorial in the series. Please also see the tutorial that focuses on more complex plotting techniques and common epidemiological plots.  
+Congratulation on finishing this tutorial!  
+
+Some additional resources are listed below. Please also see the tutorial that focuses on more complex plotting techniques and common epidemiological plots.  
 
 Please consider making a donation to us. We are a nonprofit organization and rely on your contributions to continue supporting frontline epidemiologists around the world.
 
@@ -2203,7 +2235,7 @@ Please consider making a donation to us. We are a nonprofit organization and rel
 </form>
 
 
-For refreshers on what we have covered in this tutorial and more detailed information on **ggplot2** look at the [ggplot basics](https://epirhandbook.com/en/ggplot-basics.html) and [ggplot tips](https://epirhandbook.com/en/ggplot-tips.html) sections of the Epi R Handbook.  
+For refreshers on what we have covered in this tutorial and more detailed information on {ggplot2} look at the [ggplot basics](https://epirhandbook.com/en/ggplot-basics.html) and [ggplot tips](https://epirhandbook.com/en/ggplot-tips.html) sections of the Epi R Handbook.  
 
 Further {ggplot2} resources are plentiful with all of the documentation for individual functions available directly from the [Tidyverse website](https://ggplot2.tidyverse.org/), including a nice [cheat sheet](https://github.com/rstudio/cheatsheets/blob/main/data-visualization-2.1.pdf) which you can print as a simple refresher and reference guide.  
 
