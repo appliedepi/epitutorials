@@ -1288,7 +1288,6 @@ facet_wrap(~source)
 ```
 
 
-You will also notice that the date axes in these facet plots look terrible by default! We will address this in the scales section of the tutorial.
 
 ### Free axes  
 
@@ -1318,8 +1317,8 @@ Within the `facet_wrap()` function, you can also control the number of columns o
 Try editing the below code, which facets the histogram by the column `hospital_clean`:
 
 1. Add a "free_y" free y axis
-2. Have only 2 columns of plots
-3.Assign `fill` to the column `source` of infection (tip: review the aesthetic mapping section above)  
+2. Have only 2 columns of plots  
+3. Assign `fill =` to the column `source` of infection (tip: review the aesthetic mapping section above)  
 
 ```{r facet-test, exercise = TRUE, warning=F, message=F}
 ggplot(
@@ -1448,17 +1447,31 @@ facet_wrap vs facet_grid
 
 Below is a short quiz on facets, these are free text questions so there are no wrong answers, let us know what you think!  
 
-```{r facet-quiz}
-quiz(
-  question_text("When would you use a facet rather than an aesthetic?",
-    answer("Facets are useful to contrast and compare subsets of the data, sometimes this cannot be done efficiently with aesthetics alone as there is a large amount of overlap between different datasets. Sometimes we are already using multiple aesthetics to show different properties of the data and a facet gives us an additional diffentiation without further cluttering the plot.", correct = T), incorrect  = "Facets are useful to contrast and compare subsets of the data, sometimes this cannot be done efficiently with aesthetics alone as there is a large amount of overlap between different datasets. Sometimes we are already using multiple aesthetics to show different properties of the data and a facet gives us an additional diffentiation without further cluttering the plot."
-    ),
-    question_text("When would we use facet_wrap rather than facet_grid?",
-    answer("Facet grid is most useful for 2 discrete variables, where you are see all or most combinations of these two variables in your data. To split by one variable with a lot of levels or just to provide an additional aesthetic without cluttering the plot facet_wrap may be more useful.", correct = T), incorrect = "Facet grid is most useful for 2 discrete variables, where you are see all or most combinations of these two variables in your data. To split by one variable with a lot of levels or just to provide an additional aesthetic without cluttering the plot facet_wrap may be more useful. "
-    )
-  
+
+```{r rhetorical1, echo = FALSE}
+question_text(
+  "When would you use a facet rather than an aesthetic?",
+  answer_fn(function(value) {
+    if (grepl(paste(letters, collapse = "|"), value)) {
+      correct("")
+    }
+  }, )
 )
 ```
+
+
+```{r rhetorical2, echo = FALSE}
+question_text(
+  "When would you use a facet_wrap() instead of facet_grid()?",
+  answer_fn(function(value) {
+    if (grepl(paste(letters, collapse = "|"), value)) {
+      correct("Facet grid is most useful for 2 discrete variables, where you are see all or most combinations of these two variables in your data. To split by one variable with a lot of levels or just to provide an additional aesthetic without cluttering the plot facet_wrap may be more useful.")
+    }
+  }, )
+)
+```
+
+
 
 
 ## Scales  
