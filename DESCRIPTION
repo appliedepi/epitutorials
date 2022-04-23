@@ -15,6 +15,7 @@ Imports:
     forcats,
     lubridate,
     stringr,
+    scales,
     emo (>= 0.0.0.9000),
     flair,
     fontawesome,

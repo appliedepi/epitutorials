@@ -139,9 +139,9 @@ knitr::include_graphics("images/applied_epi_banner.png", error = F)
 
 </br>
 
-#### Tutorial 3: Introduction to data visualization
+#### Tutorial 4: Introduction to data visualization
 
-This is the **third** tutorial in the series.  
+This is the **fourth** tutorial in the series.  
 
 * **This tutorial teaches**: Introduction to visualization of public health and epidemiological data using the {ggplot2} R package  
 * **Target audience**: Public health practitioners, epidemiologists, clinicians, and researchers who cannot access our live courses  
@@ -443,6 +443,8 @@ tbl_cross(data = linelist, row = gender, col = case_def)
 grade_this_code("Correct, you should see a cross-tabulation of the linelist, in which gender is in the rows and case definition is in the columns.")
 ```
 
+</br>
+
 `r fontawesome::fa("exclamation", fill = "red")` If you get the error: `It looks like this might not be valid R code...` try typing the code instead of copy/pasting into the codebox.  
 
 
@@ -455,7 +457,7 @@ To practice, please answer the following questions:
 
 ```{r quiz-use-helper, echo=F}
 quiz(
-  question_radio("When should I view the red 'helper' code?",
+  question_radio("When should I view the code hints and solutions?",
     answer("After trying to write the code myself", correct = TRUE),
     answer("Before I try coding", correct = FALSE),
     correct = "Reviewing best-practice code after trying to write yourself can help you improve",

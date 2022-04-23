@@ -2,7 +2,7 @@ pacman::p_load(rio, here, scales, flextable, lubridate, tidyverse, janitor)
 
 messy <- import(file.choose(), sheet = "site_coverage_merged")
 
-messy_xlsx <- openxlsx::read.xlsx(file.choose(), sheet = "site_coverage_merged", fillMergedCells = TRUE)
+filled_xlsx <- openxlsx::read.xlsx(file.choose(), sheet = "site_coverage_merged", fillMergedCells = TRUE)
 
 
 # import long tidy data
@@ -51,6 +51,10 @@ sites_clean %>%
   adorn_ns("front") %>% 
   qflextable() %>% 
   add_header_row(values = c("Coverage status by province"), colwidths = c(3))
+
+sites_clean %>% 
+  group_by(Date) %>% 
+  summarise(`Need coverage` = sum(Status == "No"))
 
 sites_clean %>% 
   tabyl(Date, Status) %>% 

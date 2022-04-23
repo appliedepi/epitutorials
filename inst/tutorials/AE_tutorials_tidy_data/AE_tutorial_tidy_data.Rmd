@@ -1,5 +1,5 @@
 ---
-title: "Applied Epi Tutorials: Tidy data"
+title: "Applied Epi Tutorials: Data preparation"
 tutorial:
   id: "AE_tutorial_tidy_data"
 output: 
@@ -22,7 +22,12 @@ library(learnr)          # create lessons from rmd
 library(gradethis)       # evaluate exercises
 library(sortable)        # questions on choosing order of commands
 library(skimr)           # dataset summary
+library(scales)          # plots
 library(dplyr)           # wrangle data
+library(lubridate)       # dates
+library(janitor)         # quick tables
+library(forcats)         # factors
+library(tidyr)           # for complete in the messy dats series
 library(flair)           # highlight code
 library(ggplot2)         # visualise data
 library(gtsummary)       # visualise data
@@ -106,6 +111,7 @@ malaria_counts <- rio::import(system.file("dat/malaria_facility_count_data.rds",
 
 datadict <- rio::import(system.file("dat/linelist_datadict.csv", package = "epitutorials"))
 
+long_data <- rio::import(system.file("dat/site_coverage_messy.xlsx", package = "epitutorials"), sheet = "Tidy")
 # hide non-exercise code chunks ------------------------------------------------
 knitr::opts_chunk$set(echo = FALSE)
 
@@ -123,9 +129,9 @@ knitr::include_graphics("images/applied_epi_banner.png", error = F)
 
 </br>
 
-#### Tutorial 0: Tidy data  
+#### Tutorial 2: Data preparation  
 
-This is the **first** tutorial in the series.  
+This is the **second** tutorial in the series.  
 
 * **This tutorial teaches**: Best practices for data entry, format, documentation, and preparation for analysis using R  
 * **Target audience**: Public health practitioners, epidemiologists, clinicians, and researchers who cannot access our live courses  
@@ -564,6 +570,346 @@ knitr::include_graphics("images/messydata2.PNG")
 
 
 
+
+
+
+
+
+
+
+
+
+## "Machine-readable" data  
+
+When you first begin to collect data, you must ask the question: *is the primary audience of this dataset **humans** or **machines**?*   
+
+Recording information such that it is optimized for for "human-readability" can be very different than optimization for "machine-readability" and analysis. Be clear from the beginning what your priority is. Please allow us to give some general advice - it is generally easier to transition from machine-readable to human-readable than the other way!  
+
+### Excel spreadsheets  
+
+At Applied Epi, we promote the use of R for [many reasons](https://appliedepi.org/why-r/), but we know that for most applied epidemiologists, Excel is tool that is fundamental to their workflows. There is nothing wrong with using Excel. Workflows that involve R almost always *also involve Excel*. But it is important that you use Excel in a manner that allows you to also maximize the benefits of R.  
+
+
+```{r, out.width = "85%", fig.align = "center", echo=F}
+knitr::include_graphics("images/interoperability.png")
+```
+
+Excel is a powerful and beginner-friendly software. While it is also possible to do some analysis in Excel, you find that more complex analyses and data management operations may be very complicated or impossible to carry out in this software. This is where versatile programs such as R become very useful.  
+
+
+```{r, out.width = "85%", fig.align = "center", echo=F, fig.cap="R has an initial learning curve, but more complex tasks become much easier than in Excel."}
+knitr::include_graphics("images/difficulty_plot-1.png")
+```
+
+
+In this series of tutorials, you will become more familiar with R code syntax. In this section, we will focus on steps that you can take to ensure that an Excel dataset can be easily interpreted by R for analysis.  
+
+
+## Non-tidy data
+
+*The main reason one encounters non-tidy data is because many Excel spreadsheets are designed to prioritize easy reading by humans, not easy reading by machines/software.* 
+
+“Tidy” datasets may not be as readable to a human eye, but they make data cleaning and analysis much easier!
+
+To help you see the difference, below are some fictional examples of **non-tidy data** that prioritize *human*-readability over *machine*-readability.
+Here is our hospital capacity dataset in Excel:
+
+```{r, out.width = "55%", fig.align = "left", echo=F}
+knitr::include_graphics("images/messydata.PNG")
+```
+
+
+```{r quiz_messydata}
+quiz(
+  question("What do you foresee may be issues when uploading this to R? Tick all that are most likely to apply.",
+    answer("I don't think there will be any issues when we upload this to R.", message = "The format will not be the same in R."),
+    answer("R will not be able to read this dataset.", message = "R will be able to read this dataset, however it will require a lot of cleaning!"),
+    answer("The colours won't appear.", correct = TRUE, message = "The colours won't appear, which may be an issue if the colours represent another variable!"),
+    answer("The colours will appear but it is not clear what they represent.", message = "The colours will not appear in R."),
+    answer("Some rows are empty.", correct = TRUE, message = "The extra empty rows will require an extra cleaning step."),
+    answer("Some row values are empty.", correct = TRUE, message = "R can handle missing values in different cells. The issue with this dataset is that some empty cells imply another value (that from the row above)."),
+    answer("Some columns are empty.", correct = TRUE, message = "The empty columns will require an extra cleaning step."),
+    answer("Some column values are empty.", message = "R can handle missing values in columns."),
+    answer("Spaces in the column names.", correct = TRUE, message = "Column names will be changed from what we see in Excel if they have spaces and as a result and may require an extra cleaning step!"),
+    answer("Spaces in the cell values.", message = "R can handle spaces when it comes to cell values. Note that these values will then be recorded as a character (i.e. string) variable."),
+    answer("Different recording formats in the same column.", message = "If the same column has different recording formats, R will still be able to read it. It may however save it in the wrong format which will require an extra cleaning step. Recording in different formats in the same column also does not follow the principles of tidy data."),
+    allow_retry = TRUE
+  )
+)
+```
+
+These different options have already given you quite a few things to think about! Let's now go over specific issues that you may encounter when importing a dataset from Excel to R.
+
+
+### **Merged cells**
+
+Merged cells are often useful to make data *human-readable* but can cause problems for analysis by machines.  
+
+In the spreadsheet below, the "coverage" at 14 sites are tracked for a period of days in May and June 2022.  
+
+```{r, out.width = "100%", fig.align = "left", echo=F}
+knitr::include_graphics("images/site_coverage_untidy.jpg")
+```
+
+
+
+```{r quiz_mergedcells}
+question("What issues do you think R will encounter when loading this dataset?",
+  answer("R will not recognise the merged cells and will drop the value.",
+         message = "Indeed, R cannot recognise merged cells. However it will not drop all those values."),
+  answer("R will recognise the merged cell and also create a merged cell.",
+         message = "Data frames in R cannot contain merged cells."),
+  answer("R will not recognise the merged cell so will only keep the value in the first row and column of the merged area.", correct = TRUE),
+  answer("R will recognise the merged cells and duplicate these values across the merged area.",
+         message = "Unfortunately, most import functions in R will not do this by default."),
+  allow_retry = TRUE
+)
+```
+
+Using most import functions, R will not recognize the merged cell formatting, and all cells except the first merged cell will be read-in as empty! This will lead to loss of data and make analysis difficult.  
+
+Let's see this in action: if we import this spreadsheet into R, see what it looks like in the RStudio viewer.  
+
+```{r, out.width = "100%", fig.align = "left", echo=F}
+knitr::include_graphics("images/site_coverage_imported.jpg")
+```
+
+As you see, importing this dataset into R in the given Excel format leads to data loss in multiple ways:
+
+* Most columns do not have the right header
+* Many observations (i.e. rows) are missing data
+* The actual values of interest are not all in the right rows  
+
+We can use the {openxlsx} R package to import the spreadsheet, which is built specifically for handling Excel spreadsheets, to reduce the damage.  
+
+```{r, echo=TRUE, eval=FALSE}
+sites <- openxlsx::read.xlsx("site_coverage.xlsx", fillMergedCells = TRUE)
+```
+
+The argument `fillMergedCells = ` can result in the merged value appearing in all its cells, but the spreadsheet is still very difficult to analyze:  
+
+```{r, out.width = "100%", fig.align = "left", echo=F}
+knitr::include_graphics("images/site_coverage_filled.jpg")
+```
+
+Which columns to use is still not clear - it would take many R commands to clean the data in order to produce even a simple tabulation of "Yes" values by site.  
+
+**How could you enter these data in a manner that is "tidy" and machine-readable?**  
+
+```{r quiz_mergedtidy}
+question("If these data were entered in a tidy format, what would be the column headers?",
+  answer("Day, Cell, Province, X", message = ""),
+  answer("Date, Province, Site, Status", correct=T, message = "Correct, these are the variables in play, with Status being either Yes or No."),
+  answer("May, June"),
+  answer("A, B, Site, Date"),
+  allow_retry = TRUE
+)
+```
+
+Here you can see these same data entered in that "tidy" format (also called "long" format). See how:  
+
+* Every value has its own cell  
+* Every observation has its own row  
+* Every underlying variable has its own column  
+
+```{r, out.width = "50%", fig.align = "left", echo=F}
+knitr::include_graphics("images/site_coverage_long.jpg")
+```
+
+The above format is not very easy for humans to read, but it is easily imported and handled by R.  
+
+Once in R, it is relatively easy to work with the dataset - the code below cleans/expands this tidy data so that *every possible date and site are present in the data*.  
+
+```{r, echo=TRUE, eval=TRUE}
+# import the long data 
+sites_clean <- long_data %>%    # create complete dataset 
+  mutate(Date = ymd(Date)) %>%  # convert dates to proper class in R
+  complete(                     # fill-in all sites and dates not mentioned
+    Date = seq.Date(
+      from = min(Date),
+      to = max(Date),
+      by = "day"),
+    Site = seq(1:14),
+    fill = list(Status = "No")) %>% 
+  mutate(Province = as_factor(ifelse(Site %in% 1:7, "A", "B")),
+         Site = as_factor(Site)) 
+```
+
+Now the dataset has expanded from `r nrow(long_data)` rows to `r nrow(sites_clean)` rows - all possible dates and sites - a complete data set! (one row for each cell in the original messy Excel spreadsheet!)  
+
+```{r, eval=TRUE, echo=TRUE}
+sites_clean
+```
+
+Now we can use the {ggplot2} package to create a "heat plot" that resembles the original Excel spreadsheet.  
+
+```{r, eval=TRUE, echo=TRUE, fig.width=8, fig.height=6}
+# create heat tile plot
+ggplot(data = sites_clean, mapping = aes(x = Date, y = fct_rev(Site),
+                                         fill = Status, label = Status))+
+  geom_tile(color = "white")+
+  geom_text()+
+  scale_x_date(
+    date_breaks = "day",
+    labels = label_date_short(),
+    expand = c(0,0))+
+  scale_fill_manual(
+    values = c(
+      "Yes" = "darkgreen",
+      "No" = "orange"))+
+  theme_minimal(base_size = 16)+
+  labs(title = "Site coverage",
+       y = "Site")+
+  facet_wrap(~Province, ncol = 1, scales = "free_y")
+```
+
+If you don't understand the above code, that is OK - we only want to show you that with a few line of R code you can create an "Excel-like", "human-readable" output that is *much* more easy to analyze than the original spreadsheet.  
+
+In many ways, this setup is more useful than the original Excel spreadsheet:  
+
+* The data are able to be analyzed, whereas in the Excel they could not be  
+* New rows added to the Excel can be re-imported and the plot updated in seconds  
+* This plot can be exported to a PDF report and emailed to partner organizations  
+
+Unlike the Excel, this dataset in R can be analyzed! It takes only a few lines of code to tabulate `Status` by `Province`:  
+
+```{r, echo=TRUE, eval= TRUE, fig.cap="Site coverage by province"}
+sites_clean %>% 
+  tabyl(Province, Status)
+```
+
+Or by `Date`:  
+
+```{r, echo=TRUE, eval= TRUE, fig.cap="Site coverage by date"}
+sites_clean %>% 
+  tabyl(Date, Status) %>% 
+  arrange(desc(No))
+```
+
+Or the number of unfilled spots by week:  
+
+```{r, echo=TRUE, eval= TRUE, fig.cap="Site coverage by week"}
+sites_clean %>% 
+  group_by(week_of = floor_date(Date, "week")) %>% 
+  summarise(days_coverage_needed = sum(Status == "No"))
+```
+
+Or to make other kinds of plots:  
+
+```{r, echo=TRUE, eval=TRUE}
+sites_clean %>% 
+  filter(Status == "Yes") %>% 
+  ggplot(mapping = aes(x = fct_infreq(Site)))+
+  geom_bar(fill = "dodgerblue")+
+  coord_flip()+
+  theme_minimal(base_size = 16)+
+  labs(title = "Number of days 'covered', by site",
+       x = "Site",
+       y = "Number of days with coverage")
+```
+
+
+
+
+```{r quiz_mergedcells2}
+question("Out of the answers given below, which course of action do you think would be the wisest to make this dataset *machine*-readable?",
+  answer("Combining header names so that the columns are: `Location_Province`, `Location_District`, `Date_Sun_31`, `Date_Mon_1`, etc.",
+         message = "Whilst this would fix the header problem, this option is probably not the most efficient one out of the options here. It also does not deal with the loss of values in the cells under the columns `Date`."),
+  answer("Removing the unecessary header location (so we have `Province` and `District` and changing the date variables into two columns `Date_day_of_week` and `Date_day_N` with one new column for the value.",
+         correct=T,
+         message = "If you remember the principles of tidy data, each variable should be in a column. Having the date spread across multiple columns makes it more complex for data analysis and if your data collection keeps going, you might end up with a very heavy Excel file!"),
+  answer("Only keep the 3rd row as header and repeat the value in the merged cell in each cell", 
+         message = "The 3rd row does indeed contain the most relevant information out of the 3 top rows used to specify the header. However, keeping the date in this wide format does not follow tidy data principles and, if only the numbers are kept as headers, it may not be obvious what these represent in the new version."),
+  answer("Separate the recording of data for each province in a new sheet",
+         message = "This is not necessary and would probably complicate importing the dataset to R and the consequent analysis."),
+  allow_retry = TRUE
+)
+```
+
+### *Conclusions*
+
+When collecting data for analysis, it is best to avoid the use of merged cells. Try and think of ways to represent your data that avoids having the combine cells and if you can't, you should then replicate the value in each cell that is relevant. Remember that variables are represented in columns, and think of the most efficient way of showing this (for example, date can be written in one column rather than spread across multiple ones). 
+
+### **Empty cells**
+
+```{r, out.width = "100%", fig.align = "left", echo=F}
+knitr::include_graphics("images/messydata.PNG")
+```
+
+
+*Problems*: In the spreadsheet above, there are numerous extra empty rows and columns within the dataset - this will cause cleaning headaches in R.
+
+```{r quiz_emptyrows}
+question("Which of the empty cells do you think will be most problematic?",
+  answer("The first empty row as R will not recognise the column names",
+         message = "R will actually recognise the second row as the header row in this case. So whilst this is not ideal, this empty row is not too problematic."),
+  answer("The third empty row.",
+         message = "The third empty row will be loaded as a row of `NA` values. Whilst not ideal, this can be fairly easily removed."),
+  answer("The empty columns.", correct = TRUE,
+         message = "These will be the most problematic as you will probably have to manually remove these in R, because one 'real' column (`Patients`) also does not contain values. This means that you will need to take note of every column number that you want to remove and do so manually!"),
+  answer("All empty cells.",
+         message = "All empty cells are not necessarily issues, as sometimes there is no data available for one particular variable (which may be data itself, or grounds for exclusion from analysis)."),
+  allow_retry = TRUE
+)
+```
+
+### *Answer*
+
+The empty columns in this dataset are likely to be the most problematic out of the options given above, as you will probably manually have to remove these. The empty rows from row number 4 onwards are also an issue, as they actually imply the value that is given in the cell above, but will be recorded as `NA` values. This will require significant extra cleaning. 
+On the other hand, the values in the column `Patients` are actually missing. In this case, it would be wiser to write `NA` in each of the cells of this column, to explicitly indicate that these data are missing for this particular variable.
+
+
+### **Colour dictionaries**
+
+```{r, out.width = "55%", fig.align = "left", echo=F}
+knitr::include_graphics("images/messydata2.PNG")
+```
+
+*Problems:* A color-based dictionary is to the right side of the dataset shown above and cell values are represented by colors - which is also not easily interpreted by R (nor by humans with color-blindness!). Furthermore, different pieces of information are combined into one cell (multiple partner organizations working in one area, or the status “TBC” in the same cell as “Partner D”).
+
+```{r quiz_colourdict}
+question("In this case, what do you think would be the best modification before loading the dataset to R?",
+  answer("Keep as is, R will recognise the colours.",
+         message = "R cannot read in colours."),
+  answer("Keep as is, but add text to the colours.",
+         message = "This would help as R cannot read colours. However, this data format would still not be well read in R and the colour dictionary at the right would cause issues."),
+  answer("Keep as is, but move the colour dictionary to another sheet.",
+         message = "Moving the colour dictionary to another sheet would be helpful and could be loaded separately as a lookup, however R cannot read colours so you would still face issues when loading the main table."),
+  answer("Change the dataset so that each column is a variable and each cell contains one unique value, integrating the colours as a new variable.", correct = TRUE,
+         message = "Indeed, transforming this data to a tidy format is absolutely necessary if any analysis will be performed on this data. Removing the necessity for colours by adding a variable to specify what these represent would be the way to go."),
+  answer("Change the dataset by adding a column to specify what the colour means.",
+         message = "Whilst this is generally the way to go to transform a dataset using a colour dictionary before uploading it to R, this dataset contains other issues making it untidy and hard to analyse in the current format."),
+  allow_retry = TRUE
+)
+```
+
+### *Answer*
+
+Whilst colour dictionaries may be helpful for human-readability of a dataset, colours should never be used as the only way of recording data as machines will not be able to interpret it for analysis. Again, it is important to think of how best to represent that data layer, probably by adding an extra variable column.
+As a general rule, dictionaries (whether they are colour dictionaries as shown here or data dictionaries) should be kept separately from the main table. In Excel, it would be best practice to have this dictionary on another sheet. When loading it to R, you can then load it as a separate dataframe. But we're getting ahead of ourselves... More on data dictionaries later!
+
+
+### **Excel-to-R resources**
+
+Here are some links to tutorials to help you transition to R from Excel:
+
+*   [R vs. Excel](https://www.northeastern.edu/graduate/blog/r-vs-excel/)
+*   [RStudio course in R for Excel users](https://rstudio-conf-2020.github.io/r-for-excel/)
+
+
+### **R-Excel interaction**
+
+R has robust ways to import Excel workbooks, work with the data, export/save Excel files, and work with the nuances of Excel sheets.
+
+It is true that some of the more aesthetic Excel formatting can get lost in translation (e.g. italics, sideways text, etc.). If your work flow requires passing documents back-and-forth between R and Excel while retaining the original Excel formatting, try packages such as {openxlsx}.  
+
+
+
+
+
+
+
+
 ## What is tidy data?
 
 Tidying data refers to the process of structuring your datasets for analysis. Most datasets will require some level of cleaning, a process which can make up the majority of the time you spend on your analysis depending on how "messy" your dataset is.
@@ -616,11 +962,13 @@ quiz(
 
 ### Principles of tidy data
 
-These are the three main requirements for “tidy” data:
+These are the three main principles of “tidy” data:
 
 *    Each **variable** must have its own **column**
 *    Each **observation** must have its own **row**
 *    Each **value** must have its own **cell**
+
+*Source: [R for Data Science](http://r4ds.had.co.nz/)*  
 
 Why is it important to make sure your data is tidy?
 
@@ -775,174 +1123,18 @@ In a dataset where one cell contains more than one value, such as `linelist1`, e
 
 In a dataset where different variables are contained in the same column, such as shown in `linelist2`, you will have to filter for your variable of interest, which requires one extra line of code. Whilst this dataset does not follow tidy data principles, we will see later how such formats may sometimes be easier for data analysis.
 
-## "Human"- vs. "Machine"-readability
-
-Excel is a powerful and user-friendly software which is a good example of how data may be recorded in a user-friendly way. Whilst it is also possible to do some analysis in Excel, you may find that you quickly may be limited in the type of analyses you can do and more complex operations may become very complicated to carry out in this software. This is where programs such as R become very powerful.
-In this series of tutorials, you should have begun to get more familiarised with how R works. In this section, we will focus on the transition from Excel to R for data analysis, with things to avoid, how to deal with transition or import issues, and recommendations for best practices. 
-
-### **Excel-to-R resources**
-
-Here are some links to tutorials to help you transition to R from Excel:
-
-*   [R vs. Excel](https://www.northeastern.edu/graduate/blog/r-vs-excel/)
-*   [RStudio course in R for Excel users](https://rstudio-conf-2020.github.io/r-for-excel/)
 
 
-### **R-Excel interaction**
-
-R has robust ways to import Excel workbooks, work with the data, export/save Excel files, and work with the nuances of Excel sheets.
-
-It is true that some of the more aesthetic Excel formatting can get lost in translation (e.g. italics, sideways text, etc.). If your work flow requires passing documents back-and-forth between R and Excel while retaining the original Excel formatting, try packages such as **openxlsx**.
-
-## Non-tidy data
-
-*The main reason one encounters non-tidy data is because many Excel spreadsheets are designed to prioritize easy reading by humans, not easy reading by machines/software.* 
-
-“Tidy” datasets may not be as readable to a human eye, but they make data cleaning and analysis much easier!
-
-To help you see the difference, below are some fictional examples of **non-tidy data** that prioritize *human*-readability over *machine*-readability.
-Here is our hospital capacity dataset in Excel:
-
-```{r, out.width = "55%", fig.align = "left", echo=F}
-knitr::include_graphics("images/messydata.PNG")
-```
 
 
-```{r quiz_messydata}
-quiz(
-  question("What do you foresee may be issues when uploading this to R? Tick all that are most likely to apply.",
-    answer("I don't think there will be any issues when we upload this to R.", message = "The format will not be the same in R."),
-    answer("R will not be able to read this dataset.", message = "R will be able to read this dataset, however it will require a lot of cleaning!"),
-    answer("The colours won't appear.", correct = TRUE, message = "The colours won't appear, which may be an issue if the colours represent another variable!"),
-    answer("The colours will appear but it is not clear what they represent.", message = "The colours will not appear in R."),
-    answer("Some rows are empty.", correct = TRUE, message = "The extra empty rows will require an extra cleaning step."),
-    answer("Some row values are empty.", correct = TRUE, message = "R can handle missing values in different cells. The issue with this dataset is that some empty cells imply another value (that from the row above)."),
-    answer("Some columns are empty.", correct = TRUE, message = "The empty columns will require an extra cleaning step."),
-    answer("Some column values are empty.", message = "R can handle missing values in columns."),
-    answer("Spaces in the column names.", correct = TRUE, message = "Column names will be changed from what we see in Excel if they have spaces and as a result and may require an extra cleaning step!"),
-    answer("Spaces in the cell values.", message = "R can handle spaces when it comes to cell values. Note that these values will then be recorded as a character (i.e. string) variable."),
-    answer("Different recording formats in the same column.", message = "If the same column has different recording formats, R will still be able to read it. It may however save it in the wrong format which will require an extra cleaning step. Recording in different formats in the same column also does not follow the principles of tidy data."),
-    allow_retry = TRUE
-  )
-)
-```
-
-These different options have already given you quite a few things to think about! Let's now go over specific issues that you may encounter when importing a dataset from Excel to R.
 
 
-### **Merged cells**
-
-```{r, out.width = "55%", fig.align = "left", echo=F}
-knitr::include_graphics("images/messydata2_nocolours.PNG")
-```
-
-*Problems*: In the spreadsheet above, there are **merged cells** which are not easily digested by R. Which row should be considered the “header” is not clear.
-
-```{r quiz_mergedcells}
-question("What issues do you think R will encounter when loading this dataset?",
-  answer("R will not recognise the merged cell and will drop the value.",
-         message = "Indeed, R cannot recognise merged cells. However it will not drop the value."),
-  answer("R will recognise the merged cell and also create a merged cell.",
-         message = "Dataframes in R cannot contain merged cells."),
-  answer("R will not recognise the merged cell so will only keep the value in the first row and column of the merged area.", correct = TRUE),
-  answer("R will recognise the merged cells and duplicate these values across the merged area.",
-         message = "Unfortunately R cannot recognise merged cells."),
-  allow_retry = TRUE
-)
-```
-
-### *Answer*
-
-R cannot recognise the merged cell format, so all cells but the first one included in the merged environment will be read as cells with empty values! You can imagine that this will not only make the analysis of the dataset harder, it will also lead to a loss of data. 
-
-Let's load this dataset to R, to see what issues these merged cells would mean in terms of data values.
-
-```{r mergedcells}
-#head(data_collection)
-```
-
-As you see, loading this dataset to R in the given Excel format leads to data loss in multiple ways:
-
-* Most columns do not have the right header
-* Many observations (i.e. rows) are missing data
-* The actual values of interest are not all in the right rows.
-
-```{r quiz_mergedcells2}
-question("Out of the answers given below, which course of action do you think would be the wisest to make this dataset *machine*-readable?",
-  answer("Combining header names so that the columns are: `Location_Province`, `Location_District`, `Date_Sun_31`, `Date_Mon_1`, etc.",
-         message = "Whilst this would fix the header problem, this option is probably not the most efficient one out of the options here. It also does not deal with the loss of values in the cells under the columns `Date`."),
-  answer("Removing the unecessary header location (so we have `Province` and `District` and changing the date variables into two columns `Date_day_of_week` and `Date_day_N` with one new column for the value.",
-         correct=T,
-         message = "If you remember the principles of tidy data, each variable should be in a column. Having the date spread across multiple columns makes it more complex for data analysis and if your data collection keeps going, you might end up with a very heavy Excel file!"),
-  answer("Only keep the 3rd row as header and repeat the value in the merged cell in each cell", 
-         message = "The 3rd row does indeed contain the most relevant information out of the 3 top rows used to specify the header. However, keeping the date in this wide format does not follow tidy data principles and, if only the numbers are kept as headers, it may not be obvious what these represent in the new version."),
-  answer("Separate the recording of data for each province in a new sheet",
-         message = "This is not necessary and would probably complicate importing the dataset to R and the consequent analysis."),
-  allow_retry = TRUE
-)
-```
-
-### *Conclusions*
-
-When collecting data for analysis, it is best to avoid the use of merged cells. Try and think of ways to represent your data that avoids having the combine cells and if you can't, you should then replicate the value in each cell that is relevant. Remember that variables are represented in columns, and think of the most efficient way of showing this (for example, date can be written in one column rather than spread across multiple ones). 
-
-### **Empty cells**
-
-```{r, out.width = "55%", fig.align = "left", echo=F}
-knitr::include_graphics("images/messydata.PNG")
-```
 
 
-*Problems*: In the spreadsheet above, there are numerous extra empty rows and columns within the dataset - this will cause cleaning headaches in R.
-
-```{r quiz_emptyrows}
-question("Which of the empty cells do you think will be most problematic?",
-  answer("The first empty row as R will not recognise the column names",
-         message = "R will actually recognise the second row as the header row in this case. So whilst this is not ideal, this empty row is not too problematic."),
-  answer("The third empty row.",
-         message = "The third empty row will be loaded as a row of `NA` values. Whilst not ideal, this can be fairly easily removed."),
-  answer("The empty columns.", correct = TRUE,
-         message = "These will be the most problematic as you will probably have to manually remove these in R, because one 'real' column (`Patients`) also does not contain values. This means that you will need to take note of every column number that you want to remove and do so manually!"),
-  answer("All empty cells.",
-         message = "All empty cells are not necessarily issues, as sometimes there is no data available for one particular variable (which may be data itself, or grounds for exclusion from analysis)."),
-  allow_retry = TRUE
-)
-```
-
-### *Answer*
-
-The empty columns in this dataset are likely to be the most problematic out of the options given above, as you will probably manually have to remove these. The empty rows from row number 4 onwards are also an issue, as they actually imply the value that is given in the cell above, but will be recorded as `NA` values. This will require significant extra cleaning. 
-On the other hand, the values in the column `Patients` are actually missing. In this case, it would be wiser to write `NA` in each of the cells of this column, to explicitly indicate that these data are missing for this particular variable.
 
 
-### **Colour dictionaries**
 
-```{r, out.width = "55%", fig.align = "left", echo=F}
-knitr::include_graphics("images/messydata2.PNG")
-```
 
-*Problems:* A color-based dictionary is to the right side of the dataset shown above and cell values are represented by colors - which is also not easily interpreted by R (nor by humans with color-blindness!). Furthermore, different pieces of information are combined into one cell (multiple partner organizations working in one area, or the status “TBC” in the same cell as “Partner D”).
-
-```{r quiz_colourdict}
-question("In this case, what do you think would be the best modification before loading the dataset to R?",
-  answer("Keep as is, R will recognise the colours.",
-         message = "R cannot read in colours."),
-  answer("Keep as is, but add text to the colours.",
-         message = "This would help as R cannot read colours. However, this data format would still not be well read in R and the colour dictionary at the right would cause issues."),
-  answer("Keep as is, but move the colour dictionary to another sheet.",
-         message = "Moving the colour dictionary to another sheet would be helpful and could be loaded separately as a lookup, however R cannot read colours so you would still face issues when loading the main table."),
-  answer("Change the dataset so that each column is a variable and each cell contains one unique value, integrating the colours as a new variable.", correct = TRUE,
-         message = "Indeed, transforming this data to a tidy format is absolutely necessary if any analysis will be performed on this data. Removing the necessity for colours by adding a variable to specify what these represent would be the way to go."),
-  answer("Change the dataset by adding a column to specify what the colour means.",
-         message = "Whilst this is generally the way to go to transform a dataset using a colour dictionary before uploading it to R, this dataset contains other issues making it untidy and hard to analyse in the current format."),
-  allow_retry = TRUE
-)
-```
-
-### *Answer*
-
-Whilst colour dictionaries may be helpful for human-readability of a dataset, colours should never be used as the only way of recording data as machines will not be able to interpret it for analysis. Again, it is important to think of how best to represent that data layer, probably by adding an extra variable column.
-As a general rule, dictionaries (whether they are colour dictionaries as shown here or data dictionaries) should be kept separately from the main table. In Excel, it would be best practice to have this dictionary on another sheet. When loading it to R, you can then load it as a separate dataframe. But we're getting ahead of ourselves... More on data dictionaries later!
 
 ## Pivoting data for analysis
 

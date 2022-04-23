@@ -455,7 +455,7 @@ To practice, please answer the following questions:
 
 ```{r quiz-use-helper, echo=F}
 quiz(
-  question_radio("When should I view the red 'helper' code?",
+  question_radio("When should I view the code hints and solutions?",
     answer("After trying to write the code myself", correct = TRUE),
     answer("Before I try coding", correct = FALSE),
     correct = "Reviewing best-practice code after trying to write yourself can help you improve",
@@ -3417,7 +3417,7 @@ quiz(caption = "Quiz - reviewing the data",
 
 Congratulations! You have completed the first tutorial in this series!  
 
-We suggest completing our tutorial on "Tidy data" next.  
+We suggest completing our tutorial on "Data preparation" next.  
 
 Please consider making a donation to us. We are a nonprofit organization and rely on your contributions to continue supporting frontline epidemiologists around the world.
 
