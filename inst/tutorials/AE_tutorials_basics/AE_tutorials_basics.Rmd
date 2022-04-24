@@ -310,6 +310,11 @@ knitr::include_graphics("images/tephinet-logo.png")
 ::::
 
 
+### License {.unnumbered} 
+
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a> Applied Epi Incorporated, 2022 <br />This work is licensed by Applied Epi Incorporated under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.  
+
+
 
 
 **Click "Next Topic" to move to the next section of the tutorial, or navigate using the Table of Contents on the left.**  
