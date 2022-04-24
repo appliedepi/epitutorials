@@ -1392,8 +1392,7 @@ For ease we can pipe this amended data straight into `ggplot()` rather than savi
 ```{r dropping, echo=T, warning=F, message=F, fig.height=10}
 # begin with the linelist
 linelist %>% 
-   drop_na(gender, hospital_clean) %>%  # drop rows that are missing (NA) gender and hospital 
-   filter(hospital_clean != "Missing") %>%    # drop rows where hospital is "Missing" 
+   drop_na(gender, hospital_clean) %>%  # drop rows with NA gender and hospital 
 
 # pipe filtered linelist into the ggplot() command
 # note: no data= argument needed
