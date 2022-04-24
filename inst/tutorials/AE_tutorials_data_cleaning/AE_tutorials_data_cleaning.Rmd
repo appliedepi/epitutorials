@@ -229,9 +229,9 @@ knitr::include_graphics("images/teaching_icon.png")
 ```
 
 **Training:**  
-**[Live courses](www.appliedepi.org)**  
-**[Tutorials](https://training.appliedepi.org)**  
-**[Case studies](www.training.appliedepi.org)**  
+**[Live courses](https://appliedepi.org/live/)**  
+**[Tutorials](https://appliedepi.org/tutorial/)**  
+**[Case studies](https://appliedepi.org/case/)**  
 :::
 
 ::: {}
@@ -240,7 +240,7 @@ knitr::include_graphics("images/tools_icon.png")
 ```
 
 **Tools:**  
-**[Epi R Handbook](www.epiRhandbook.com)**  
+**[Epi R Handbook](https://epiRhandbook.com)**  
 **[R packages](https://appliedepi.org/tools/)**  
 **[Sitrep templates](https://appliedepi.org/tools/)**  
 :::
@@ -251,10 +251,11 @@ knitr::include_graphics("images/QA_icon.png")
 ```
 
 **Support:**  
-**[Community forum](www.community.appliedepi.org)**  
+**[Community forum](https:/community.appliedepi.org)**  
 **[R Help Desk](https://appliedepi.org/helpdesk/)**  
 **[Mentorship](https://appliedepi.org/join/)**  
 :::
+
 
 
 ::::
