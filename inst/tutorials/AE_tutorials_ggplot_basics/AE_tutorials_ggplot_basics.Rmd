@@ -146,13 +146,12 @@ This is the **fourth** tutorial in the series.
 * **This tutorial teaches**: Introduction to visualization of public health and epidemiological data using the {ggplot2} R package  
 * **Target audience**: Public health practitioners, epidemiologists, clinicians, and researchers who cannot access our live courses  
 * **Format**: R coding is performed *within* this tutorial window  
-* **Offline access**: Follow [these instructions](www.training.appliedepi.org) to download and view offline in your RStudio  
 
 </br>
 
 #### Our introductory R training materials  
 
-All of our training materials focus on challenges and solutions for frontline practitioners, and are accessible to beginner audiences. Read more about our educational approach [here](training.appliedepi.org/educational-approach) 
+All of our training materials focus on challenges and solutions for frontline practitioners, and are accessible to beginner audiences. Read more about our educational approach [here](https://appliedepi.org/eduapproach/) 
 
 :::: {style="display: flex;"}
 
@@ -187,7 +186,7 @@ extensive frontline public health experience
 
 ::::
 
-See our [live course offerings](www.training.appliedepi.org), [educational philosophy](https://applied-epi-training.netlify.app/educational-approach.html), and [email us](mailto:contact@appliedepi.org) for tutorial personal coaching options.  
+See our [live course offerings](https://appliedepi.org/live/), [educational philosophy](https://appliedepi.org/edapproach/), and [email us](mailto:contact@appliedepi.org) for tutorial personal coaching options.  
 
 </br>
 
@@ -199,11 +198,11 @@ See our [live course offerings](www.training.appliedepi.org), [educational philo
 ::: {}
 
 
-**[Applied Epi](www.appliedepi.org) is a nonprofit organization that supports frontline public health practitioners through accessible tools, training, and support.**  
+**[Applied Epi](https://appliedepi.org/) is a nonprofit organization that supports frontline public health practitioners through accessible tools, training, and support.**  
 
 We are a global team of 150 applied epidemiologists and public health practitioners with extensive ground-level experience.  
 
-Our free [Epidemiologist R Handbook](www.epiRhandbook.com) is a vital resource for over **175,000 people**.  
+Our free [Epidemiologist R Handbook](https://epiRhandbook.com) is a vital resource for over **175,000 people**.  
 
 We offer a comprehensive ecosystem of training, tools, and support:  
 
@@ -243,6 +242,7 @@ knitr::include_graphics("images/QA_icon.png")
 **[R Help Desk](https://appliedepi.org/helpdesk/)**  
 **[Mentorship](https://appliedepi.org/join/)**  
 :::
+
 
 
 ::::
@@ -351,7 +351,7 @@ In this tutorial you will learn and practice:
 
 #### Accompanying resources
 
-This tutorial draws from chapters of our free [Epidemiologist R handbook](https://epirhandbook.com/en/) such as [ggplot basics](https://www.epirhandbook.com/en/ggplot-basics.html), [ggplot tips](https://www.epirhandbook.com/en/ggplot-tips.html), and [epidemic curves](https://www.epirhandbook.com/en/epidemic-curves.html).  
+This tutorial draws from chapters of our free [Epidemiologist R handbook](https://epirhandbook.com/en/) such as [ggplot basics](https://epirhandbook.com/en/ggplot-basics.html), [ggplot tips](https://epirhandbook.com/en/ggplot-tips.html), and [epidemic curves](https://epirhandbook.com/en/epidemic-curves.html).  
 
 
 #### Next steps  
@@ -547,7 +547,7 @@ Below are plots that were all created with R. You too can make plots as beautifu
 knitr::include_graphics("images/epicurve_top.png")
 ```
 
-[Source: Epi R Handbook](www.epiRhandbook.com)
+[Source: Epi R Handbook](https://epirhandbook.com)
 
 ### Age pyramids  
 
@@ -557,7 +557,7 @@ Age pyramids are very easy to make with R. This age pyramid actually plots *two*
 knitr::include_graphics("images/pop_pyramid_baseline.png")
 ```
 
-[Source: Epi R Handbook](www.epiRhandbook.com)
+[Source: Epi R Handbook](https://epirhandbook.com)
 
 ### Reporting completeness - heat plot  
 
@@ -567,7 +567,7 @@ This heat plot shows the proportion of heath facilities reporting complete surve
 knitr::include_graphics("images/heat_tile.png")
 ```
 
-[Source: Epi R Handbook](www.epiRhandbook.com)
+[Source: Epi R Handbook](https://epirhandbook.com)
 
 ### Diagrams  
 
@@ -577,7 +577,7 @@ Simple and complex flow charts and diagrams can also be made with R, such as thi
 knitr::include_graphics("images/flow_chart.png")
 ```
 
-[Source: Epi R Handbook](www.epiRhandbook.com)
+[Source: Epi R Handbook](https://epirhandbook.com)
 
 
 ### Mapping  
@@ -736,7 +736,7 @@ Below is an command that imports the file "linelist.rds", which is located in th
 linelist <- import(here("data", "linelist.rds"))
 ```
 
-You can read more in our Basics tutorial and in the [Epi R Handbook](https://www.epirhandbook.com/en/import-and-export.html) about how RStudio projects, the {here} package, and the {rio} package can be efficiently used together to make the data import process very easy!
+You can read more in our Basics tutorial and in the [Epi R Handbook](https://epirhandbook.com/en/import-and-export.html) about how RStudio projects, the {here} package, and the {rio} package can be efficiently used together to make the data import process very easy!
 
 
 
@@ -2011,7 +2011,7 @@ themes_plots
 
 ### Themes
 
-Micro-adjustments to the theme can be made with `theme()` as these are mostly small layout and visual details we won't go into much detail here. More information is available [in the handbook](https://www.epirhandbook.com/en/ggplot-basics.html#ggplot_basics_themes). The syntax for themes taxes time to learn and is not used often enough to commit to memory for most R users. See [this list](https://ggplot2.tidyverse.org/reference/theme.html) of feature-specific arguments. or running `theme_get()` in your R window to get a list of all theme arguments in the console.
+Micro-adjustments to the theme can be made with `theme()` as these are mostly small layout and visual details we won't go into much detail here. More information is available [in the handbook](https://epirhandbook.com/en/ggplot-basics.html#ggplot_basics_themes). The syntax for themes taxes time to learn and is not used often enough to commit to memory for most R users. See [this list](https://ggplot2.tidyverse.org/reference/theme.html) of feature-specific arguments. or running `theme_get()` in your R window to get a list of all theme arguments in the console.
 ```{r theme-adjustment, echo = T, message = F, warning = F}
 ggplot(data = linelist) +
 geom_point(

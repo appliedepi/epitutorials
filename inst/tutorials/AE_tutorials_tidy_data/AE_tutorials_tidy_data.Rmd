@@ -136,13 +136,12 @@ This is the **second** tutorial in the series.
 * **This tutorial teaches**: Best practices for data entry, format, documentation, and preparation for analysis using R  
 * **Target audience**: Public health practitioners, epidemiologists, clinicians, and researchers who cannot access our live courses  
 * **Format**: R coding is performed *within* this tutorial window  
-* **Offline access**: Follow [these instructions](www.training.appliedepi.org) to download and view offline in your RStudio  
 
 </br>
 
 #### Our introductory R training materials  
 
-All of our training materials focus on challenges and solutions for frontline practitioners, and are accessible to beginner audiences. Read more about our educational approach [here](training.appliedepi.org/educational-approach) 
+All of our training materials focus on challenges and solutions for frontline practitioners, and are accessible to beginner audiences. Read more about our educational approach [here](https://appliedepi.org/eduapproach/) 
 
 :::: {style="display: flex;"}
 
@@ -177,7 +176,7 @@ extensive frontline public health experience
 
 ::::
 
-See our [live course offerings](www.training.appliedepi.org), [educational philosophy](https://applied-epi-training.netlify.app/educational-approach.html), and [email us](mailto:contact@appliedepi.org) for tutorial personal coaching options.  
+See our [live course offerings](https://appliedepi.org/live/), [educational philosophy](https://appliedepi.org/edapproach/), and [email us](mailto:contact@appliedepi.org) for tutorial personal coaching options.  
 
 </br>
 
@@ -189,11 +188,11 @@ See our [live course offerings](www.training.appliedepi.org), [educational philo
 ::: {}
 
 
-**[Applied Epi](www.appliedepi.org) is a nonprofit organization that supports frontline public health practitioners through accessible tools, training, and support.**  
+**[Applied Epi](https://appliedepi.org/) is a nonprofit organization that supports frontline public health practitioners through accessible tools, training, and support.**  
 
 We are a global team of 150 applied epidemiologists and public health practitioners with extensive ground-level experience.  
 
-Our free [Epidemiologist R Handbook](www.epiRhandbook.com) is a vital resource for over **175,000 people**.  
+Our free [Epidemiologist R Handbook](https://epiRhandbook.com) is a vital resource for over **175,000 people**.  
 
 We offer a comprehensive ecosystem of training, tools, and support:  
 
@@ -233,6 +232,7 @@ knitr::include_graphics("images/QA_icon.png")
 **[R Help Desk](https://appliedepi.org/helpdesk/)**  
 **[Mentorship](https://appliedepi.org/join/)**  
 :::
+
 
 
 ::::
