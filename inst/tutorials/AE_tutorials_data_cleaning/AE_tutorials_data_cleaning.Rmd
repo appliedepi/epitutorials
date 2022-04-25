@@ -250,7 +250,7 @@ knitr::include_graphics("images/QA_icon.png")
 ```
 
 **Support:**  
-**[Community forum](https:/community.appliedepi.org)**  
+**[Community forum](https://community.appliedepi.org)**  
 **[R Help Desk](https://appliedepi.org/helpdesk/)**  
 **[Mentorship](https://appliedepi.org/join/)**  
 :::
