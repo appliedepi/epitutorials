@@ -2200,7 +2200,7 @@ quiz(
     answer("paste(jurisdictions, space = YES, collapse = ',')", correct = FALSE, "No, space is not an argument of the paste() function"),
     answer("paste(jurisdictions, collapse = ',_')", correct = FALSE, message = "No, an underscore is its own character, and will not insert a space."),
     answer("paste(jurisdictions, collapse = ', ')", correct = TRUE, message = "That is correct. Placing a single space after the comma will make the space appear between words as well."),
-    answer("paste(jurisdictions, collapse = ',')", correct = TRUE, message = "No, this is the original."),
+    answer("paste(jurisdictions, collapse = ',')", correct = FALSE, message = "No, this is the original."),
     allow_retry = T
   )
   )
