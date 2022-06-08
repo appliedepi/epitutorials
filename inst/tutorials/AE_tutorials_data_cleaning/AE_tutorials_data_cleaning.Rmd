@@ -8,7 +8,7 @@ output:
     allow_skip: true
 runtime: shiny_prerendered
 description: >
-  Learn how to get started with R, and how to import a dataset
+  Learn how to clean a public health dataset using R
 ---
 
 <!-- NOTES: To edit images, edit them in the "images" folder that lives NEXT TO THE RMD FILE -->
