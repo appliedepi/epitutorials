@@ -646,7 +646,6 @@ R can interact with many common data collection tools, websites, and software. Y
 knitr::include_graphics("images/interoperability.png", error = FALSE)
 ```
 
-*Image source: [RECON](https://www.reconlearn.org/)*
 
 #### Equity
 
@@ -666,7 +665,6 @@ R has a vibrant user community support network, such as events facilitated by gr
 knitr::include_graphics("images/user_community.png", error = FALSE)
 ```
 
-*Image source: [RECON](https://www.reconlearn.org/)*
 
 
 
